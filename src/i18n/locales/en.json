@@ -48,7 +48,19 @@
       "sell": "Sell"
     },
     "navigation": {
-      "home": "Home"
+      "home": "Home",
+      "dashboard": "Dashboard",
+      "monitoring": "Monitoring",
+      "latestStates": "Latest States",
+      "administration": "Administration",
+      "users": "Users",
+      "roles": "Roles",
+      "sites": "Sites",
+      "groups": "Groups",
+      "devices": "Devices",
+      "brands": "Brands",
+      "models": "Models",
+      "firmwares": "Firmwares"
     }
   }
 }

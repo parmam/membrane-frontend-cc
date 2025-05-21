@@ -48,7 +48,19 @@
       "sell": "Vender"
     },
     "navigation": {
-      "home": "Inicio"
+      "home": "Inicio",
+      "dashboard": "Dashboard",
+      "monitoring": "Monitoreo",
+      "latestStates": "Últimos Estados",
+      "administration": "Administración",
+      "users": "Usuarios",
+      "roles": "Roles",
+      "sites": "Sitios",
+      "groups": "Grupos",
+      "devices": "Dispositivos",
+      "brands": "Marcas",
+      "models": "Modelos",
+      "firmwares": "Firmwares"
     }
   }
 }

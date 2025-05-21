@@ -40,7 +40,7 @@ const Sidebar: FunctionComponent = () => {
                 <Icon icon={item.icon} color='inherit' />
               </Box>
               <Typography variant='body2' color='inherit'>
-                {item.label}
+                {t(item.translationKey)}
               </Typography>
             </div>
           );
@@ -62,7 +62,7 @@ const Sidebar: FunctionComponent = () => {
                 style={{ flex: 1 }}
               >
                 <Typography variant='body2' color='inherit'>
-                  {group.label}
+                  {t(group.translationKey)}
                 </Typography>
                 <Icon icon={faChevronDown} className={styles.expandIcon} color='inherit' />
               </Box>
@@ -76,7 +76,7 @@ const Sidebar: FunctionComponent = () => {
                       <Icon icon={item.icon} color='inherit' />
                     </Box>
                     <Typography variant='body2' color='inherit'>
-                      {item.label}
+                      {t(item.translationKey)}
                     </Typography>
                   </div>
                 ))}
