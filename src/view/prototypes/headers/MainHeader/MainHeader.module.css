@@ -37,11 +37,21 @@
   margin-left: 10px;
 }
 
+.userDropdownContainer {
+  position: relative;
+}
+
 .userInfo {
   display: flex;
   align-items: center;
   padding: 0 10px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 4px;
+}
+
+.userInfo:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .avatar {
@@ -60,6 +70,81 @@
 .username {
   font-size: 14px;
   color: var(--color-text-primary);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  background-color: var(--color-background-paper);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 220px;
+  z-index: 100;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.25s ease;
+  transform-origin: top right;
+  border: 1px solid var(--color-divider);
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.dropdownHeader {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  background-color: var(--color-background-default);
+}
+
+.dropdownAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-primary-main);
+  color: var(--color-primary-contrastText);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-weight: bold;
+}
+
+.dropdownUsername {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.dropdownDivider {
+  height: 1px;
+  background-color: var(--color-divider);
+  margin: 0;
+}
+
+.dropdownItem {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dropdownItem:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dropdownIcon {
+  margin-right: 12px;
+  color: var(--color-text-secondary);
+  font-size: 16px;
 }
 
 .button {
@@ -87,5 +172,9 @@
 
   .username {
     display: none;
+  }
+
+  .dropdown {
+    right: -20px;
   }
 }

@@ -4,7 +4,8 @@
       "loading": "Cargando...",
       "error": "Error",
       "success": "Éxito",
-      "language": "Selector de idioma"
+      "language": "Selector de idioma",
+      "profile": "Perfil"
     },
     "theme": {
       "light": "Modo Claro",

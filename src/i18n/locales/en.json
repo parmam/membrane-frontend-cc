@@ -4,7 +4,8 @@
       "loading": "Loading...",
       "error": "Error",
       "success": "Success",
-      "language": "Language selector"
+      "language": "Language selector",
+      "profile": "Profile"
     },
     "theme": {
       "light": "Light Mode",

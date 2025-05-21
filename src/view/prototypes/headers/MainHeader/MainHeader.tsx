@@ -1,9 +1,9 @@
 import { useI18n } from '@/i18n';
 
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useEffect, useRef, useState } from 'react';
 
 import { faXmarkCircle } from '@fortawesome/free-regular-svg-icons/faXmarkCircle';
-import { faBars, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faSignOutAlt, faUser, faUserCircle } from '@fortawesome/free-solid-svg-icons';
 import LanguageSelector from '@view/components/LanguageSelector';
 import ThemeToggle from '@view/components/ThemeToggle';
 import Box from '@view/elements/Box';
@@ -20,12 +20,48 @@ interface MainHeaderProps {
   onBack?: () => void;
   userName?: string;
   userInitials?: string;
+  onLogout?: () => void;
+  onProfile?: () => void;
 }
 
 const MainHeader: FunctionComponent<MainHeaderProps> = (props) => {
   const { t } = useI18n();
   const userName = props.userName || 'Bruno Contartese';
   const userInitials = props.userInitials || 'BC';
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close the dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    setIsDropdownOpen(false);
+    if (props.onLogout) {
+      props.onLogout();
+    } else {
+      console.log('Logout clicked');
+    }
+  };
+
+  const handleProfile = () => {
+    setIsDropdownOpen(false);
+    if (props.onProfile) {
+      props.onProfile();
+    } else {
+      console.log('Profile clicked');
+    }
+  };
 
   return (
     <Box className={styles.container}>
@@ -44,12 +80,37 @@ const MainHeader: FunctionComponent<MainHeaderProps> = (props) => {
         <LanguageSelector className={styles.languageSelector} />
         <ThemeToggle className={styles.themeToggle} />
 
-        <Box className={styles.userInfo}>
-          <Box className={styles.avatar}>{userInitials}</Box>
-          <Typography variant='body2' className={styles.username}>
-            {userName}
-          </Typography>
-        </Box>
+        <div className={styles.userDropdownContainer} ref={dropdownRef}>
+          <div className={styles.userInfo} onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+            <Box className={styles.avatar}>{userInitials}</Box>
+            <Typography variant='body2' className={styles.username}>
+              {userName}
+            </Typography>
+          </div>
+
+          {isDropdownOpen && (
+            <div className={styles.dropdown}>
+              <div className={styles.dropdownHeader}>
+                <Box className={styles.dropdownAvatar}>{userInitials}</Box>
+                <Typography variant='body2' className={styles.dropdownUsername}>
+                  {userName}
+                </Typography>
+              </div>
+
+              <div className={styles.dropdownDivider}></div>
+
+              <div className={styles.dropdownItem} onClick={handleProfile}>
+                <Icon icon={faUserCircle} className={styles.dropdownIcon} color='inherit' />
+                <Typography variant='body2'>{t('common.profile')}</Typography>
+              </div>
+
+              <div className={styles.dropdownItem} onClick={handleLogout}>
+                <Icon icon={faSignOutAlt} className={styles.dropdownIcon} color='inherit' />
+                <Typography variant='body2'>{t('auth.logout')}</Typography>
+              </div>
+            </div>
+          )}
+        </div>
 
         {props.onClose && !props.onShowMenu && (
           <button className={styles.button} onClick={props.onClose}>
