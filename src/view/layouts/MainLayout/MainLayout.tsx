@@ -1,4 +1,5 @@
 import { FunctionComponent, ReactNode } from 'react';
+import { Outlet } from 'react-router-dom';
 
 import useTheme from '@theme/useTheme';
 import Box from '@view/elements/Box';
