@@ -88,6 +88,16 @@
   --breakpoint-md: 1200px;
   --breakpoint-lg: 1536px;
   --breakpoint-xl: 1920px;
+
+  /* Transitions */
+  --transition-duration: 0.3s;
+  --transition-timing: ease;
+  --transition-theme:
+    background-color var(--transition-duration) var(--transition-timing),
+    color var(--transition-duration) var(--transition-timing),
+    border-color var(--transition-duration) var(--transition-timing);
+  --transition-hover: background-color 0.2s var(--transition-timing);
+  --transition-transform: transform 0.2s var(--transition-timing);
 }
 
 body.light-theme {
@@ -134,9 +144,43 @@ body.dark-theme {
   --color-divider: var(--dark-color-divider);
 }
 
-/* Transición suave entre temas */
-body {
+/* Transición global para todos los elementos */
+*,
+*::before,
+*::after {
+  transition-property: background-color, color, border-color;
+  transition-duration: var(--transition-duration);
+  transition-timing-function: var(--transition-timing);
+}
+
+/* Excepciones para elementos que no deberían tener transición por temas */
+button:not(.theme-toggle),
+input,
+select,
+a,
+.menuItem:hover,
+.submenuItem:hover {
+  transition-property: initial;
+  transition-duration: initial;
+  transition-timing-function: initial;
+}
+
+/* Asegurar que los elementos hover usen sus propias transiciones */
+.menuItem,
+.submenuItem {
   transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+    var(--transition-hover),
+    color var(--transition-duration) var(--transition-timing);
+}
+
+/* Transiciones de transformación específicas */
+.expandIcon {
+  transition:
+    var(--transition-transform),
+    color var(--transition-duration) var(--transition-timing) !important;
+}
+
+/* Transición específica para el cuerpo */
+body {
+  transition: var(--transition-theme);
 }

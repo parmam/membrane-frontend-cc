@@ -24,9 +24,6 @@
   text-decoration: none;
   color: var(--color-text-primary);
   cursor: pointer;
-  transition:
-    background-color 0.2s,
-    color 0.2s;
 }
 
 .menuItem:hover {
@@ -68,7 +65,6 @@
   text-decoration: none;
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: background-color 0.2s;
   font-size: 0.9em;
 }
 
@@ -84,7 +80,7 @@
 }
 
 .expandIcon {
-  transition: transform 0.2s;
+  /* Las transiciones se manejan globalmente */
 }
 
 .expanded .expandIcon {
