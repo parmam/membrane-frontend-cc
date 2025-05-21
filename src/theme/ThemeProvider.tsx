@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
+import { ReactNode, createContext, useEffect, useState } from 'react';
 
 import defaultTheme, { Theme, ThemeMode, getDarkTheme, getLightTheme } from './theme';
 
