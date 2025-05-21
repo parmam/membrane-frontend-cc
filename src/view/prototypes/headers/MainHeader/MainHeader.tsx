@@ -3,7 +3,7 @@ import { useI18n } from '@/i18n';
 import { FunctionComponent } from 'react';
 
 import { faXmarkCircle } from '@fortawesome/free-regular-svg-icons/faXmarkCircle';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faUser } from '@fortawesome/free-solid-svg-icons';
 import LanguageSelector from '@view/components/LanguageSelector';
 import ThemeToggle from '@view/components/ThemeToggle';
 import Box from '@view/elements/Box';
@@ -18,10 +18,14 @@ interface MainHeaderProps {
   onShowMenu?: () => void;
   onClose?: () => void;
   onBack?: () => void;
+  userName?: string;
+  userInitials?: string;
 }
 
 const MainHeader: FunctionComponent<MainHeaderProps> = (props) => {
   const { t } = useI18n();
+  const userName = props.userName || 'Bruno Contartese';
+  const userInitials = props.userInitials || 'BC';
 
   return (
     <Box className={styles.container}>
@@ -31,7 +35,7 @@ const MainHeader: FunctionComponent<MainHeaderProps> = (props) => {
             <Icon icon='arrow-left' color='var(--color-text-primary)' />
           </button>
         )}
-        <Box color='var(--color-text-primary)'>logo</Box>
+        <Box className={styles.logo}>logo</Box>
         <Typography variant='h6' className={styles.title}>
           {t(props.title)}
         </Typography>
@@ -39,6 +43,14 @@ const MainHeader: FunctionComponent<MainHeaderProps> = (props) => {
       <Box className={styles.rightContainer}>
         <LanguageSelector className={styles.languageSelector} />
         <ThemeToggle className={styles.themeToggle} />
+
+        <Box className={styles.userInfo}>
+          <Box className={styles.avatar}>{userInitials}</Box>
+          <Typography variant='body2' className={styles.username}>
+            {userName}
+          </Typography>
+        </Box>
+
         {props.onClose && !props.onShowMenu && (
           <button className={styles.button} onClick={props.onClose}>
             <Icon icon={faXmarkCircle} color='var(--color-primary-main)' customSize='large' />

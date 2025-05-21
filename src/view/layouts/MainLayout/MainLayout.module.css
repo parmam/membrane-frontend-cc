@@ -1,0 +1,45 @@
+.layoutContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.headerContainer {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background-color: var(--color-background-default);
+}
+
+.bodyContainer {
+  display: flex;
+  flex: 1;
+  margin-top: 62px; /* Altura del header */
+  min-height: calc(100vh - 62px);
+}
+
+.contentContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 250px; /* Mismo ancho que el sidebar */
+  width: calc(100% - 250px);
+}
+
+.pageContent {
+  padding: 20px;
+  flex: 1;
+  overflow: auto;
+}
+
+/* Media query para pantallas pequeñas */
+@media (max-width: 900px) {
+  .bodyContainer {
+    margin-top: 48px; /* Altura del header en pantallas pequeñas */
+    min-height: calc(100vh - 48px);
+  }
+}

@@ -1,0 +1,103 @@
+.sidebar {
+  background-color: var(--color-background-default);
+  color: var(--color-text-primary);
+  width: 250px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 62px; /* Alineado con el header */
+  z-index: 100;
+  border-right: 1px solid var(--color-divider);
+}
+
+.menuContainer {
+  overflow-y: auto;
+  height: calc(100vh - 62px);
+}
+
+.menuItem {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.menuItem:hover {
+  background-color: rgba(128, 128, 128, 0.1);
+}
+
+.menuItemActive {
+  background-color: var(--color-primary-main);
+  color: var(--color-primary-contrastText) !important;
+  font-weight: bold;
+}
+
+.menuItemActive:hover {
+  background-color: var(--color-primary-main);
+}
+
+.menuItemActive .menuItemIcon,
+.menuItemActive Typography {
+  color: var(--color-primary-contrastText) !important;
+}
+
+.menuItemIcon {
+  margin-right: 10px;
+  width: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.submenu {
+  border-top: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--color-divider);
+  background-color: var(--color-background-default);
+}
+
+.submenuItem {
+  padding: 12px 15px 12px 30px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9em;
+}
+
+.submenuItem:hover {
+  background-color: rgba(128, 128, 128, 0.1);
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.expandIcon {
+  transition: transform 0.2s;
+}
+
+.expanded .expandIcon {
+  transform: rotate(180deg);
+}
+
+/* Media query para ajustar la altura en pantallas más pequeñas */
+@media (max-width: 900px) {
+  .sidebar {
+    top: 48px;
+  }
+
+  .menuContainer {
+    height: calc(100vh - 48px);
+  }
+}
