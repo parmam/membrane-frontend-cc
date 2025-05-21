@@ -43,6 +43,10 @@
   margin-right: 5px;
 }
 
+.languageSelector {
+  margin-right: 5px;
+}
+
 @media (max-width: 900px) {
   .container {
     height: 48px;

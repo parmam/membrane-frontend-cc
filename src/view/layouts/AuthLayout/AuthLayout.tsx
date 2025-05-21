@@ -1,7 +1,10 @@
+import { useI18n } from '@/i18n';
+
 import { FunctionComponent, ReactNode } from 'react';
 
 import useWindowSize from '@hooks/useWindowSize';
 import useTheme from '@theme/useTheme';
+import LanguageSelector from '@view/components/LanguageSelector';
 import ThemeToggle from '@view/components/ThemeToggle';
 import Box from '@view/elements/Box';
 
@@ -13,6 +16,7 @@ interface AuthLayoutProps {
 const AuthLayout: FunctionComponent<AuthLayoutProps> = (props) => {
   const { isMobile } = useWindowSize();
   const theme = useTheme();
+  const { t } = useI18n();
 
   return (
     <Box
@@ -25,15 +29,19 @@ const AuthLayout: FunctionComponent<AuthLayoutProps> = (props) => {
         flexDirection: isMobile ? 'column' : 'row',
       }}
     >
-      {/* Theme toggle in the top-right corner */}
+      {/* Theme and language toggles in the top-right corner */}
       <Box
         style={{
           position: 'absolute',
           top: '1rem',
           right: '1rem',
           zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
         }}
       >
+        <LanguageSelector />
         <ThemeToggle />
       </Box>
 

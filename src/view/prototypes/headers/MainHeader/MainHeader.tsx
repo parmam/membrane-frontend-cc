@@ -1,7 +1,10 @@
+import { useI18n } from '@/i18n';
+
 import { FunctionComponent } from 'react';
 
 import { faXmarkCircle } from '@fortawesome/free-regular-svg-icons/faXmarkCircle';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
+import LanguageSelector from '@view/components/LanguageSelector';
 import ThemeToggle from '@view/components/ThemeToggle';
 import Box from '@view/elements/Box';
 import Button from '@view/elements/Button';
@@ -18,6 +21,8 @@ interface MainHeaderProps {
 }
 
 const MainHeader: FunctionComponent<MainHeaderProps> = (props) => {
+  const { t } = useI18n();
+
   return (
     <Box className={styles.container}>
       <Box className={styles.leftContainer}>
@@ -28,10 +33,11 @@ const MainHeader: FunctionComponent<MainHeaderProps> = (props) => {
         )}
         <Box color='var(--color-text-primary)'>logo</Box>
         <Typography variant='h6' className={styles.title}>
-          {props.title}
+          {t(props.title)}
         </Typography>
       </Box>
       <Box className={styles.rightContainer}>
+        <LanguageSelector className={styles.languageSelector} />
         <ThemeToggle className={styles.themeToggle} />
         {props.onClose && !props.onShowMenu && (
           <button className={styles.button} onClick={props.onClose}>

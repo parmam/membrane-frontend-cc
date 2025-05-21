@@ -1,3 +1,5 @@
+import { useI18n } from '@/i18n';
+
 import { FunctionComponent, useState } from 'react';
 
 import AuthLayout from '@view/layouts/AuthLayout/AuthLayout';
@@ -8,6 +10,7 @@ import RegisterForm from '@view/prototypes/forms/RegisterForm/RegisterForm';
 type AuthFormType = 'login' | 'register' | 'recover';
 
 const AuthPage: FunctionComponent = () => {
+  const { t } = useI18n();
   const [formType, setFormType] = useState<AuthFormType>('login');
 
   const handleSwitchForm = (type: AuthFormType) => {
@@ -17,11 +20,11 @@ const AuthPage: FunctionComponent = () => {
   const getPageTitle = () => {
     switch (formType) {
       case 'login':
-        return 'Sign In';
+        return t('auth.login');
       case 'register':
-        return 'Create Account';
+        return t('auth.createAccount');
       case 'recover':
-        return 'Recover Password';
+        return t('auth.recoverPassword');
     }
   };
 

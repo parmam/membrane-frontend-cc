@@ -1,3 +1,5 @@
+import { I18nProvider } from '@/i18n';
+
 import Routes from '@navigation/Routes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@theme/ThemeProvider';
@@ -7,13 +9,15 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <div className='app'>
-          <Routes />
-        </div>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <I18nProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <div className='app'>
+            <Routes />
+          </div>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </I18nProvider>
   );
 }
 

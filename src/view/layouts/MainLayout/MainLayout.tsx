@@ -13,7 +13,7 @@ const MainLayout: FunctionComponent<MainLayoutProps> = (props) => {
 
   return (
     <Box bgcolor={theme.palette.background.default}>
-      <MainHeader title={'Home'} />
+      <MainHeader title='navigation.home' />
       {props.children}
     </Box>
   );

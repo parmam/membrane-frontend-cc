@@ -1,3 +1,5 @@
+import { useI18n } from '@/i18n';
+
 import { FunctionComponent, useState } from 'react';
 
 import useTheme from '@theme/useTheme';
@@ -13,6 +15,7 @@ interface LoginFormProps {
 
 const LoginForm: FunctionComponent<LoginFormProps> = (props) => {
   const theme = useTheme();
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -47,43 +50,43 @@ const LoginForm: FunctionComponent<LoginFormProps> = (props) => {
     <form onSubmit={handleSubmit}>
       <Box display='flex' flexDirection='column' gap='1.5rem'>
         <Input
-          label='Email'
+          label={t('auth.email')}
           type='email'
           value={email}
           onChange={setEmail}
           error={errors.email}
-          placeholder='email@example.com'
+          placeholder={t('auth.emailPlaceholder')}
           autoComplete='email'
           required
         />
 
         <Input
-          label='Password'
+          label={t('auth.password')}
           type='password'
           value={password}
           onChange={setPassword}
           error={errors.password}
-          placeholder='••••••••'
+          placeholder={t('auth.passwordPlaceholder')}
           autoComplete='current-password'
           required
         />
 
         <Box marginTop='0.5rem'>
           <Button type='submit' variant='contained' color='primary' fullWidth>
-            Sign In
+            {t('auth.login')}
           </Button>
         </Box>
 
         <Box display='flex' justifyContent='center' gap='0.5rem'>
           <Button type='button' variant='text' color='primary' onClick={props.onRecoverClick}>
-            Forgot Password?
+            {t('auth.forgotPassword')}
           </Button>
         </Box>
 
         <Box display='flex' justifyContent='center' gap='0.5rem'>
-          <span style={{ color: theme.palette.text.primary }}>Don't have an account?</span>
+          <span style={{ color: theme.palette.text.primary }}>{t('auth.dontHaveAccount')}</span>
           <Button type='button' variant='text' color='primary' onClick={props.onRegisterClick}>
-            Sign Up
+            {t('auth.register')}
           </Button>
         </Box>
       </Box>

@@ -1,3 +1,5 @@
+import { useI18n } from '@/i18n';
+
 import { FunctionComponent, useState } from 'react';
 
 import useTheme from '@theme/useTheme';
@@ -19,6 +21,7 @@ interface RegisterFormProps {
 
 const RegisterForm: FunctionComponent<RegisterFormProps> = (props) => {
   const theme = useTheme();
+  const { t } = useI18n();
   const [businessName, setBusinessName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -71,51 +74,51 @@ const RegisterForm: FunctionComponent<RegisterFormProps> = (props) => {
     <form onSubmit={handleSubmit}>
       <Box display='flex' flexDirection='column' gap='1.5rem'>
         <Input
-          label='Business Name'
+          label={t('auth.businessName')}
           type='text'
           value={businessName}
           onChange={setBusinessName}
           error={errors.businessName}
-          placeholder='Your Business Name'
+          placeholder={t('auth.businessName')}
           autoComplete='organization'
           required
         />
 
         <Input
-          label='Email'
+          label={t('auth.email')}
           type='email'
           value={email}
           onChange={setEmail}
           error={errors.email}
-          placeholder='email@example.com'
+          placeholder={t('auth.emailPlaceholder')}
           autoComplete='email'
           required
         />
 
         <Input
-          label='Password'
+          label={t('auth.password')}
           type='password'
           value={password}
           onChange={setPassword}
           error={errors.password}
-          placeholder='••••••••'
+          placeholder={t('auth.passwordPlaceholder')}
           autoComplete='new-password'
           required
         />
 
         <Input
-          label='Confirm Password'
+          label={t('auth.confirmPassword')}
           type='password'
           value={confirmPassword}
           onChange={setConfirmPassword}
           error={errors.confirmPassword}
-          placeholder='••••••••'
+          placeholder={t('auth.passwordPlaceholder')}
           autoComplete='new-password'
           required
         />
 
         <Input
-          label='Phone Number'
+          label={t('auth.phoneNumber')}
           type='tel'
           value={phoneNumber}
           onChange={setPhoneNumber}
@@ -127,14 +130,14 @@ const RegisterForm: FunctionComponent<RegisterFormProps> = (props) => {
 
         <Box marginTop='0.5rem'>
           <Button type='submit' variant='contained' color='primary' fullWidth>
-            Create Account
+            {t('auth.createAccount')}
           </Button>
         </Box>
 
         <Box display='flex' justifyContent='center' gap='0.5rem'>
-          <span style={{ color: theme.palette.text.primary }}>Already have an account?</span>
+          <span style={{ color: theme.palette.text.primary }}>{t('auth.alreadyHaveAccount')}</span>
           <Button type='button' variant='text' color='primary' onClick={props.onLoginClick}>
-            Sign In
+            {t('auth.login')}
           </Button>
         </Box>
       </Box>

@@ -1,0 +1,54 @@
+{
+  "translation": {
+    "common": {
+      "loading": "Cargando...",
+      "error": "Error",
+      "success": "Éxito",
+      "language": "Selector de idioma"
+    },
+    "theme": {
+      "light": "Modo Claro",
+      "dark": "Modo Oscuro",
+      "switchToLight": "Cambiar a Modo Claro",
+      "switchToDark": "Cambiar a Modo Oscuro"
+    },
+    "auth": {
+      "login": "Iniciar Sesión",
+      "register": "Registrarse",
+      "logout": "Cerrar Sesión",
+      "email": "Correo Electrónico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar Contraseña",
+      "businessName": "Nombre de la Empresa",
+      "phoneNumber": "Número de Teléfono",
+      "forgotPassword": "¿Olvidó su Contraseña?",
+      "dontHaveAccount": "¿No tiene una cuenta?",
+      "alreadyHaveAccount": "¿Ya tiene una cuenta?",
+      "createAccount": "Crear Cuenta",
+      "emailPlaceholder": "correo@ejemplo.com",
+      "passwordPlaceholder": "••••••••",
+      "recoverPassword": "Recuperar Contraseña",
+      "resetPassword": "Restablecer Contraseña",
+      "recoverPasswordMessage": "Ingrese su dirección de correo electrónico y le enviaremos un enlace para restablecer su contraseña.",
+      "passwordResetSent": "Si existe una cuenta con el correo electrónico {{email}}, recibirá un enlace para restablecer su contraseña. Por favor, revise su correo.",
+      "backToSignIn": "Volver a Iniciar Sesión"
+    },
+    "validation": {
+      "invalidEmail": "Formato de correo electrónico inválido",
+      "invalidPassword": "Formato de contraseña inválido",
+      "invalidText": "Formato de texto inválido",
+      "passwordsMustMatch": "Las contraseñas deben coincidir",
+      "required": "Este campo es obligatorio"
+    },
+    "currency": {
+      "selectCrypto": "Seleccione una criptomoneda"
+    },
+    "transaction": {
+      "buy": "Comprar",
+      "sell": "Vender"
+    },
+    "navigation": {
+      "home": "Inicio"
+    }
+  }
+}

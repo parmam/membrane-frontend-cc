@@ -1,0 +1,54 @@
+{
+  "translation": {
+    "common": {
+      "loading": "Loading...",
+      "error": "Error",
+      "success": "Success",
+      "language": "Language selector"
+    },
+    "theme": {
+      "light": "Light Mode",
+      "dark": "Dark Mode",
+      "switchToLight": "Switch to Light Mode",
+      "switchToDark": "Switch to Dark Mode"
+    },
+    "auth": {
+      "login": "Sign In",
+      "register": "Sign Up",
+      "logout": "Logout",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "businessName": "Business Name",
+      "phoneNumber": "Phone Number",
+      "forgotPassword": "Forgot Password?",
+      "dontHaveAccount": "Don't have an account?",
+      "alreadyHaveAccount": "Already have an account?",
+      "createAccount": "Create Account",
+      "emailPlaceholder": "email@example.com",
+      "passwordPlaceholder": "••••••••",
+      "recoverPassword": "Recover Password",
+      "resetPassword": "Reset Password",
+      "recoverPasswordMessage": "Enter your email address and we'll send you a link to reset your password.",
+      "passwordResetSent": "If an account exists with the email {{email}}, you will receive a password reset link. Please check your email.",
+      "backToSignIn": "Back to Sign In"
+    },
+    "validation": {
+      "invalidEmail": "Invalid email format",
+      "invalidPassword": "Invalid password format",
+      "invalidText": "Invalid text format",
+      "passwordsMustMatch": "Passwords must match",
+      "required": "This field is required"
+    },
+    "currency": {
+      "selectCrypto": "Select a crypto"
+    },
+    "transaction": {
+      "buy": "Buy",
+      "sell": "Sell"
+    },
+    "navigation": {
+      "home": "Home"
+    }
+  }
+}

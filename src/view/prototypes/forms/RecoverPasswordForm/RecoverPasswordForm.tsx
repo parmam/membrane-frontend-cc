@@ -1,5 +1,8 @@
+import { useI18n } from '@/i18n';
+
 import { FunctionComponent, useState } from 'react';
 
+import useTheme from '@theme/useTheme';
 import { ValidationErrors, validateEmail } from '@utils/field-validations';
 import Box from '@view/elements/Box';
 import Button from '@view/elements/Button';
@@ -10,6 +13,8 @@ interface RecoverPasswordFormProps {
 }
 
 const RecoverPasswordForm: FunctionComponent<RecoverPasswordFormProps> = (props) => {
+  const theme = useTheme();
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [submitted, setSubmitted] = useState(false);
@@ -42,40 +47,39 @@ const RecoverPasswordForm: FunctionComponent<RecoverPasswordFormProps> = (props)
         {!submitted ? (
           <>
             <Box marginBottom='1rem'>
-              <p style={{ color: 'white', margin: 0 }}>
-                Enter your email address and we'll send you a link to reset your password.
+              <p style={{ color: theme.palette.text.primary, margin: 0 }}>
+                {t('auth.recoverPasswordMessage')}
               </p>
             </Box>
 
             <Input
-              label='Email'
+              label={t('auth.email')}
               type='email'
               value={email}
               onChange={setEmail}
               error={errors.email}
-              placeholder='email@example.com'
+              placeholder={t('auth.emailPlaceholder')}
               autoComplete='email'
               required
             />
 
             <Box marginTop='0.5rem'>
               <Button type='submit' variant='contained' color='primary' fullWidth>
-                Reset Password
+                {t('auth.resetPassword')}
               </Button>
             </Box>
           </>
         ) : (
           <Box display='flex' flexDirection='column' alignItems='center' gap='1.5rem'>
-            <p style={{ color: 'white', textAlign: 'center' }}>
-              If an account exists with the email <strong>{email}</strong>, you will receive a
-              password reset link. Please check your email.
+            <p style={{ color: theme.palette.text.primary, textAlign: 'center' }}>
+              {t('auth.passwordResetSent', { email })}
             </p>
           </Box>
         )}
 
         <Box display='flex' justifyContent='center' gap='0.5rem'>
           <Button type='button' variant='text' color='primary' onClick={props.onLoginClick}>
-            Back to Sign In
+            {t('auth.backToSignIn')}
           </Button>
         </Box>
       </Box>

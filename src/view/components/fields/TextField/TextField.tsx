@@ -1,3 +1,5 @@
+import { useI18n } from '@/i18n';
+
 import { FunctionComponent, useRef, useState } from 'react';
 
 import { FieldError } from '@models/Error';
@@ -10,32 +12,29 @@ import styles from './TextField.module.css';
 
 type FieldType = 'email' | 'password' | 'text';
 
-const errorMap: Record<FieldType, FieldError> = {
-  email: { name: 'email', message: 'Invalid email format', code: 'invalid_email' },
-  password: { name: 'password', message: 'Invalid password format', code: 'invalid_password' },
-  text: { name: 'text', message: 'Invalid text format', code: 'invalid_text' },
-};
-
-interface TextFieldProps extends Omit<InputProps, 'onChange' | 'onBlur' | 'value' | 'onError'> {
-  fieldType: FieldType;
-  error?: boolean;
-  value: string;
-  title?: string;
-  onError?: (error: FieldError) => void;
-  onChange?: (value: string) => void;
-}
-
-const isEmailFormat = (value: string) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-};
-
-const isPasswordFormat = (value: string) => {
-  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/.test(value);
-};
-
 const TextField: FunctionComponent<TextFieldProps> = (props) => {
+  const { t } = useI18n();
   const [value, setValue] = useState<string>(props.value);
   const [error, setError] = useState<FieldError | undefined>(undefined);
+
+  // Mapeo de errores con traducciones
+  const errorMap: Record<FieldType, FieldError> = {
+    email: {
+      name: 'email',
+      message: t('validation.invalidEmail'),
+      code: 'invalid_email',
+    },
+    password: {
+      name: 'password',
+      message: t('validation.invalidPassword'),
+      code: 'invalid_password',
+    },
+    text: {
+      name: 'text',
+      message: t('validation.invalidText'),
+      code: 'invalid_text',
+    },
+  };
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -64,7 +63,7 @@ const TextField: FunctionComponent<TextFieldProps> = (props) => {
 
   return (
     <Box className={styles.root}>
-      {title && <Typography>{title}</Typography>}
+      {title && <Typography>{t(title)}</Typography>}
       <Input
         {...inputProps}
         ref={inputRef}
@@ -77,6 +76,23 @@ const TextField: FunctionComponent<TextFieldProps> = (props) => {
       {error && <InputError error={error} />}
     </Box>
   );
+};
+
+interface TextFieldProps extends Omit<InputProps, 'onChange' | 'onBlur' | 'value' | 'onError'> {
+  fieldType: FieldType;
+  error?: boolean;
+  value: string;
+  title?: string;
+  onError?: (error: FieldError) => void;
+  onChange?: (value: string) => void;
+}
+
+const isEmailFormat = (value: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+};
+
+const isPasswordFormat = (value: string) => {
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/.test(value);
 };
 
 export default TextField;
