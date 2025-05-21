@@ -1,0 +1,83 @@
+.theme-toggle {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  outline: none;
+}
+
+.toggle-track {
+  width: 50px;
+  height: 24px;
+  border-radius: 12px;
+  background-color: var(--color-background-paper);
+  border: 1px solid var(--color-divider);
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.toggle-indicator {
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  top: 2px;
+  left: 2px;
+  background-color: var(--color-primary-main);
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.light-mode .toggle-indicator {
+  transform: translateX(0);
+}
+
+.dark-mode .toggle-indicator {
+  transform: translateX(26px);
+}
+
+.toggle-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.toggle-mode-text {
+  font-size: 12px;
+  position: relative;
+  z-index: 0;
+}
+
+.light-icon {
+  margin-right: auto;
+  margin-left: 2px;
+}
+
+.dark-icon {
+  margin-left: auto;
+  margin-right: 2px;
+}
+
+.light-mode .light-icon {
+  opacity: 1;
+}
+
+.light-mode .dark-icon {
+  opacity: 0.5;
+}
+
+.dark-mode .light-icon {
+  opacity: 0.5;
+}
+
+.dark-mode .dark-icon {
+  opacity: 1;
+}

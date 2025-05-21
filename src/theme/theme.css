@@ -1,0 +1,142 @@
+:root {
+  /* Light Theme Colors */
+  --light-color-primary-main: #bd790b;
+  --light-color-primary-light: #e5a040;
+  --light-color-primary-dark: #8a5a0a;
+  --light-color-secondary-main: #ff9a4e;
+  --light-color-secondary-light: #ffbc85;
+  --light-color-secondary-dark: #dd7e2d;
+  --light-color-background-default: #f5f5f5;
+  --light-color-background-paper: #ffffff;
+  --light-color-text-primary: #333333;
+  --light-color-text-secondary: #666666;
+  --light-color-common-black: #0d0604;
+  --light-color-common-white: #ffffff;
+  --light-color-success-main: #18d22b;
+  --light-color-success-light: #5ae768;
+  --light-color-success-dark: #0fad21;
+  --light-color-error-main: #d32f2f;
+  --light-color-error-light: #ef5350;
+  --light-color-error-dark: #b71c1c;
+  --light-color-divider: #e0e0e0;
+
+  /* Dark Theme Colors */
+  --dark-color-primary-main: #bd790b;
+  --dark-color-primary-light: #e5a040;
+  --dark-color-primary-dark: #8a5a0a;
+  --dark-color-secondary-main: #ff9a4e;
+  --dark-color-secondary-light: #ffbc85;
+  --dark-color-secondary-dark: #dd7e2d;
+  --dark-color-background-default: #0d0604;
+  --dark-color-background-paper: #322e2c;
+  --dark-color-text-primary: #ffffff;
+  --dark-color-text-secondary: #cccccc;
+  --dark-color-common-black: #0d0604;
+  --dark-color-common-white: #ffffff;
+  --dark-color-success-main: #18d22b;
+  --dark-color-success-light: #5ae768;
+  --dark-color-success-dark: #0fad21;
+  --dark-color-error-main: #d32f2f;
+  --dark-color-error-light: #ef5350;
+  --dark-color-error-dark: #b71c1c;
+  --dark-color-divider: rgb(87, 72, 49);
+
+  /* Default to dark theme initially */
+  --color-primary-main: var(--dark-color-primary-main);
+  --color-primary-light: var(--dark-color-primary-light);
+  --color-primary-dark: var(--dark-color-primary-dark);
+  --color-secondary-main: var(--dark-color-secondary-main);
+  --color-secondary-light: var(--dark-color-secondary-light);
+  --color-secondary-dark: var(--dark-color-secondary-dark);
+  --color-background-default: var(--dark-color-background-default);
+  --color-background-paper: var(--dark-color-background-paper);
+  --color-text-primary: var(--dark-color-text-primary);
+  --color-text-secondary: var(--dark-color-text-secondary);
+  --color-common-black: var(--dark-color-common-black);
+  --color-common-white: var(--dark-color-common-white);
+  --color-success-main: var(--dark-color-success-main);
+  --color-success-light: var(--dark-color-success-light);
+  --color-success-dark: var(--dark-color-success-dark);
+  --color-error-main: var(--dark-color-error-main);
+  --color-error-light: var(--dark-color-error-light);
+  --color-error-dark: var(--dark-color-error-dark);
+  --color-divider: var(--dark-color-divider);
+
+  /* Typography */
+  --font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Breakpoints */
+  --breakpoint-xs: 600px;
+  --breakpoint-sm: 900px;
+  --breakpoint-md: 1200px;
+  --breakpoint-lg: 1536px;
+  --breakpoint-xl: 1920px;
+}
+
+body.light-theme {
+  --color-primary-main: var(--light-color-primary-main);
+  --color-primary-light: var(--light-color-primary-light);
+  --color-primary-dark: var(--light-color-primary-dark);
+  --color-secondary-main: var(--light-color-secondary-main);
+  --color-secondary-light: var(--light-color-secondary-light);
+  --color-secondary-dark: var(--light-color-secondary-dark);
+  --color-background-default: var(--light-color-background-default);
+  --color-background-paper: var(--light-color-background-paper);
+  --color-text-primary: var(--light-color-text-primary);
+  --color-text-secondary: var(--light-color-text-secondary);
+  --color-common-black: var(--light-color-common-black);
+  --color-common-white: var(--light-color-common-white);
+  --color-success-main: var(--light-color-success-main);
+  --color-success-light: var(--light-color-success-light);
+  --color-success-dark: var(--light-color-success-dark);
+  --color-error-main: var(--light-color-error-main);
+  --color-error-light: var(--light-color-error-light);
+  --color-error-dark: var(--light-color-error-dark);
+  --color-divider: var(--light-color-divider);
+}
+
+body.dark-theme {
+  --color-primary-main: var(--dark-color-primary-main);
+  --color-primary-light: var(--dark-color-primary-light);
+  --color-primary-dark: var(--dark-color-primary-dark);
+  --color-secondary-main: var(--dark-color-secondary-main);
+  --color-secondary-light: var(--dark-color-secondary-light);
+  --color-secondary-dark: var(--dark-color-secondary-dark);
+  --color-background-default: var(--dark-color-background-default);
+  --color-background-paper: var(--dark-color-background-paper);
+  --color-text-primary: var(--dark-color-text-primary);
+  --color-text-secondary: var(--dark-color-text-secondary);
+  --color-common-black: var(--dark-color-common-black);
+  --color-common-white: var(--dark-color-common-white);
+  --color-success-main: var(--dark-color-success-main);
+  --color-success-light: var(--dark-color-success-light);
+  --color-success-dark: var(--dark-color-success-dark);
+  --color-error-main: var(--dark-color-error-main);
+  --color-error-light: var(--dark-color-error-light);
+  --color-error-dark: var(--dark-color-error-dark);
+  --color-divider: var(--dark-color-divider);
+}
+
+/* Transición suave entre temas */
+body {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}

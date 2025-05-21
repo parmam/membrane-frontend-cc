@@ -1,0 +1,49 @@
+.box {
+  display: flex;
+  position: relative;
+}
+
+/* Variants para soportar propiedades comunes de Material UI Box */
+.flexColumn {
+  flex-direction: column;
+}
+
+.flexRow {
+  flex-direction: row;
+}
+
+.flexWrap {
+  flex-wrap: wrap;
+}
+
+.justifyStart {
+  justify-content: flex-start;
+}
+
+.justifyCenter {
+  justify-content: center;
+}
+
+.justifyEnd {
+  justify-content: flex-end;
+}
+
+.justifyBetween {
+  justify-content: space-between;
+}
+
+.justifyAround {
+  justify-content: space-around;
+}
+
+.alignStart {
+  align-items: flex-start;
+}
+
+.alignCenter {
+  align-items: center;
+}
+
+.alignEnd {
+  align-items: flex-end;
+}

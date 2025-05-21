@@ -1,0 +1,64 @@
+.spinner {
+  display: inline-block;
+  position: relative;
+  animation: rotate 1.4s linear infinite;
+}
+
+.circle {
+  stroke: var(--color-primary-main);
+  stroke-dasharray: 80px, 200px;
+  stroke-dashoffset: 0;
+  animation: dash 1.4s ease-in-out infinite;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1px, 200px;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 100px, 200px;
+    stroke-dashoffset: -15px;
+  }
+  100% {
+    stroke-dasharray: 100px, 200px;
+    stroke-dashoffset: -125px;
+  }
+}
+
+.small {
+  width: 24px;
+  height: 24px;
+}
+
+.medium {
+  width: 40px;
+  height: 40px;
+}
+
+.large {
+  width: 56px;
+  height: 56px;
+}
+
+.primary {
+  color: var(--color-primary-main);
+}
+
+.secondary {
+  color: var(--color-secondary-main);
+}
+
+.success {
+  color: var(--color-success-main);
+}
+
+.error {
+  color: var(--color-error-main);
+}

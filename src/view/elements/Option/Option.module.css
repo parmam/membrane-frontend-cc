@@ -1,0 +1,23 @@
+.option {
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  padding: 8px 16px;
+  display: block;
+  width: 100%;
+  text-align: left;
+  color: var(--color-text-primary);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.option:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
