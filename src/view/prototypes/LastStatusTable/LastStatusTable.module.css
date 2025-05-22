@@ -17,6 +17,104 @@
   position: relative;
 }
 
+/* Mobile container */
+.mobileContainer {
+  background-color: var(--color-background-default);
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Cards container */
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 16px;
+  width: 100%;
+}
+
+/* Device card styles */
+.deviceCard {
+  background-color: var(--color-background-paper);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  border-left: 4px solid transparent;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.deviceCard:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.criticalCard {
+  border-left: 4px solid var(--color-error-main);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.cardStatus {
+  display: flex;
+  justify-content: flex-start;
+  margin: 4px 0 8px 0;
+}
+
+.cardDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+
+.cardDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cardDetailLabel {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.cardDetailValue {
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.loadingCardContainer {
+  padding: 24px;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
 .tableContainer::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -194,4 +292,89 @@
   50% {
     opacity: 0.9;
   }
+}
+
+/* Media query for responsiveness in the cards */
+@media (max-width: 480px) {
+  .mobileContainer {
+    padding: 12px;
+  }
+
+  .cardContainer {
+    gap: 12px;
+  }
+
+  .cardDetails {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .deviceCard {
+    padding: 16px;
+  }
+
+  .cardTitle {
+    font-size: 1.1rem;
+  }
+
+  .cardDetail {
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .cardDetail:last-child {
+    border-bottom: none;
+  }
+
+  .cardDetailLabel {
+    font-size: 0.7rem;
+  }
+
+  .cardDetailValue {
+    font-size: 0.95rem;
+  }
+}
+
+/* Mobile specific styles */
+@media (max-width: 768px) {
+  .scrollHint {
+    margin: 8px;
+    border-radius: 8px;
+    padding: 14px;
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .loadingIndicator {
+    padding: 8px 0;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .loadingIndicator::before {
+    width: 22px;
+    height: 22px;
+    border-width: 3px;
+  }
+}
+
+/* Mobile header */
+.mobileHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px 16px 4px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobileCount {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.08);
+  padding: 6px 12px;
+  border-radius: 100px;
 }
