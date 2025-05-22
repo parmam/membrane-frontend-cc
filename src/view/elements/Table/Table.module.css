@@ -3,15 +3,17 @@
   border-collapse: collapse;
   background-color: var(--color-background-paper);
   color: var(--color-text-primary);
-  overflow: auto;
+  overflow: visible;
 }
 
 .tableContainer {
   width: 100%;
   overflow-x: auto;
+  overflow-y: auto;
   margin-bottom: 16px;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  max-height: 600px;
 }
 
 .tableHead {

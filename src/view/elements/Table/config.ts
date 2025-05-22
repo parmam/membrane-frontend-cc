@@ -17,16 +17,19 @@ export interface TableConfig {
   hover: boolean;
   /** Enable/disable borders */
   bordered: boolean;
+  /** Distance to bottom threshold for infinite scroll (px) */
+  scrollThreshold: number;
 }
 
 export const DEFAULT_TABLE_CONFIG: TableConfig = {
-  itemsPerPage: 10,
+  itemsPerPage: 15,
   virtualizationThreshold: 50,
-  tableHeight: 500,
+  tableHeight: 600,
   rowHeight: 48,
   bufferSize: 5,
-  pageSizeOptions: [5, 10, 25, 50, 100],
+  pageSizeOptions: [10, 15, 25, 50, 100],
   striped: true,
   hover: true,
   bordered: false,
+  scrollThreshold: 100,
 };
