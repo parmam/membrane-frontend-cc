@@ -7,6 +7,9 @@ import useTheme from '@theme/useTheme';
 import LanguageSelector from '@view/components/LanguageSelector';
 import ThemeToggle from '@view/components/ThemeToggle';
 import Box from '@view/elements/Box';
+import Typography from '@view/elements/Typography';
+
+import styles from './AuthLayout.module.css';
 
 interface AuthLayoutProps {
   children?: ReactNode;
@@ -19,69 +22,23 @@ const AuthLayout: FunctionComponent<AuthLayoutProps> = (props) => {
   const { t } = useI18n();
 
   return (
-    <Box
-      display='flex'
-      flexDirection='row'
-      height='100vh'
-      width='100%'
-      bgcolor={theme.palette.background.default}
-      style={{
-        flexDirection: isMobile ? 'column' : 'row',
-      }}
-    >
+    <Box className={styles.authLayoutContainer} bgcolor={theme.palette.background.default}>
       {/* Theme and language toggles in the top-right corner */}
-      <Box
-        style={{
-          position: 'absolute',
-          top: '1rem',
-          right: '1rem',
-          zIndex: 10,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-        }}
-      >
+      <Box className={styles.headerControls}>
         <LanguageSelector />
         <ThemeToggle />
       </Box>
 
       {/* Left side - will have background image later */}
-      <Box
-        display='flex'
-        width='50%'
-        height='100%'
-        bgcolor={theme.palette.background.paper}
-        style={{
-          display: isMobile ? 'none' : 'flex',
-          width: isMobile ? '100%' : '50%',
-        }}
-      />
+      <Box className={styles.leftPanel} bgcolor={theme.palette.background.paper} />
 
       {/* Right side - form container */}
-      <Box
-        display='flex'
-        flexDirection='column'
-        justifyContent='center'
-        alignItems='center'
-        width='50%'
-        height='100%'
-        padding='2rem'
-        style={{
-          width: isMobile ? '100%' : '50%',
-        }}
-      >
-        <Box display='flex' flexDirection='column' maxWidth='450px' width='100%'>
+      <Box className={styles.rightPanel}>
+        <Box className={styles.formContainer}>
           <Box marginBottom='2rem'>
-            <h1
-              style={{
-                color: theme.palette.text.primary,
-                fontSize: '1.75rem',
-                fontWeight: 600,
-                margin: 0,
-              }}
-            >
+            <Typography variant='h4' className={styles.authTitle}>
               {props.title}
-            </h1>
+            </Typography>
           </Box>
           {props.children}
         </Box>

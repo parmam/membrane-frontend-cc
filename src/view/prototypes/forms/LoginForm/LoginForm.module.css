@@ -1,0 +1,37 @@
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.actionButton {
+  margin-top: 0.5rem;
+}
+
+.linkContainer {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.forgotPasswordLink {
+  margin-top: 0.5rem;
+}
+
+/* Para dispositivos móviles */
+@media (max-width: 768px) {
+  .formContainer {
+    gap: 1.25rem;
+  }
+}
+
+/* Para dispositivos muy pequeños */
+@media (max-width: 480px) {
+  .linkContainer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}

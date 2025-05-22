@@ -1,4 +1,4 @@
-import { CSSProperties, FunctionComponent, HTMLAttributes, ReactNode } from 'react';
+import { CSSProperties, HTMLAttributes, ReactNode, Ref, forwardRef } from 'react';
 
 import clsx from 'clsx';
 
@@ -10,16 +10,16 @@ export interface TableContainerProps extends HTMLAttributes<HTMLDivElement> {
   style?: CSSProperties;
 }
 
-const TableContainer: FunctionComponent<TableContainerProps> = ({
-  children,
-  className,
-  ...rest
-}) => {
-  return (
-    <div className={clsx(styles.tableContainer, className)} {...rest}>
-      {children}
-    </div>
-  );
-};
+const TableContainer = forwardRef<HTMLDivElement, TableContainerProps>(
+  ({ children, className, ...rest }, ref) => {
+    return (
+      <div ref={ref} className={clsx(styles.tableContainer, className)} {...rest}>
+        {children}
+      </div>
+    );
+  },
+);
+
+TableContainer.displayName = 'TableContainer';
 
 export default TableContainer;

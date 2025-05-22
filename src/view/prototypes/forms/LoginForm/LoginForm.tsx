@@ -7,6 +7,9 @@ import { ValidationErrors, validateEmail, validatePassword } from '@utils/field-
 import Box from '@view/elements/Box';
 import Button from '@view/elements/Button';
 import Input from '@view/elements/Input';
+import Typography from '@view/elements/Typography';
+
+import styles from './LoginForm.module.css';
 
 interface LoginFormProps {
   onRegisterClick: () => void;
@@ -48,7 +51,7 @@ const LoginForm: FunctionComponent<LoginFormProps> = (props) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Box display='flex' flexDirection='column' gap='1.5rem'>
+      <Box className={styles.formContainer}>
         <Input
           label={t('auth.email')}
           type='email'
@@ -71,20 +74,22 @@ const LoginForm: FunctionComponent<LoginFormProps> = (props) => {
           required
         />
 
-        <Box marginTop='0.5rem'>
+        <Box className={styles.actionButton}>
           <Button type='submit' variant='contained' color='primary' fullWidth>
             {t('auth.login')}
           </Button>
         </Box>
 
-        <Box display='flex' justifyContent='center' gap='0.5rem'>
+        <Box className={`${styles.linkContainer} ${styles.forgotPasswordLink}`}>
           <Button type='button' variant='text' color='primary' onClick={props.onRecoverClick}>
             {t('auth.forgotPassword')}
           </Button>
         </Box>
 
-        <Box display='flex' justifyContent='center' gap='0.5rem'>
-          <span style={{ color: theme.palette.text.primary }}>{t('auth.dontHaveAccount')}</span>
+        <Box className={styles.linkContainer}>
+          <Typography variant='body2' color='secondary'>
+            {t('auth.dontHaveAccount')}
+          </Typography>
           <Button type='button' variant='text' color='primary' onClick={props.onRegisterClick}>
             {t('auth.register')}
           </Button>

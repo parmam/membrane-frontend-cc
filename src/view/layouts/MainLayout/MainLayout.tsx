@@ -1,10 +1,10 @@
-import { FunctionComponent, ReactNode } from 'react';
+import { FunctionComponent, ReactNode, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import useTheme from '@theme/useTheme';
 import Box from '@view/elements/Box';
 import Sidebar from '@view/prototypes/Sidebar/Sidebar';
-import MainHeader from '@view/prototypes/headers/MainHeader';
+import MainHeader from '@view/prototypes/headers/MainHeader/MainHeader';
 
 import styles from './MainLayout.module.css';
 
@@ -12,19 +12,48 @@ interface MainLayoutProps {
   children?: ReactNode;
 }
 
-const MainLayout: FunctionComponent<MainLayoutProps> = (props) => {
+const MainLayout: FunctionComponent<MainLayoutProps> = () => {
   const theme = useTheme();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
   return (
     <Box className={styles.layoutContainer} bgcolor={theme.palette.background.default}>
       <Box className={styles.headerContainer}>
-        <MainHeader title='navigation.home' />
+        <MainHeader title='navigation.home' onShowMenu={isMobile ? toggleMobileMenu : undefined} />
       </Box>
 
       <Box className={styles.bodyContainer}>
-        <Sidebar />
-        <Box className={styles.contentContainer}>
-          <Box className={styles.pageContent}>{props.children}</Box>
+        <div
+          className={`${styles.sidebarWrapper} ${isMobileMenuOpen ? styles.mobileMenuOpen : ''}`}
+        >
+          <Sidebar />
+          {isMobile && isMobileMenuOpen && (
+            <div className={styles.backdrop} onClick={toggleMobileMenu}></div>
+          )}
+        </div>
+        <Box
+          className={`${styles.contentContainer} ${isMobileMenuOpen ? styles.contentShifted : ''}`}
+        >
+          <Box className={styles.pageContent}>
+            <Outlet />
+          </Box>
         </Box>
       </Box>
     </Box>

@@ -3,6 +3,7 @@
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
+  overflow-x: hidden; /* Evita scroll horizontal */
 }
 
 .headerContainer {
@@ -20,6 +21,12 @@
   flex: 1;
   margin-top: 62px; /* Altura del header */
   min-height: calc(100vh - 62px);
+  position: relative;
+}
+
+.sidebarWrapper {
+  position: relative;
+  height: 100%;
 }
 
 .contentContainer {
@@ -28,6 +35,7 @@
   flex-direction: column;
   margin-left: 250px; /* Mismo ancho que el sidebar */
   width: calc(100% - 250px);
+  transition: margin-left 0.3s ease;
 }
 
 .pageContent {
@@ -36,10 +44,52 @@
   overflow: auto;
 }
 
-/* Media query para pantallas pequeñas */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  display: none;
+}
+
+/* Media queries para dispositivos móviles y tablets */
 @media (max-width: 900px) {
   .bodyContainer {
     margin-top: 48px; /* Altura del header en pantallas pequeñas */
     min-height: calc(100vh - 48px);
+  }
+}
+
+@media (max-width: 768px) {
+  .contentContainer {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .sidebarWrapper {
+    z-index: 150;
+  }
+
+  .sidebarWrapper > div {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .mobileMenuOpen > div {
+    transform: translateX(0);
+  }
+
+  .mobileMenuOpen .backdrop {
+    display: block;
+  }
+}
+
+/* Ajustes adicionales para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .pageContent {
+    padding: 15px 10px;
   }
 }

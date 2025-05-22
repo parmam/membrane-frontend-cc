@@ -9,6 +9,7 @@ import {
   faMemory,
   faMicrochip,
   faObjectGroup,
+  faShoppingCart,
   faTachometerAlt,
   faTags,
   faUserTag,
@@ -64,7 +65,7 @@ export const sidebarItemGroups: SidebarItemGroup[] = [
     label: 'Administración',
     translationKey: 'navigation.administration',
     icon: faCog,
-    expanded: true,
+    expanded: false,
     items: [
       {
         id: 4,
@@ -94,6 +95,15 @@ export const sidebarItemGroups: SidebarItemGroup[] = [
         icon: faObjectGroup,
         path: '/admin/grupos',
       },
+    ],
+  },
+  {
+    id: 'products',
+    label: 'Productos',
+    translationKey: 'navigation.products',
+    icon: faShoppingCart,
+    expanded: false,
+    items: [
       {
         id: 8,
         label: 'Dispositivos',

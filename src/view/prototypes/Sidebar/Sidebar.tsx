@@ -48,10 +48,42 @@ const Sidebar: FunctionComponent = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
-    Object.fromEntries(sidebarItemGroups.map((group) => [group.id, group.expanded || false])),
+
+  // Inicializamos todos los grupos como cerrados
+  const initialExpandedState = Object.fromEntries(
+    sidebarItemGroups.map((group) => [group.id, false]),
   );
+
+  const [expandedGroups, setExpandedGroups] =
+    useState<Record<string, boolean>>(initialExpandedState);
   const [prevLanguage, setPrevLanguage] = useState(language);
+
+  // Detecta si la ruta actual corresponde a algún grupo y lo abre
+  useEffect(() => {
+    const currentPath = location.pathname;
+
+    // Busca qué grupo contiene la ruta actual
+    let groupToExpand = '';
+    sidebarItemGroups.forEach((group) => {
+      const matchingItem = group.items.find((item) => {
+        const itemPath = getLocalizedPath(item.path);
+        return currentPath === itemPath || currentPath.startsWith(itemPath + '/');
+      });
+
+      if (matchingItem) {
+        groupToExpand = group.id;
+      }
+    });
+
+    // Si encontramos un grupo que coincide con la ruta, lo expandimos
+    if (groupToExpand) {
+      setExpandedGroups((prev) => {
+        const newState = { ...initialExpandedState };
+        newState[groupToExpand] = true;
+        return newState;
+      });
+    }
+  }, [location.pathname]);
 
   // Handle language change to update route
   useEffect(() => {
@@ -69,10 +101,30 @@ const Sidebar: FunctionComponent = () => {
   }, [language, location.pathname, navigate, prevLanguage]);
 
   const toggleGroup = (groupId: string) => {
-    setExpandedGroups((prev) => ({
-      ...prev,
-      [groupId]: !prev[groupId],
-    }));
+    setExpandedGroups((prev) => {
+      // Si el grupo que se está clicando ya está abierto, lo cerramos
+      if (prev[groupId]) {
+        return {
+          ...prev,
+          [groupId]: false,
+        };
+      }
+
+      // Si estamos abriendo un grupo, cerramos todos los demás
+      const newState = Object.keys(prev).reduce(
+        (acc, key) => {
+          acc[key] = false;
+          return acc;
+        },
+        {} as Record<string, boolean>,
+      );
+
+      // Y abrimos solo el grupo clicado
+      return {
+        ...newState,
+        [groupId]: true,
+      };
+    });
   };
 
   // Function to get localized path based on the current language
