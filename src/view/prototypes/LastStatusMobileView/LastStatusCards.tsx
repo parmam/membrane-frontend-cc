@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { DEFAULT_TABLE_CONFIG } from '@view/elements/Table/config';
+import { DeviceData } from '@view/prototypes/LastStatusTable/data';
 import clsx from 'clsx';
 
-import { DEFAULT_TABLE_CONFIG } from '../../elements/Table/config';
-import { DeviceData } from '../LastStatusTable/data';
 import styles from './LastStatusCards.module.css';
 
 // Extender el tipo Window para permitir el timeout

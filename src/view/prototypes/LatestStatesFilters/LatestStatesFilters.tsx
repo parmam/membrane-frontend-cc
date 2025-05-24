@@ -1,10 +1,11 @@
 import { FunctionComponent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import Option from '../../elements/Option/Option';
-import Select from '../../elements/Select/Select';
-import { brands, deviceTypes, sites, statusOptions } from '../../prototypes/LastStatusTable/data';
-import DateSelector from '../DateSelector/DateSelector';
+import DateSelector from '@view/components/DateSelector/DateSelector';
+import Option from '@view/elements/Option/Option';
+import Select from '@view/elements/Select/Select';
+import { brands, deviceTypes, sites, statusOptions } from '@view/prototypes/LastStatusTable/data';
+
 import styles from './LatestStatesFilters.module.css';
 
 interface LatestStatesFiltersProps {

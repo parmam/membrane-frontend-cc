@@ -1,8 +1,8 @@
-import React from 'react';
+import { FunctionComponent } from 'react';
 
-import ContentTitles from '../view/components/ContentTitles/ContentTitles';
+import ContentTitles from '@view/components/ContentTitles/ContentTitles';
 
-const DevicesPage: React.FC = () => {
+const DevicesPage: FunctionComponent = () => {
   return (
     <div>
       <ContentTitles title='Devices Page' subtitle='This is the devices management page.' />

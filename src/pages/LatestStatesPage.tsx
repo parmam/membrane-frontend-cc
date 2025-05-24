@@ -1,10 +1,11 @@
 import { FunctionComponent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import ContentTitles from '../view/components/ContentTitles/ContentTitles';
-import LatestStatesFilters from '../view/components/LatestStatesFilters/LatestStatesFilters';
-import LastStatusTable from '../view/prototypes/LastStatusTable/LastStatusTable';
-import { DeviceData, dummyDeviceData } from '../view/prototypes/LastStatusTable/data';
+import ContentTitles from '@view/components/ContentTitles/ContentTitles';
+import LastStatusTable from '@view/prototypes/LastStatusTable/LastStatusTable';
+import { DeviceData, dummyDeviceData } from '@view/prototypes/LastStatusTable/data';
+import LatestStatesFilters from '@view/prototypes/LatestStatesFilters/LatestStatesFilters';
+
 import styles from './LatestStatesPage.module.css';
 
 interface FilterState {

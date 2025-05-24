@@ -1,8 +1,7 @@
 import { CSSProperties, FunctionComponent } from 'react';
 
+import logo from '@assets/images/logo.svg';
 import clsx from 'clsx';
-
-import logo from '/@application/assets/images/logo.svg';
 
 import styles from './Logo.module.css';
 

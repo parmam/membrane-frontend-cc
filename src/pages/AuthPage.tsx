@@ -3,9 +3,9 @@ import { useI18n } from '@/i18n';
 import { FunctionComponent, useState } from 'react';
 
 import AuthLayout from '@view/layouts/AuthLayout/AuthLayout';
-import LoginForm from '@view/prototypes/forms/LoginForm/LoginForm';
-import RecoverPasswordForm from '@view/prototypes/forms/RecoverPasswordForm/RecoverPasswordForm';
-import RegisterForm from '@view/prototypes/forms/RegisterForm/RegisterForm';
+import LoginForm from '@view/prototypes/Forms/LoginForm/LoginForm';
+import RecoverPasswordForm from '@view/prototypes/Forms/RecoverPasswordForm/RecoverPasswordForm';
+import RegisterForm from '@view/prototypes/Forms/RegisterForm/RegisterForm';
 
 type AuthFormType = 'login' | 'register' | 'recover';
 

@@ -3,8 +3,8 @@ import { Outlet } from 'react-router-dom';
 
 import useTheme from '@theme/useTheme';
 import Box from '@view/elements/Box';
+import MainHeader from '@view/prototypes/Headers/MainHeader/MainHeader';
 import Sidebar from '@view/prototypes/Sidebar/Sidebar';
-import MainHeader from '@view/prototypes/headers/MainHeader/MainHeader';
 
 import styles from './MainLayout.module.css';
 

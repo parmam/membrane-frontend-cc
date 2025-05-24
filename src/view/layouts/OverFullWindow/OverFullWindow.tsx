@@ -1,7 +1,7 @@
 import { FunctionComponent, ReactNode } from 'react';
 
 import Box from '@view/elements/Box';
-import MainHeader from '@view/prototypes/headers/MainHeader';
+import MainHeader from '@view/prototypes/Headers/MainHeader/MainHeader';
 
 import styles from './OverFullWindow.module.css';
 

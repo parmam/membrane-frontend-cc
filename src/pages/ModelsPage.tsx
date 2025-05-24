@@ -1,9 +1,9 @@
-import React from 'react';
+import { FunctionComponent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import ContentTitles from '../view/components/ContentTitles/ContentTitles';
+import ContentTitles from '@view/components/ContentTitles/ContentTitles';
 
-const ModelsPage: React.FC = () => {
+const ModelsPage: FunctionComponent = () => {
   const { t } = useTranslation();
 
   return (

@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Table from '@view/elements/Table';
+import { TableBody, TableHead } from '@view/elements/Table';
+import { DEFAULT_TABLE_CONFIG } from '@view/elements/Table/config';
+import LastStatusCards from '@view/prototypes/LastStatusMobileView/LastStatusCards';
 import clsx from 'clsx';
 
-import Table from '../../elements/Table';
-import { TableBody, TableHead } from '../../elements/Table';
-import { DEFAULT_TABLE_CONFIG } from '../../elements/Table/config';
-import LastStatusCards from '../lastStatusMobileView/LastStatusCards';
 import styles from './LastStatusTable.module.css';
 import { DeviceData, dummyDeviceData } from './data';
 

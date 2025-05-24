@@ -1,6 +1,7 @@
+import { LanguageCode, SUPPORTED_LANGUAGES, useI18n } from '@/i18n';
+
 import React, { useEffect, useState } from 'react';
 
-import { LanguageCode, SUPPORTED_LANGUAGES, useI18n } from '../../../i18n';
 import styles from './LanguageSelector.module.css';
 
 interface LanguageSelectorProps {
