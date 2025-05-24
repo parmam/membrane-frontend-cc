@@ -1,11 +1,14 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import ContentTitles from '../view/components/ContentTitles/ContentTitles';
 
 const GroupsPage: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <div>
-      <ContentTitles title='Groups Page' subtitle='This is the groups management page.' />
+      <ContentTitles title={t('pages.groups.title')} subtitle={t('pages.groups.subtitle')} />
     </div>
   );
 };

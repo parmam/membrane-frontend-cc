@@ -5,7 +5,23 @@
       "error": "Error",
       "success": "Éxito",
       "language": "Selector de idioma",
-      "profile": "Perfil"
+      "profile": "Perfil",
+      "apply": "Aplicar",
+      "clear": "Limpiar",
+      "reset": "Restablecer",
+      "device": "Dispositivo",
+      "devices": "Dispositivos",
+      "type": "Tipo",
+      "brand": "Marca",
+      "site": "Sitio",
+      "status": "Estado",
+      "critical": "Crítico",
+      "all": "Todos",
+      "yes": "Sí",
+      "no": "No",
+      "filters": "Filtros",
+      "resetFilters": "Restablecer filtros",
+      "showing": "Mostrando {{count}} de {{total}} dispositivos"
     },
     "theme": {
       "light": "Modo Claro",
@@ -63,6 +79,63 @@
       "brands": "Marcas",
       "models": "Modelos",
       "firmwares": "Firmwares"
+    },
+    "dateSelector": {
+      "selectDateRange": "Seleccionar rango de fechas",
+      "from": "Desde {{date}}",
+      "to": "Hasta {{date}}",
+      "start": "Inicio",
+      "end": "Fin",
+      "dateRange": "Rango de fechas",
+      "selectMonth": "Seleccionar mes",
+      "selectYear": "Seleccionar año"
+    },
+    "latestStates": {
+      "title": "Estado de los dispositivos",
+      "subtitle": "Monitoreo en tiempo real de todos los dispositivos en la red",
+      "allDevices": "Todos los dispositivos",
+      "allTypes": "Todos los tipos",
+      "allBrands": "Todas las marcas",
+      "allSites": "Todos los sitios",
+      "allStatuses": "Todos los estados"
+    },
+    "pages": {
+      "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Esta es la página de dashboard con información general."
+      },
+      "monitoring": {
+        "title": "Monitoreo",
+        "subtitle": "Esta es la página de monitoreo del sistema."
+      },
+      "users": {
+        "title": "Usuarios",
+        "subtitle": "Esta es la página de gestión de usuarios."
+      },
+      "roles": {
+        "title": "Roles",
+        "subtitle": "Esta es la página de gestión de roles de usuario."
+      },
+      "sites": {
+        "title": "Sitios",
+        "subtitle": "Esta es la página de gestión de sitios."
+      },
+      "groups": {
+        "title": "Grupos",
+        "subtitle": "Esta es la página de gestión de grupos."
+      },
+      "brands": {
+        "title": "Marcas",
+        "subtitle": "Esta es la página de gestión de marcas."
+      },
+      "models": {
+        "title": "Modelos",
+        "subtitle": "Esta es la página de gestión de modelos de dispositivos."
+      },
+      "firmwares": {
+        "title": "Firmwares",
+        "subtitle": "Esta es la página de gestión de firmwares."
+      }
     }
   }
 }

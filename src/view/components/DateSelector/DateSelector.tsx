@@ -1,4 +1,5 @@
 import { FunctionComponent, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   faCalendar,
@@ -21,6 +22,7 @@ interface DateSelectorProps {
 type ViewMode = 'calendar' | 'month' | 'year';
 
 const DateSelector: FunctionComponent<DateSelectorProps> = (props) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [localStartDate, setLocalStartDate] = useState(props.startDate);
   const [localEndDate, setLocalEndDate] = useState(props.endDate);
@@ -29,10 +31,10 @@ const DateSelector: FunctionComponent<DateSelectorProps> = (props) => {
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Formatea las fechas para mostrarlas en el botón
+  // Format dates for display in button
   const formatDisplayDate = () => {
     if (!props.startDate && !props.endDate) {
-      return 'Seleccionar rango de fechas';
+      return t('dateSelector.selectDateRange');
     }
 
     if (props.startDate && props.endDate) {
@@ -43,15 +45,15 @@ const DateSelector: FunctionComponent<DateSelectorProps> = (props) => {
 
     if (props.startDate) {
       const start = new Date(props.startDate);
-      return `Desde ${start.toLocaleDateString()}`;
+      return t('dateSelector.from', { date: start.toLocaleDateString() });
     }
 
     if (props.endDate) {
       const end = new Date(props.endDate);
-      return `Hasta ${end.toLocaleDateString()}`;
+      return t('dateSelector.to', { date: end.toLocaleDateString() });
     }
 
-    return 'Seleccionar rango de fechas';
+    return t('dateSelector.selectDateRange');
   };
 
   // Cierra el dropdown cuando se hace clic fuera
@@ -228,24 +230,20 @@ const DateSelector: FunctionComponent<DateSelectorProps> = (props) => {
     }
   };
 
-  // Nombres de los meses
-  const monthNames = [
-    'Enero',
-    'Febrero',
-    'Marzo',
-    'Abril',
-    'Mayo',
-    'Junio',
-    'Julio',
-    'Agosto',
-    'Septiembre',
-    'Octubre',
-    'Noviembre',
-    'Diciembre',
-  ];
+  // Month names - use the browser's locale
+  const monthNames = Array.from({ length: 12 }).map((_, i) => {
+    const date = new Date();
+    date.setMonth(i);
+    return date.toLocaleString(undefined, { month: 'long' });
+  });
 
-  // Nombres cortos de los días de la semana
-  const weekDayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  // Weekday names - use the browser's locale
+  const weekDayNames = Array.from({ length: 7 }).map((_, i) => {
+    const date = new Date();
+    // Set to Monday + i
+    date.setDate(date.getDate() - date.getDay() + 1 + i);
+    return date.toLocaleString(undefined, { weekday: 'short' });
+  });
 
   // Renderiza el calendario
   const renderCalendar = () => {
@@ -307,7 +305,7 @@ const DateSelector: FunctionComponent<DateSelectorProps> = (props) => {
     return (
       <div className={styles.monthSelector}>
         <div className={styles.selectorHeader}>
-          <span>Seleccionar mes</span>
+          <span>{t('dateSelector.selectMonth')}</span>
         </div>
         <div className={styles.monthsGrid}>
           {monthNames.map((month, index) => (
@@ -336,7 +334,7 @@ const DateSelector: FunctionComponent<DateSelectorProps> = (props) => {
     return (
       <div className={styles.yearSelector}>
         <div className={styles.selectorHeader}>
-          <span>Seleccionar año</span>
+          <span>{t('dateSelector.selectYear')}</span>
         </div>
         <div className={styles.yearsGrid}>
           {years.map((year) => (
@@ -381,11 +379,11 @@ const DateSelector: FunctionComponent<DateSelectorProps> = (props) => {
           {renderView()}
           <div className={styles.selectedDates}>
             <div className={styles.dateDisplay}>
-              <label>Inicio:</label>
+              <label>{t('dateSelector.start')}:</label>
               <span>{localStartDate ? new Date(localStartDate).toLocaleDateString() : '-'}</span>
             </div>
             <div className={styles.dateDisplay}>
-              <label>Fin:</label>
+              <label>{t('dateSelector.end')}:</label>
               <span>{localEndDate ? new Date(localEndDate).toLocaleDateString() : '-'}</span>
             </div>
           </div>
@@ -395,14 +393,14 @@ const DateSelector: FunctionComponent<DateSelectorProps> = (props) => {
               type='button'
               onClick={handleClear}
             >
-              Limpiar
+              {t('common.clear')}
             </button>
             <button
               className={clsx(styles.actionButton, styles.applyButton)}
               type='button'
               onClick={handleApply}
             >
-              Aplicar
+              {t('common.apply')}
             </button>
           </div>
         </div>

@@ -1,11 +1,14 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import ContentTitles from '../view/components/ContentTitles/ContentTitles';
 
 const ModelsPage: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <div>
-      <ContentTitles title='Models Page' subtitle='This is the device models management page.' />
+      <ContentTitles title={t('pages.models.title')} subtitle={t('pages.models.subtitle')} />
     </div>
   );
 };

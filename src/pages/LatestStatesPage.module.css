@@ -1,0 +1,12 @@
+.resultsInfo {
+  display: flex;
+  justify-content: flex-end;
+  margin: 16px 0;
+  padding: 0 8px;
+}
+
+.resultCount {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}

@@ -5,7 +5,23 @@
       "error": "Error",
       "success": "Success",
       "language": "Language selector",
-      "profile": "Profile"
+      "profile": "Profile",
+      "apply": "Apply",
+      "clear": "Clear",
+      "reset": "Reset",
+      "device": "Device",
+      "devices": "Devices",
+      "type": "Type",
+      "brand": "Brand",
+      "site": "Site",
+      "status": "Status",
+      "critical": "Critical",
+      "all": "All",
+      "yes": "Yes",
+      "no": "No",
+      "filters": "Filters",
+      "resetFilters": "Reset filters",
+      "showing": "Showing {{count}} of {{total}} devices"
     },
     "theme": {
       "light": "Light Mode",
@@ -63,6 +79,63 @@
       "brands": "Brands",
       "models": "Models",
       "firmwares": "Firmwares"
+    },
+    "dateSelector": {
+      "selectDateRange": "Select date range",
+      "from": "From {{date}}",
+      "to": "To {{date}}",
+      "start": "Start",
+      "end": "End",
+      "dateRange": "Date range",
+      "selectMonth": "Select month",
+      "selectYear": "Select year"
+    },
+    "latestStates": {
+      "title": "Device Status",
+      "subtitle": "Real-time monitoring of all devices in the network",
+      "allDevices": "All devices",
+      "allTypes": "All types",
+      "allBrands": "All brands",
+      "allSites": "All sites",
+      "allStatuses": "All statuses"
+    },
+    "pages": {
+      "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "This is the dashboard page with overview information."
+      },
+      "monitoring": {
+        "title": "Monitoring",
+        "subtitle": "This is the system monitoring page."
+      },
+      "users": {
+        "title": "Users",
+        "subtitle": "This is the users management page."
+      },
+      "roles": {
+        "title": "Roles",
+        "subtitle": "This is the user roles management page."
+      },
+      "sites": {
+        "title": "Sites",
+        "subtitle": "This is the sites management page."
+      },
+      "groups": {
+        "title": "Groups",
+        "subtitle": "This is the groups management page."
+      },
+      "brands": {
+        "title": "Brands",
+        "subtitle": "This is the brands management page."
+      },
+      "models": {
+        "title": "Models",
+        "subtitle": "This is the device models management page."
+      },
+      "firmwares": {
+        "title": "Firmwares",
+        "subtitle": "This is the firmwares management page."
+      }
     }
   }
 }

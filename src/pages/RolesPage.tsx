@@ -1,11 +1,14 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import ContentTitles from '../view/components/ContentTitles/ContentTitles';
 
 const RolesPage: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <div>
-      <ContentTitles title='Roles Page' subtitle='This is the user roles management page.' />
+      <ContentTitles title={t('pages.roles.title')} subtitle={t('pages.roles.subtitle')} />
     </div>
   );
 };

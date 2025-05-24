@@ -1,4 +1,5 @@
 import { FunctionComponent, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import Option from '../../elements/Option/Option';
 import Select from '../../elements/Select/Select';
@@ -11,24 +12,25 @@ interface LatestStatesFiltersProps {
 }
 
 interface FilterState {
-  dispositivo: string;
-  tipo: string;
-  marca: string;
-  sitio: string;
-  ultimoEstado: string;
-  critico: string;
+  device: string;
+  type: string;
+  brand: string;
+  site: string;
+  lastStatus: string;
+  critical: string;
   startDate: string | null;
   endDate: string | null;
 }
 
 const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props) => {
+  const { t } = useTranslation();
   const [filters, setFilters] = useState<FilterState>({
-    dispositivo: '',
-    tipo: '',
-    marca: '',
-    sitio: '',
-    ultimoEstado: '',
-    critico: '',
+    device: '',
+    type: '',
+    brand: '',
+    site: '',
+    lastStatus: '',
+    critical: '',
     startDate: null,
     endDate: null,
   });
@@ -62,12 +64,12 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
 
   const resetFilters = () => {
     const resetValues: FilterState = {
-      dispositivo: '',
-      tipo: '',
-      marca: '',
-      sitio: '',
-      ultimoEstado: '',
-      critico: '',
+      device: '',
+      type: '',
+      brand: '',
+      site: '',
+      lastStatus: '',
+      critical: '',
       startDate: null,
       endDate: null,
     };
@@ -82,23 +84,23 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
   return (
     <div>
       <div className={styles.filtersHeader}>
-        <h3 className={styles.filtersTitle}>Filtros</h3>
+        <h3 className={styles.filtersTitle}>{t('common.filters')}</h3>
         <button className={styles.resetButton} onClick={resetFilters} type='button'>
-          Restablecer filtros
+          {t('common.resetFilters')}
         </button>
       </div>
 
       <div className={styles.filtersContainer}>
-        {/* Primera fila de filtros */}
+        {/* First row of filters */}
         <div className={styles.filtersRow}>
           <div className={styles.filterGroup}>
             <Select
-              label='Dispositivo'
-              value={filters.dispositivo}
-              onChange={(value: string) => handleFilterChange('dispositivo', value)}
+              label={t('common.device')}
+              value={filters.device}
+              onChange={(value: string) => handleFilterChange('device', value)}
             >
-              <Option value=''>Todos los dispositivos</Option>
-              {/* En un caso real, esto podría ser una lista dinámica de dispositivos */}
+              <Option value=''>{t('latestStates.allDevices')}</Option>
+              {/* In a real case, this could be a dynamic list of devices */}
               <Option value='Device-1000'>Device-1000</Option>
               <Option value='Device-1001'>Device-1001</Option>
               <Option value='Device-1002'>Device-1002</Option>
@@ -107,11 +109,11 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
 
           <div className={styles.filterGroup}>
             <Select
-              label='Tipo'
-              value={filters.tipo}
-              onChange={(value: string) => handleFilterChange('tipo', value)}
+              label={t('common.type')}
+              value={filters.type}
+              onChange={(value: string) => handleFilterChange('type', value)}
             >
-              <Option value=''>Todos los tipos</Option>
+              <Option value=''>{t('latestStates.allTypes')}</Option>
               {deviceTypes.map((type: string) => (
                 <Option key={type} value={type}>
                   {type}
@@ -122,11 +124,11 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
 
           <div className={styles.filterGroup}>
             <Select
-              label='Marca'
-              value={filters.marca}
-              onChange={(value: string) => handleFilterChange('marca', value)}
+              label={t('common.brand')}
+              value={filters.brand}
+              onChange={(value: string) => handleFilterChange('brand', value)}
             >
-              <Option value=''>Todas las marcas</Option>
+              <Option value=''>{t('latestStates.allBrands')}</Option>
               {brands.map((brand: string) => (
                 <Option key={brand} value={brand}>
                   {brand}
@@ -137,11 +139,11 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
 
           <div className={styles.filterGroup}>
             <Select
-              label='Sitio'
-              value={filters.sitio}
-              onChange={(value: string) => handleFilterChange('sitio', value)}
+              label={t('common.site')}
+              value={filters.site}
+              onChange={(value: string) => handleFilterChange('site', value)}
             >
-              <Option value=''>Todos los sitios</Option>
+              <Option value=''>{t('latestStates.allSites')}</Option>
               {sites.map((site: string) => (
                 <Option key={site} value={site}>
                   {site}
@@ -151,15 +153,15 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
           </div>
         </div>
 
-        {/* Segunda fila de filtros */}
+        {/* Second row of filters */}
         <div className={styles.filtersRow}>
           <div className={styles.filterGroup}>
             <Select
-              label='Estado'
-              value={filters.ultimoEstado}
-              onChange={(value: string) => handleFilterChange('ultimoEstado', value)}
+              label={t('common.status')}
+              value={filters.lastStatus}
+              onChange={(value: string) => handleFilterChange('lastStatus', value)}
             >
-              <Option value=''>Todos los estados</Option>
+              <Option value=''>{t('latestStates.allStatuses')}</Option>
               {statusOptions.map((status: string) => (
                 <Option key={status} value={status}>
                   {status}
@@ -170,13 +172,13 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
 
           <div className={styles.filterGroup}>
             <Select
-              label='Crítico'
-              value={filters.critico}
-              onChange={(value: string) => handleFilterChange('critico', value)}
+              label={t('common.critical')}
+              value={filters.critical}
+              onChange={(value: string) => handleFilterChange('critical', value)}
             >
-              <Option value=''>Todos</Option>
-              <Option value='true'>Sí</Option>
-              <Option value='false'>No</Option>
+              <Option value=''>{t('common.all')}</Option>
+              <Option value='true'>{t('common.yes')}</Option>
+              <Option value='false'>{t('common.no')}</Option>
             </Select>
           </div>
 
@@ -185,11 +187,11 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
               startDate={filters.startDate}
               endDate={filters.endDate}
               onDateChange={handleDateChange}
-              label='Rango de fechas'
+              label={t('dateSelector.dateRange')}
             />
           </div>
 
-          {/* Espacio para equilibrar la distribución */}
+          {/* Empty space to balance distribution */}
           <div className={styles.filterGroup}></div>
         </div>
       </div>
