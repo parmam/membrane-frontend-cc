@@ -135,12 +135,12 @@
 
 .statusRestarting {
   background-color: rgba(33, 150, 243, 0.2);
-  color: #2196f3;
+  color: var(--color-primary-main);
 }
 
 .statusOverloaded {
   background-color: rgba(233, 30, 99, 0.2);
-  color: #e91e63;
+  color: var(--color-error-main);
 }
 
 .loadingCardContainer {
@@ -259,20 +259,21 @@
 
 .cardsContainer {
   width: 100%;
-  padding: 0 16px;
-  margin-bottom: 20px;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .card {
-  background-color: #fff;
+  background-color: var(--color-background-paper);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 16px;
+  margin: 16px 0;
   padding: 16px;
 }
 
 .criticalCard {
-  border-left: 4px solid #ff5252;
+  border-left: 4px solid var(--color-error-main);
 }
 
 .cardHeader {
@@ -286,10 +287,11 @@
   font-size: 18px;
   font-weight: 600;
   margin: 0;
+  color: var(--color-text-primary);
 }
 
 .criticalIcon {
-  color: #ff5252;
+  color: var(--color-error-main);
   font-size: 20px;
 }
 
@@ -306,12 +308,12 @@
 .infoLabel {
   font-size: 12px;
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .infoValue {
   font-size: 14px;
-  color: #333;
+  color: var(--color-text-primary);
   text-align: right;
 }
 
@@ -331,36 +333,42 @@
 
 /* Status colors */
 .statusOverloaded {
-  background-color: #ffe1e1;
-  color: #d32f2f;
+  background-color: rgba(233, 30, 99, 0.2);
+  color: var(--color-error-main);
 }
 
 .statusRestarting {
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: rgba(33, 150, 243, 0.2);
+  color: var(--color-primary-main);
 }
 
 .statusNormal {
-  background-color: #e8f5e9;
-  color: #388e3c;
+  background-color: rgba(76, 175, 80, 0.2);
+  color: var(--color-success-main);
 }
 
 .statusInactive {
-  background-color: #eeeeee;
-  color: #616161;
+  background-color: rgba(158, 158, 158, 0.2);
+  color: var(--color-text-secondary);
+}
+
+.statusWarning {
+  background-color: rgba(255, 152, 0, 0.2);
+  color: #f90;
 }
 
 .loadingIndicator {
   text-align: center;
   padding: 16px;
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
+  margin: 0 16px;
 }
 
 .scrollHint {
   text-align: center;
   padding: 8px;
   font-size: 12px;
-  color: #999;
-  margin-top: 8px;
+  color: var(--color-text-secondary);
+  margin: 0 16px 16px;
 }

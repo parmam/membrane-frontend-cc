@@ -1,12 +1,36 @@
+.filtersWrapper {
+  margin-bottom: 16px;
+}
+
 .filtersContainer {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   background-color: var(--color-background-paper);
   padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    margin-bottom 0.3s ease;
+  max-height: 500px;
+  opacity: 1;
+}
+
+.filtersContainer.collapsed {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  opacity: 0;
+}
+
+.filtersContainer.expanded {
+  max-height: 500px;
+  opacity: 1;
 }
 
 .filtersRow {
@@ -20,26 +44,21 @@
   min-width: 180px;
 }
 
-@media (max-width: 768px) {
-  .filtersContainer {
-    gap: 12px;
-  }
-
-  .filtersRow {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .filterGroup {
-    width: 100%;
-  }
-}
-
 .filtersHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  padding: 8px 16px;
+  background-color: var(--color-background-paper);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 8px;
+}
+
+.filtersTitleContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .filtersTitle {
@@ -47,6 +66,26 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
   margin: 0;
+}
+
+.activeFilterBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background-color: var(--color-primary-main);
+  color: white;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.filtersHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .resetButton {
@@ -68,4 +107,52 @@
 .resetButton:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(189, 121, 11, 0.2);
+}
+
+.toggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.toggleButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.toggleIcon {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.toggleIcon.expanded {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 768px) {
+  .filtersContainer {
+    gap: 12px;
+  }
+
+  .filtersRow {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filterGroup {
+    width: 100%;
+  }
+
+  .filtersHeader {
+    padding: 12px;
+  }
 }

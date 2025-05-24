@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import clsx from 'clsx';
 
 import { DEFAULT_TABLE_CONFIG } from '../../elements/Table/config';
-import { DeviceData, dummyDeviceData } from '../LastStatusTable/data';
+import { DeviceData } from '../LastStatusTable/data';
 import styles from './LastStatusCards.module.css';
 
 // Extender el tipo Window para permitir el timeout
@@ -31,50 +31,6 @@ const debounce = <T extends (...args: unknown[]) => void>(
       fn(...args);
     }, delay);
   };
-};
-
-// Componente para la vista de tarjeta en móviles
-const DeviceCard = ({ device }: { device: DeviceData }) => {
-  return (
-    <div className={clsx(styles.deviceCard, device.critico && styles.criticalCard)}>
-      <div className={styles.cardHeader}>
-        <h3 className={styles.cardTitle}>{device.dispositivo}</h3>
-        {device.critico && (
-          <FontAwesomeIcon icon={faCircleExclamation} className={styles.criticalIcon} />
-        )}
-      </div>
-
-      <div className={styles.cardStatus}>
-        <span
-          className={clsx(
-            styles.statusIndicator,
-            styles[`status${device.ultimoEstado.replace(/\s+/g, '')}`],
-          )}
-        >
-          {device.ultimoEstado}
-        </span>
-      </div>
-
-      <div className={styles.cardDetails}>
-        <div className={styles.cardDetail}>
-          <span className={styles.cardDetailLabel}>Tipo</span>
-          <span className={styles.cardDetailValue}>{device.tipo}</span>
-        </div>
-        <div className={styles.cardDetail}>
-          <span className={styles.cardDetailLabel}>Marca</span>
-          <span className={styles.cardDetailValue}>{device.marca}</span>
-        </div>
-        <div className={styles.cardDetail}>
-          <span className={styles.cardDetailLabel}>Sitio</span>
-          <span className={styles.cardDetailValue}>{device.sitio}</span>
-        </div>
-        <div className={styles.cardDetail}>
-          <span className={styles.cardDetailLabel}>FCO</span>
-          <span className={styles.cardDetailValue}>{device.fco}</span>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 interface LastStatusCardsProps {

@@ -24,6 +24,7 @@ interface FilterState {
 
 const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props) => {
   const { t } = useTranslation();
+  const [isExpanded, setIsExpanded] = useState(true);
   const [filters, setFilters] = useState<FilterState>({
     device: '',
     type: '',
@@ -81,16 +82,45 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
     }
   };
 
+  const toggleFilters = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  // Count active filters for display
+  const getActiveFilterCount = () => {
+    return Object.values(filters).filter((value) => value !== '' && value !== null).length;
+  };
+
+  const activeFilterCount = getActiveFilterCount();
+
   return (
-    <div>
+    <div className={styles.filtersWrapper}>
       <div className={styles.filtersHeader}>
-        <h3 className={styles.filtersTitle}>{t('common.filters')}</h3>
-        <button className={styles.resetButton} onClick={resetFilters} type='button'>
-          {t('common.resetFilters')}
-        </button>
+        <div className={styles.filtersTitleContainer}>
+          <h3 className={styles.filtersTitle}>{t('common.filters')}</h3>
+          {activeFilterCount > 0 && (
+            <span className={styles.activeFilterBadge}>{activeFilterCount}</span>
+          )}
+        </div>
+        <div className={styles.filtersHeaderActions}>
+          <button className={styles.resetButton} onClick={resetFilters} type='button'>
+            {t('common.resetFilters')}
+          </button>
+          <button
+            className={styles.toggleButton}
+            onClick={toggleFilters}
+            type='button'
+            aria-expanded={isExpanded}
+            aria-label={isExpanded ? t('common.collapse') : t('common.expand')}
+          >
+            <span className={`${styles.toggleIcon} ${isExpanded ? styles.expanded : ''}`}>▼</span>
+          </button>
+        </div>
       </div>
 
-      <div className={styles.filtersContainer}>
+      <div
+        className={`${styles.filtersContainer} ${isExpanded ? styles.expanded : styles.collapsed}`}
+      >
         {/* First row of filters */}
         <div className={styles.filtersRow}>
           <div className={styles.filterGroup}>

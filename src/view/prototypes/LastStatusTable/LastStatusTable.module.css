@@ -123,12 +123,12 @@
 }
 
 .tableContainer::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--color-scrollbar-track, rgba(0, 0, 0, 0.1));
   border-radius: 4px;
 }
 
 .tableContainer::-webkit-scrollbar-thumb {
-  background: rgba(87, 72, 49, 0.5);
+  background: var(--color-scrollbar-thumb, rgba(87, 72, 49, 0.5));
   border-radius: 4px;
 }
 
