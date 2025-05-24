@@ -143,6 +143,10 @@
     gap: 12px;
   }
 
+  .filtersContainer.expanded {
+    max-height: 1000px;
+  }
+
   .filtersRow {
     flex-direction: column;
     gap: 12px;
