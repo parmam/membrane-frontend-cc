@@ -1,0 +1,17 @@
+.titleContainer {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}

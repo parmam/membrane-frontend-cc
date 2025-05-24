@@ -1,10 +1,11 @@
 import React from 'react';
 
+import ContentTitles from '../view/components/ContentTitles/ContentTitles';
+
 const RolesPage: React.FC = () => {
   return (
     <div>
-      <h1>Roles Page</h1>
-      <p>This is the user roles management page.</p>
+      <ContentTitles title='Roles Page' subtitle='This is the user roles management page.' />
     </div>
   );
 };

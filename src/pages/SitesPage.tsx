@@ -1,10 +1,11 @@
 import React from 'react';
 
+import ContentTitles from '../view/components/ContentTitles/ContentTitles';
+
 const SitesPage: React.FC = () => {
   return (
     <div>
-      <h1>Sites Page</h1>
-      <p>This is the sites management page.</p>
+      <ContentTitles title='Sites Page' subtitle='This is the sites management page.' />
     </div>
   );
 };

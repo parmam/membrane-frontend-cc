@@ -1,10 +1,11 @@
 import React from 'react';
 
+import ContentTitles from '../view/components/ContentTitles/ContentTitles';
+
 const DevicesPage: React.FC = () => {
   return (
     <div>
-      <h1>Devices Page</h1>
-      <p>This is the devices management page.</p>
+      <ContentTitles title='Devices Page' subtitle='This is the devices management page.' />
     </div>
   );
 };

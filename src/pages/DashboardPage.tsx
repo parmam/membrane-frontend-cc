@@ -1,10 +1,14 @@
 import React from 'react';
 
+import ContentTitles from '../view/components/ContentTitles/ContentTitles';
+
 const DashboardPage: React.FC = () => {
   return (
     <div>
-      <h1>Dashboard Page</h1>
-      <p>This is the dashboard page with overview information.</p>
+      <ContentTitles
+        title='Dashboard Page'
+        subtitle='This is the dashboard page with overview information.'
+      />
     </div>
   );
 };
