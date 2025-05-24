@@ -213,7 +213,10 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
             </Select>
           </div>
 
-          <div className={styles.filterGroup}>
+          <div
+            className={`${styles.filterGroup} ${styles.dateFilterGroup}`}
+            style={{ zIndex: 999 }}
+          >
             <DateSelector
               startDate={filters.startDate}
               endDate={filters.endDate}

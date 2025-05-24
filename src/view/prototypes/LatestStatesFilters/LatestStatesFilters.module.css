@@ -1,5 +1,6 @@
 .filtersWrapper {
   margin-bottom: 16px;
+  position: relative;
 }
 
 .filtersContainer {
@@ -11,13 +12,15 @@
   padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  overflow: visible;
   transition:
     max-height 0.3s ease,
     opacity 0.3s ease,
     margin-bottom 0.3s ease;
   max-height: 500px;
   opacity: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .filtersContainer.collapsed {
@@ -37,11 +40,13 @@
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+  position: relative;
 }
 
 .filterGroup {
   flex: 1;
   min-width: 180px;
+  position: relative;
 }
 
 .filtersHeader {
@@ -138,22 +143,40 @@
   transform: rotate(180deg);
 }
 
+/* Date selector specific styling */
+.dateFilterGroup {
+  position: relative;
+  z-index: 10 !important;
+}
+
 @media (max-width: 768px) {
   .filtersContainer {
     gap: 12px;
+    overflow: visible !important;
   }
 
   .filtersContainer.expanded {
     max-height: 1000px;
+    overflow: visible !important;
   }
 
   .filtersRow {
     flex-direction: column;
     gap: 12px;
+    position: relative;
+    z-index: 1;
   }
 
   .filterGroup {
     width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Ensure date selector is always on top in mobile */
+  .dateFilterGroup {
+    position: relative;
+    z-index: 100 !important;
   }
 
   .filtersHeader {
