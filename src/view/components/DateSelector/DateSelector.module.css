@@ -1,0 +1,133 @@
+.dateSelector {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.selectorButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px;
+  background-color: var(--color-background-paper);
+  border: 1px solid var(--color-divider);
+  border-radius: 4px;
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  margin: 0;
+}
+
+.selectorButton:hover {
+  border-color: var(--color-primary-light);
+}
+
+.selectorButton:focus {
+  outline: none;
+  border-color: var(--color-primary-main);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: var(--color-background-paper);
+  border: 1px solid var(--color-divider);
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  padding: 16px;
+  display: none;
+  margin-top: 4px;
+}
+
+.open .dropdown {
+  display: block;
+}
+
+.dateInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dateInputGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.dateInputLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.dateInput {
+  padding: 16px;
+  border: 1px solid var(--color-divider);
+  border-radius: 4px;
+  background-color: var(--color-background-default);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  width: 100%;
+  font-family: var(--font-family);
+  line-height: 1.5;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: var(--color-primary-main);
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.actionButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-hover);
+}
+
+.clearButton {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-divider);
+}
+
+.clearButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.applyButton {
+  background-color: var(--color-primary-main);
+  color: white;
+}
+
+.applyButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.buttonContent {
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  margin-right: 8px;
+  color: var(--color-primary-main);
+}

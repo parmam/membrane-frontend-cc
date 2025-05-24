@@ -1,0 +1,71 @@
+.filtersContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+  background-color: var(--color-background-paper);
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.filtersRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.filterGroup {
+  flex: 1;
+  min-width: 180px;
+}
+
+@media (max-width: 768px) {
+  .filtersContainer {
+    gap: 12px;
+  }
+
+  .filtersRow {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filterGroup {
+    width: 100%;
+  }
+}
+
+.filtersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.filtersTitle {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.resetButton {
+  background-color: transparent;
+  border: none;
+  color: var(--color-primary-main);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: var(--transition-hover);
+  border-radius: 4px;
+}
+
+.resetButton:hover {
+  background-color: rgba(189, 121, 11, 0.1);
+}
+
+.resetButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(189, 121, 11, 0.2);
+}

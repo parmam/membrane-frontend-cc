@@ -11,7 +11,7 @@ export interface DeviceData {
 }
 
 // Device types
-const deviceTypes = [
+export const deviceTypes = [
   'Router',
   'Switch',
   'Firewall',
@@ -25,7 +25,7 @@ const deviceTypes = [
 ];
 
 // Brands
-const brands = [
+export const brands = [
   'Cisco',
   'Juniper',
   'Arista',
@@ -39,7 +39,7 @@ const brands = [
 ];
 
 // Sites
-const sites = [
+export const sites = [
   'Datacenter A',
   'Datacenter B',
   'Office Madrid',
@@ -53,7 +53,7 @@ const sites = [
 ];
 
 // Status options
-const statusOptions = [
+export const statusOptions = [
   'Online',
   'Offline',
   'Warning',
