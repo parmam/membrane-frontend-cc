@@ -78,159 +78,123 @@ const DeviceCard = ({ device }: { device: DeviceData }) => {
 };
 
 interface LastStatusCardsProps {
-  data?: DeviceData[];
+  data: DeviceData[];
   className?: string;
 }
 
-const LastStatusCards = ({ data = dummyDeviceData, className }: LastStatusCardsProps) => {
-  // Cantidad inicial de elementos a mostrar
+const LastStatusCards = ({ data, className }: LastStatusCardsProps) => {
+  // Initial items to show - we render all initially but will load more as user scrolls
   const initialVisibleCount = DEFAULT_TABLE_CONFIG.itemsPerPage * 2;
   const [displayCount, setDisplayCount] = useState(initialVisibleCount);
   const [loading, setLoading] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isNearBottom, setIsNearBottom] = useState(false);
-  const isLoadingRef = useRef(false); // Referencia para evitar cargas simultáneas
+  const isLoadingRef = useRef(false);
 
-  // Inicializamos contador de scroll
-  if (typeof window !== 'undefined' && window.lastScrollTop === undefined) {
-    window.lastScrollTop = 0;
-  }
+  // Calculate scroll threshold at 70% of displayed items
+  const calculateThreshold = useCallback(() => {
+    return Math.floor(displayCount * 0.7);
+  }, [displayCount]);
 
-  // Función para cargar más elementos cuando se hace scroll hacia abajo
+  // Visible data to render
+  const visibleData = data.slice(0, displayCount);
+  const hasMore = displayCount < data.length;
+
+  // Function to load more items
   const loadMoreItems = useCallback(() => {
-    // Prevenir cargas múltiples usando ref en lugar de state
-    if (isLoadingRef.current) {
-      return;
-    }
+    if (isLoadingRef.current || !hasMore) return;
 
-    const shouldLoad = displayCount < data.length;
-    if (!shouldLoad) return;
-
-    // Marcar como cargando
     isLoadingRef.current = true;
     setLoading(true);
 
-    // Simulamos una carga asíncrona
+    // Simulate async loading
     setTimeout(() => {
       setDisplayCount((prevCount) => {
         const newCount = prevCount + initialVisibleCount;
         return Math.min(newCount, data.length);
       });
 
-      // Finalizar carga
       setLoading(false);
       isLoadingRef.current = false;
     }, 300);
-  }, [data.length, displayCount, initialVisibleCount]);
+  }, [data.length, hasMore, initialVisibleCount]);
 
-  // Verificar si estamos cerca del final del scroll
-  const checkIfNearBottom = useCallback(() => {
-    if (!containerRef.current) return;
+  // Handle scroll event on the window
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isLoadingRef.current || !hasMore) return;
 
-    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+      // Calculate which item we're currently viewing
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.body.offsetHeight;
 
-    // Determinar dirección de scroll
-    const lastScrollTop = window.lastScrollTop ?? 0;
-    const direction =
-      scrollTop > lastScrollTop ? 'down' : scrollTop < lastScrollTop ? 'up' : 'none';
-
-    // Actualizar último scrollTop
-    window.lastScrollTop = scrollTop;
-
-    // Usar el valor configurado para el umbral de scroll
-    const threshold = DEFAULT_TABLE_CONFIG.scrollThreshold;
-    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-
-    // Si estamos a menos del umbral del final, consideramos que estamos cerca del final
-    const nearBottom = distanceFromBottom < threshold;
-
-    // Solo actualizamos el estado si cambia para evitar renderizados innecesarios
-    if (nearBottom !== isNearBottom) {
-      setIsNearBottom(nearBottom);
-
-      // Si estamos cerca del final y hay más elementos por cargar, los cargamos
-      // Pero solo si el usuario está desplazándose hacia abajo
-      if (
-        nearBottom &&
-        direction === 'down' &&
-        !isLoadingRef.current &&
-        displayCount < data.length
-      ) {
+      // Check if we've scrolled to 70% of the current list
+      const scrollPercentage = (scrollY + windowHeight) / documentHeight;
+      if (scrollPercentage > 0.7) {
         loadMoreItems();
       }
-    }
-  }, [data.length, displayCount, isNearBottom, loadMoreItems]);
-
-  // Versión con debounce del checkIfNearBottom
-  const debouncedCheckIfNearBottom = useCallback(
-    debounce(() => {
-      checkIfNearBottom();
-    }, 150), // 150ms de debounce para evitar múltiples llamadas
-    [checkIfNearBottom],
-  );
-
-  // Manejar eventos de scroll
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Implementación directa del evento de scroll
-    const handleScroll = () => {
-      // Usamos el método con debounce
-      debouncedCheckIfNearBottom();
     };
 
-    // Registrar el evento de scroll directamente
-    container.addEventListener('scroll', handleScroll, { passive: true });
+    // Add scroll listener to window
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
-    // Limpieza
     return () => {
-      container.removeEventListener('scroll', handleScroll);
-
-      // Limpiar el debounce timer si existe
-      if (window.debounceTimer) {
-        clearTimeout(window.debounceTimer);
-      }
+      window.removeEventListener('scroll', handleScroll);
     };
-  }, [debouncedCheckIfNearBottom]);
-
-  // Elementos que serán mostrados según el scroll
-  const visibleData = data.slice(0, displayCount);
-  const hasMore = displayCount < data.length;
+  }, [hasMore, loadMoreItems]);
 
   return (
-    <div
-      ref={containerRef}
-      className={clsx(styles.mobileContainer, className)}
-      style={{
-        height: `${DEFAULT_TABLE_CONFIG.tableHeight}px`,
-        maxHeight: `${DEFAULT_TABLE_CONFIG.tableHeight}px`,
-        overflowY: 'auto',
-        overflowX: 'hidden',
-      }}
-      onScroll={() => debouncedCheckIfNearBottom()}
-    >
-      <div className={styles.cardContainer}>
-        <div className={styles.mobileHeader}>
-          <span className={styles.mobileCount}>
-            {visibleData.length} de {data.length} dispositivos
-          </span>
-        </div>
-
-        {visibleData.map((device) => (
-          <DeviceCard key={device.id} device={device} />
-        ))}
-
-        {loading && (
-          <div className={styles.loadingCardContainer}>
-            <div className={styles.loadingIndicator}>Cargando más dispositivos...</div>
+    <div className={clsx(styles.cardsContainer, className)}>
+      {visibleData.map((device) => (
+        <div key={device.id} className={clsx(styles.card, device.critico && styles.criticalCard)}>
+          <div className={styles.cardHeader}>
+            <h3 className={styles.deviceName}>{device.dispositivo}</h3>
+            {device.critico && (
+              <FontAwesomeIcon icon={faCircleExclamation} className={styles.criticalIcon} />
+            )}
           </div>
-        )}
 
-        {hasMore && !loading && (
-          <div className={styles.scrollHint}>Desplázate hacia abajo para cargar más</div>
-        )}
-      </div>
+          <div className={styles.cardBody}>
+            <div className={styles.infoRow}>
+              <div className={styles.infoLabel}>TIPO</div>
+              <div className={styles.infoValue}>{device.tipo}</div>
+            </div>
+
+            <div className={styles.infoRow}>
+              <div className={styles.infoLabel}>MARCA</div>
+              <div className={styles.infoValue}>{device.marca}</div>
+            </div>
+
+            <div className={styles.infoRow}>
+              <div className={styles.infoLabel}>SITIO</div>
+              <div className={styles.infoValue}>{device.sitio}</div>
+            </div>
+
+            <div className={styles.infoRow}>
+              <div className={styles.infoLabel}>FCO</div>
+              <div className={styles.infoValue}>{device.fco}</div>
+            </div>
+          </div>
+
+          <div className={styles.cardFooter}>
+            <span
+              className={clsx(
+                styles.statusIndicator,
+                styles[`status${device.ultimoEstado.replace(/\s+/g, '')}`],
+              )}
+            >
+              {device.ultimoEstado}
+            </span>
+          </div>
+        </div>
+      ))}
+
+      {loading && <div className={styles.loadingIndicator}>Cargando más dispositivos...</div>}
+
+      {hasMore && !loading && (
+        <div className={styles.scrollHint}>
+          Desplázate hacia abajo para cargar más ({visibleData.length} de {data.length})
+        </div>
+      )}
     </div>
   );
 };

@@ -13,6 +13,7 @@
   width: 100%;
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: thin;
   position: relative;
 }
@@ -115,6 +116,7 @@
   margin-top: 8px;
 }
 
+/* Scrollbar styles for the table container */
 .tableContainer::-webkit-scrollbar {
   width: 8px;
   height: 8px;

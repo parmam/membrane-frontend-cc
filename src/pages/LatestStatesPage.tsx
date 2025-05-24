@@ -87,16 +87,18 @@ const LatestStatesPage: FunctionComponent = () => {
 
   return (
     <div style={{ width: '100%' }}>
-      <ContentTitles title={t('latestStates.title')} subtitle={t('latestStates.subtitle')} />
-      <LatestStatesFilters onFilterChange={handleFilterChange} />
+      <div className={styles.pageHeader}>
+        <ContentTitles title={t('latestStates.title')} subtitle={t('latestStates.subtitle')} />
+        <LatestStatesFilters onFilterChange={handleFilterChange} />
 
-      <div className={styles.resultsInfo}>
-        <span className={styles.resultCount}>
-          {t('common.showing', { count: filteredData.length, total: totalDevices })}
-        </span>
+        <div className={styles.resultsInfo}>
+          <span className={styles.resultCount}>
+            {t('common.showing', { count: filteredData.length, total: totalDevices })}
+          </span>
+        </div>
       </div>
 
-      <section>
+      <section className={styles.pageContent}>
         <LastStatusTable data={filteredData} />
       </section>
     </div>

@@ -1,12 +1,28 @@
 .resultsInfo {
   display: flex;
-  justify-content: flex-end;
-  margin: 16px 0;
-  padding: 0 8px;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0;
+  padding: 0 1rem;
 }
 
 .resultCount {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  font-weight: var(--font-weight-medium);
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Add mobile specific styles */
+@media (max-width: 768px) {
+  .pageHeader {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 10;
+    padding-bottom: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .pageContent {
+    padding-top: 0.5rem;
+  }
 }

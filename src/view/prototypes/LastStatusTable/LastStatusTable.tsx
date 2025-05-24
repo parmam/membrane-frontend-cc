@@ -176,6 +176,9 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
 
   // Manejar eventos de scroll
   useEffect(() => {
+    // Skip for mobile view
+    if (isMobileView) return;
+
     const container = containerRef.current;
     if (!container) return;
 
@@ -188,6 +191,9 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
     // Registrar el evento de scroll directamente
     container.addEventListener('scroll', handleScroll, { passive: true });
 
+    // Debug log
+    console.log('Scroll event registered on table container');
+
     // Limpieza
     return () => {
       container.removeEventListener('scroll', handleScroll);
@@ -197,10 +203,13 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
         clearTimeout(window.debounceTimer);
       }
     };
-  }, [debouncedCheckIfNearBottom]);
+  }, [debouncedCheckIfNearBottom, isMobileView]);
 
   // Forzar una comprobación cuando cambia el tamaño de la ventana
   useEffect(() => {
+    // Skip for mobile view
+    if (isMobileView) return;
+
     const handleResize = debounce(() => {
       checkIfNearBottom();
     }, 200);
@@ -212,7 +221,7 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
         clearTimeout(window.debounceTimer);
       }
     };
-  }, [checkIfNearBottom]);
+  }, [checkIfNearBottom, isMobileView]);
 
   // Elementos que serán mostrados según el scroll
   const visibleData = data.slice(0, displayCount);
@@ -235,7 +244,12 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
           overflowY: 'auto',
           overflowX: 'hidden', // Hide horizontal scrollbar
         }}
-        onScroll={() => debouncedCheckIfNearBottom()}
+        onScroll={(e) => {
+          // Direct scroll handler
+          if (!isMobileView) {
+            debouncedCheckIfNearBottom();
+          }
+        }}
       >
         <Table className={styles.table}>
           <TableHead>
