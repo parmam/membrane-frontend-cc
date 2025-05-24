@@ -5,8 +5,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import clsx from 'clsx';
 
 import Table from '../../elements/Table';
-import { TableBody, TableContainer, TableHead } from '../../elements/Table';
+import { TableBody, TableHead } from '../../elements/Table';
 import { DEFAULT_TABLE_CONFIG } from '../../elements/Table/config';
+import LastStatusCards from '../lastStatusMobileView/LastStatusCards';
 import styles from './LastStatusTable.module.css';
 import { DeviceData, dummyDeviceData } from './data';
 
@@ -46,50 +47,6 @@ const MOBILE_BREAKPOINT = 768;
 // Verificar si es vista móvil
 const isMobileViewport = () => {
   return typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT;
-};
-
-// Componente para la vista de tarjeta en móviles
-const DeviceCard = ({ device }: { device: DeviceData }) => {
-  return (
-    <div className={clsx(styles.deviceCard, device.critico && styles.criticalCard)}>
-      <div className={styles.cardHeader}>
-        <h3 className={styles.cardTitle}>{device.dispositivo}</h3>
-        {device.critico && (
-          <FontAwesomeIcon icon={faCircleExclamation} className={styles.criticalIcon} />
-        )}
-      </div>
-
-      <div className={styles.cardStatus}>
-        <span
-          className={clsx(
-            styles.statusIndicator,
-            styles[`status${device.ultimoEstado.replace(/\s+/g, '')}`],
-          )}
-        >
-          {device.ultimoEstado}
-        </span>
-      </div>
-
-      <div className={styles.cardDetails}>
-        <div className={styles.cardDetail}>
-          <span className={styles.cardDetailLabel}>Tipo</span>
-          <span className={styles.cardDetailValue}>{device.tipo}</span>
-        </div>
-        <div className={styles.cardDetail}>
-          <span className={styles.cardDetailLabel}>Marca</span>
-          <span className={styles.cardDetailValue}>{device.marca}</span>
-        </div>
-        <div className={styles.cardDetail}>
-          <span className={styles.cardDetailLabel}>Sitio</span>
-          <span className={styles.cardDetailValue}>{device.sitio}</span>
-        </div>
-        <div className={styles.cardDetail}>
-          <span className={styles.cardDetailLabel}>FCO</span>
-          <span className={styles.cardDetailValue}>{device.fco}</span>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableProps) => {
@@ -261,116 +218,17 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
   const visibleData = data.slice(0, displayCount);
   const hasMore = displayCount < data.length;
 
-  // Renderizar contenido basado en el tipo de vista
-  const renderContent = () => {
-    if (isMobileView) {
-      return (
-        // Vista móvil con tarjetas
-        <div className={styles.cardContainer}>
-          <div className={styles.mobileHeader}>
-            <span className={styles.mobileCount}>
-              {visibleData.length} de {data.length} dispositivos
-            </span>
-          </div>
+  // Si es vista móvil, renderizamos el componente LastStatusCards
+  if (isMobileView) {
+    return <LastStatusCards data={data} className={className} />;
+  }
 
-          {visibleData.map((device) => (
-            <DeviceCard key={device.id} device={device} />
-          ))}
-
-          {loading && (
-            <div className={styles.loadingCardContainer}>
-              <div className={styles.loadingIndicator}>Cargando más dispositivos...</div>
-            </div>
-          )}
-
-          {hasMore && !loading && (
-            <div className={styles.scrollHint}>Desplázate hacia abajo para cargar más</div>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      // Vista de escritorio con tabla
-      <Table className={styles.table}>
-        <TableHead>
-          <tr>
-            <th className={styles.tableHeadCell} style={{ width: '15%' }}>
-              DISPOSITIVOS
-            </th>
-            <th className={styles.tableHeadCell} style={{ width: '12%' }}>
-              TIPO
-            </th>
-            <th className={styles.tableHeadCell} style={{ width: '12%' }}>
-              MARCA
-            </th>
-            <th className={styles.tableHeadCell} style={{ width: '15%' }}>
-              SITIO
-            </th>
-            <th className={styles.tableHeadCell} style={{ width: '15%' }}>
-              FCO
-            </th>
-            <th className={styles.tableHeadCell} style={{ width: '18%' }}>
-              ULTIMO ESTADO
-            </th>
-            <th className={styles.tableHeadCell} style={{ width: '8%', textAlign: 'center' }}>
-              CRITICO
-            </th>
-          </tr>
-        </TableHead>
-        <TableBody>
-          {visibleData.map((row) => (
-            <tr key={row.id} className={clsx(styles.tableRow, row.critico && styles.criticalRow)}>
-              <td className={styles.tableCell}>{row.dispositivo}</td>
-              <td className={styles.tableCell}>{row.tipo}</td>
-              <td className={styles.tableCell}>{row.marca}</td>
-              <td className={styles.tableCell}>{row.sitio}</td>
-              <td className={styles.tableCell}>{row.fco}</td>
-              <td className={styles.tableCell} style={{ textAlign: 'center' }}>
-                <span
-                  className={clsx(
-                    styles.statusIndicator,
-                    styles[`status${row.ultimoEstado.replace(/\s+/g, '')}`],
-                  )}
-                >
-                  {row.ultimoEstado}
-                </span>
-              </td>
-              <td className={styles.tableCell} style={{ textAlign: 'center' }}>
-                {row.critico && (
-                  <FontAwesomeIcon icon={faCircleExclamation} className={styles.criticalIcon} />
-                )}
-              </td>
-            </tr>
-          ))}
-          {loading && (
-            <tr className={styles.loadingRow}>
-              <td colSpan={7} className={styles.loadingCell}>
-                <div className={styles.loadingIndicator}>Cargando más dispositivos...</div>
-              </td>
-            </tr>
-          )}
-        </TableBody>
-        {hasMore && !loading && (
-          <tfoot>
-            <tr>
-              <td colSpan={7}>
-                <div className={styles.scrollHint}>
-                  Desplázate hacia abajo para cargar más ({visibleData.length} de {data.length})
-                </div>
-              </td>
-            </tr>
-          </tfoot>
-        )}
-      </Table>
-    );
-  };
-
+  // Vista de escritorio con tabla
   return (
     <div className={clsx(styles.lastStatusTableWrapper, className)} style={{ overflow: 'hidden' }}>
       <div
         ref={containerRef}
-        className={clsx(styles.tableContainer, isMobileView && styles.mobileContainer)}
+        className={styles.tableContainer}
         style={{
           height: `${DEFAULT_TABLE_CONFIG.tableHeight}px`,
           maxHeight: `${DEFAULT_TABLE_CONFIG.tableHeight}px`,
@@ -379,7 +237,77 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
         }}
         onScroll={() => debouncedCheckIfNearBottom()}
       >
-        {renderContent()}
+        <Table className={styles.table}>
+          <TableHead>
+            <tr>
+              <th className={styles.tableHeadCell} style={{ width: '15%' }}>
+                DISPOSITIVOS
+              </th>
+              <th className={styles.tableHeadCell} style={{ width: '12%' }}>
+                TIPO
+              </th>
+              <th className={styles.tableHeadCell} style={{ width: '12%' }}>
+                MARCA
+              </th>
+              <th className={styles.tableHeadCell} style={{ width: '15%' }}>
+                SITIO
+              </th>
+              <th className={styles.tableHeadCell} style={{ width: '15%' }}>
+                FCO
+              </th>
+              <th className={styles.tableHeadCell} style={{ width: '18%' }}>
+                ULTIMO ESTADO
+              </th>
+              <th className={styles.tableHeadCell} style={{ width: '8%', textAlign: 'center' }}>
+                CRITICO
+              </th>
+            </tr>
+          </TableHead>
+          <TableBody>
+            {visibleData.map((row) => (
+              <tr key={row.id} className={clsx(styles.tableRow, row.critico && styles.criticalRow)}>
+                <td className={styles.tableCell}>{row.dispositivo}</td>
+                <td className={styles.tableCell}>{row.tipo}</td>
+                <td className={styles.tableCell}>{row.marca}</td>
+                <td className={styles.tableCell}>{row.sitio}</td>
+                <td className={styles.tableCell}>{row.fco}</td>
+                <td className={styles.tableCell} style={{ textAlign: 'center' }}>
+                  <span
+                    className={clsx(
+                      styles.statusIndicator,
+                      styles[`status${row.ultimoEstado.replace(/\s+/g, '')}`],
+                    )}
+                  >
+                    {row.ultimoEstado}
+                  </span>
+                </td>
+                <td className={styles.tableCell} style={{ textAlign: 'center' }}>
+                  {row.critico && (
+                    <FontAwesomeIcon icon={faCircleExclamation} className={styles.criticalIcon} />
+                  )}
+                </td>
+              </tr>
+            ))}
+            {loading && (
+              <tr className={styles.loadingRow}>
+                <td colSpan={7} className={styles.loadingCell}>
+                  <div className={styles.loadingIndicator}>Cargando más dispositivos...</div>
+                </td>
+              </tr>
+            )}
+          </TableBody>
+          {hasMore && !loading && (
+            <tfoot>
+              <tr>
+                <td colSpan={7}>
+                  <div className={styles.scrollHint}>
+                    Desplázate hacia abajo para cargar más ({visibleData.length} de {data.length})
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          )}
+        </Table>
       </div>
     </div>
   );

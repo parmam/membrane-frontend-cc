@@ -3,7 +3,7 @@ import { useI18n } from '@/i18n';
 import { FunctionComponent, useEffect, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import useTheme from '@theme/useTheme';
 import Box from '@view/elements/Box';
 import Icon from '@view/elements/Icon';
@@ -11,7 +11,7 @@ import Typography from '@view/elements/Typography';
 import clsx from 'clsx';
 
 import styles from './Sidebar.module.css';
-import { SidebarItemGroup, sidebarItemGroups, sidebarItems } from './model';
+import { sidebarItemGroups, sidebarItems } from './model';
 
 // Route translations between languages
 const routeTranslations: Record<string, Record<string, string>> = {
