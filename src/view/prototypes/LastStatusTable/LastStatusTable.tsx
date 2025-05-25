@@ -4,7 +4,7 @@ import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Table from '@view/elements/Table';
 import { TableBody, TableHead } from '@view/elements/Table';
-import { DEFAULT_TABLE_CONFIG } from '@view/elements/Table/config';
+import { DEFAULT_VIRTUALIZED_CONFIG, VirtualizedListConfig } from '@view/elements/Table/config';
 import LastStatusCards from '@view/prototypes/LastStatusMobileView/LastStatusCards';
 import clsx from 'clsx';
 
@@ -24,6 +24,7 @@ declare global {
 interface LastStatusTableProps {
   data?: DeviceData[];
   className?: string;
+  config?: Partial<VirtualizedListConfig>;
 }
 
 // Función para debounce
@@ -49,15 +50,25 @@ const isMobileViewport = () => {
   return typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT;
 };
 
-const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableProps) => {
+const LastStatusTable = ({
+  data = dummyDeviceData,
+  className,
+  config = {},
+}: LastStatusTableProps) => {
+  // Merge provided config with default config
+  const mergedConfig = { ...DEFAULT_VIRTUALIZED_CONFIG, ...config };
+
   // Cantidad inicial de elementos a mostrar - aumentamos para crear scroll
-  const initialVisibleCount = DEFAULT_TABLE_CONFIG.itemsPerPage * 2; // Doubled to ensure scrolling
+  const initialVisibleCount = mergedConfig.itemsPerPage * 2; // Doubled to ensure scrolling
   const [displayCount, setDisplayCount] = useState(initialVisibleCount);
   const [loading, setLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isNearBottom, setIsNearBottom] = useState(false);
   const isLoadingRef = useRef(false); // Referencia para evitar cargas simultáneas
   const [isMobileView, setIsMobileView] = useState(isMobileViewport());
+
+  // Ref to store the latest scroll check function to avoid circular dependencies
+  const checkIfNearBottomRef = useRef<() => void>(() => {});
 
   // Inicializamos contador de scroll
   if (typeof window !== 'undefined' && window.lastScrollTop === undefined) {
@@ -102,37 +113,78 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
   }, [isMobileView]);
 
   // Función para cargar más elementos cuando se hace scroll hacia abajo
-  const loadMoreItems = useCallback(() => {
-    // Prevenir cargas múltiples usando ref en lugar de state
-    if (isLoadingRef.current) {
-      return;
-    }
+  const loadMoreItems = useCallback(
+    (isPrefetch = false) => {
+      // Verificar si podemos cargar más elementos
+      if (isLoadingRef.current || displayCount >= data.length) {
+        return;
+      }
 
-    const shouldLoad = displayCount < data.length;
-    if (!shouldLoad) return;
+      // Marcar como cargando
+      isLoadingRef.current = true;
 
-    // Marcar como cargando
-    isLoadingRef.current = true;
-    setLoading(true);
+      // Solo mostrar indicador de carga para cargas regulares, no para prefetch
+      if (!isPrefetch) {
+        setLoading(true);
+      }
 
-    // Simulamos una carga asíncrona
-    setTimeout(() => {
-      setDisplayCount((prevCount) => {
-        const newCount = prevCount + initialVisibleCount;
-        return Math.min(newCount, data.length);
-      });
+      // Calculamos cuántos elementos más cargar
+      const itemsToLoad = initialVisibleCount;
+      const availableItems = data.length - displayCount;
+      const itemsToActuallyLoad = Math.min(itemsToLoad, availableItems);
 
-      // Finalizar carga
-      setLoading(false);
-      isLoadingRef.current = false;
-    }, 300);
-  }, [data.length, displayCount, initialVisibleCount]);
+      // Verificamos si hay elementos para cargar
+      if (itemsToActuallyLoad <= 0) {
+        isLoadingRef.current = false;
+        setLoading(false);
+        return;
+      }
+
+      // Para prefetch, cargamos inmediatamente para mejorar la experiencia
+      if (isPrefetch) {
+        setDisplayCount((prevCount) => {
+          const newCount = prevCount + itemsToLoad;
+          return Math.min(newCount, data.length);
+        });
+        isLoadingRef.current = false;
+        return;
+      }
+
+      // Para cargas normales, simulamos una carga asíncrona
+      setTimeout(() => {
+        // Asegurarnos de que el componente sigue montado antes de actualizar el estado
+        setDisplayCount((prevCount) => {
+          const newCount = prevCount + itemsToLoad;
+          return Math.min(newCount, data.length);
+        });
+
+        // Finalizar carga después de un pequeño retraso para que el usuario vea el indicador
+        setTimeout(() => {
+          setLoading(false);
+          isLoadingRef.current = false;
+
+          // Verificar si debemos cargar más (en caso de que el usuario siga desplazándose rápidamente)
+          if (containerRef.current) {
+            setTimeout(() => {
+              if (checkIfNearBottomRef.current) {
+                checkIfNearBottomRef.current();
+              }
+            }, 100);
+          }
+        }, 200);
+      }, 300);
+    },
+    [data.length, displayCount, initialVisibleCount],
+  );
 
   // Verificar si estamos cerca del final del scroll
   const checkIfNearBottom = useCallback(() => {
     if (!containerRef.current) return;
 
     const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+
+    // Ensure we have valid measurements
+    if (scrollHeight <= 0 || clientHeight <= 0) return;
 
     // Determinar dirección de scroll
     const lastScrollTop = window.lastScrollTop ?? 0;
@@ -142,29 +194,43 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
     // Actualizar último scrollTop
     window.lastScrollTop = scrollTop;
 
-    // Usar el valor configurado para el umbral de scroll
-    const threshold = DEFAULT_TABLE_CONFIG.scrollThreshold;
-    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    // Calcular qué porcentaje del contenido ha sido visto
+    const scrollPercentage = Math.min(100, ((scrollTop + clientHeight) / scrollHeight) * 100);
 
-    // Si estamos a menos del umbral del final, consideramos que estamos cerca del final
-    const nearBottom = distanceFromBottom < threshold;
+    // Verificar si hemos visto el porcentaje configurado de los elementos
+    const hasViewedThresholdPercent = scrollPercentage >= mergedConfig.loadThresholdPercent;
+    const shouldPrefetch =
+      scrollPercentage >= mergedConfig.prefetchThresholdPercent &&
+      scrollPercentage < mergedConfig.loadThresholdPercent;
 
-    // Solo actualizamos el estado si cambia para evitar renderizados innecesarios
-    if (nearBottom !== isNearBottom) {
-      setIsNearBottom(nearBottom);
+    // Carga de más elementos solo si hay más por cargar
+    const canLoadMore = displayCount < data.length && !isLoadingRef.current;
 
-      // Si estamos cerca del final y hay más elementos por cargar, los cargamos
-      // Pero solo si el usuario está desplazándose hacia abajo
-      if (
-        nearBottom &&
-        direction === 'down' &&
-        !isLoadingRef.current &&
-        displayCount < data.length
-      ) {
-        loadMoreItems();
-      }
+    // Usar un enfoque más simple y directo similar al mobile
+    if (direction === 'down' && hasViewedThresholdPercent && canLoadMore) {
+      // Force update the state first to avoid race conditions
+      setIsNearBottom(true);
+      loadMoreItems(false); // Carga normal
+    } else if (direction === 'down' && shouldPrefetch && canLoadMore) {
+      // Prefetch - cargamos más elementos sin mostrar indicador de carga
+      loadMoreItems(true); // Prefetch
+    } else if (hasViewedThresholdPercent !== isNearBottom) {
+      // Actualizar el estado si cambia
+      setIsNearBottom(hasViewedThresholdPercent);
     }
-  }, [data.length, displayCount, isNearBottom, loadMoreItems]);
+  }, [
+    data.length,
+    displayCount,
+    isNearBottom,
+    loadMoreItems,
+    mergedConfig.loadThresholdPercent,
+    mergedConfig.prefetchThresholdPercent,
+  ]);
+
+  // Update the ref whenever the function changes
+  useEffect(() => {
+    checkIfNearBottomRef.current = checkIfNearBottom;
+  }, [checkIfNearBottom]);
 
   // Versión con debounce del checkIfNearBottom
   const debouncedCheckIfNearBottom = useCallback(
@@ -182,7 +248,7 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
     const container = containerRef.current;
     if (!container) return;
 
-    // Implementación directa del evento de scroll
+    // Implementación directa del evento de scroll con throttling para mejor rendimiento
     const handleScroll = () => {
       // Usamos el método con debounce
       debouncedCheckIfNearBottom();
@@ -191,8 +257,12 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
     // Registrar el evento de scroll directamente
     container.addEventListener('scroll', handleScroll, { passive: true });
 
-    // Debug log
-    console.log('Scroll event registered on table container');
+    // Hacer una comprobación inicial después de montar
+    setTimeout(() => {
+      if (containerRef.current) {
+        checkIfNearBottom();
+      }
+    }, 100);
 
     // Limpieza
     return () => {
@@ -203,18 +273,25 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
         clearTimeout(window.debounceTimer);
       }
     };
-  }, [debouncedCheckIfNearBottom, isMobileView]);
+  }, [debouncedCheckIfNearBottom, isMobileView, checkIfNearBottom]);
 
   // Forzar una comprobación cuando cambia el tamaño de la ventana
   useEffect(() => {
     // Skip for mobile view
     if (isMobileView) return;
 
+    // Función para manejar el redimensionamiento
     const handleResize = debounce(() => {
-      checkIfNearBottom();
+      // Forzar un nuevo cálculo después de que se redimensione la ventana
+      if (containerRef.current) {
+        checkIfNearBottom();
+      }
     }, 200);
 
+    // Registrar evento de redimensionamiento
     window.addEventListener('resize', handleResize);
+
+    // Limpieza
     return () => {
       window.removeEventListener('resize', handleResize);
       if (window.debounceTimer) {
@@ -223,13 +300,32 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
     };
   }, [checkIfNearBottom, isMobileView]);
 
+  // Hacer una comprobación cada vez que cambia displayCount para manejar carga continua si es necesario
+  useEffect(() => {
+    // Solo para vista de escritorio
+    if (isMobileView) return;
+
+    // Si acabamos de cargar más elementos, verificar si necesitamos cargar aún más
+    // Esto es útil cuando el usuario está desplazándose muy rápidamente
+    if (containerRef.current && displayCount < data.length && !isLoadingRef.current) {
+      // Esperar un momento antes de verificar para evitar cargas múltiples simultáneas
+      const timer = setTimeout(() => {
+        checkIfNearBottom();
+      }, 100);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [displayCount, data.length, isMobileView, checkIfNearBottom]);
+
   // Elementos que serán mostrados según el scroll
   const visibleData = data.slice(0, displayCount);
   const hasMore = displayCount < data.length;
 
   // Si es vista móvil, renderizamos el componente LastStatusCards
   if (isMobileView) {
-    return <LastStatusCards data={data} className={className} />;
+    return <LastStatusCards data={data} className={className} config={mergedConfig} />;
   }
 
   // Vista de escritorio con tabla
@@ -239,16 +335,10 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
         ref={containerRef}
         className={styles.tableContainer}
         style={{
-          height: `${DEFAULT_TABLE_CONFIG.tableHeight}px`,
-          maxHeight: `${DEFAULT_TABLE_CONFIG.tableHeight}px`,
+          height: `${mergedConfig.containerHeight}px`,
+          maxHeight: `${mergedConfig.containerHeight}px`,
           overflowY: 'auto',
           overflowX: 'hidden', // Hide horizontal scrollbar
-        }}
-        onScroll={(e) => {
-          // Direct scroll handler
-          if (!isMobileView) {
-            debouncedCheckIfNearBottom();
-          }
         }}
       >
         <Table className={styles.table}>
@@ -302,14 +392,20 @@ const LastStatusTable = ({ data = dummyDeviceData, className }: LastStatusTableP
                 </td>
               </tr>
             ))}
-            {loading && (
+          </TableBody>
+
+          {/* Loading indicator moved outside TableBody */}
+          {loading && (
+            <tfoot>
               <tr className={styles.loadingRow}>
-                <td colSpan={7} className={styles.loadingCell}>
-                  <div className={styles.loadingIndicator}>Cargando más dispositivos...</div>
+                <td colSpan={7} style={{ textAlign: 'center' }}>
+                  <div className={styles.loadingIndicator}></div>
                 </td>
               </tr>
-            )}
-          </TableBody>
+            </tfoot>
+          )}
+
+          {/* Scroll hint footer also moved outside TableBody */}
           {hasMore && !loading && (
             <tfoot>
               <tr>

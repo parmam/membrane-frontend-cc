@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { DEFAULT_TABLE_CONFIG } from '@view/elements/Table/config';
+import { DEFAULT_VIRTUALIZED_CONFIG, VirtualizedListConfig } from '@view/elements/Table/config';
 import { DeviceData } from '@view/prototypes/LastStatusTable/data';
 import clsx from 'clsx';
 
@@ -36,67 +36,102 @@ const debounce = <T extends (...args: unknown[]) => void>(
 interface LastStatusCardsProps {
   data: DeviceData[];
   className?: string;
+  config?: Partial<VirtualizedListConfig>;
 }
 
-const LastStatusCards = ({ data, className }: LastStatusCardsProps) => {
+const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps) => {
+  // Merge provided config with default config
+  const mergedConfig = { ...DEFAULT_VIRTUALIZED_CONFIG, ...config };
+
   // Initial items to show - we render all initially but will load more as user scrolls
-  const initialVisibleCount = DEFAULT_TABLE_CONFIG.itemsPerPage * 2;
+  const initialVisibleCount = mergedConfig.itemsPerPage * 2;
   const [displayCount, setDisplayCount] = useState(initialVisibleCount);
   const [loading, setLoading] = useState(false);
   const isLoadingRef = useRef(false);
 
-  // Calculate scroll threshold at 70% of displayed items
+  // Calculate scroll threshold using config
   const calculateThreshold = useCallback(() => {
-    return Math.floor(displayCount * 0.7);
-  }, [displayCount]);
+    // We can use the percentage threshold from config for consistency
+    return mergedConfig.loadThresholdPercent;
+  }, [mergedConfig.loadThresholdPercent]);
 
   // Visible data to render
   const visibleData = data.slice(0, displayCount);
   const hasMore = displayCount < data.length;
 
   // Function to load more items
-  const loadMoreItems = useCallback(() => {
-    if (isLoadingRef.current || !hasMore) return;
+  const loadMoreItems = useCallback(
+    (isPrefetch = false) => {
+      if (isLoadingRef.current || !hasMore) return;
 
-    isLoadingRef.current = true;
-    setLoading(true);
+      isLoadingRef.current = true;
 
-    // Simulate async loading
-    setTimeout(() => {
-      setDisplayCount((prevCount) => {
-        const newCount = prevCount + initialVisibleCount;
-        return Math.min(newCount, data.length);
-      });
+      // Only show loading indicator for regular loads, not for prefetch
+      if (!isPrefetch) {
+        setLoading(true);
+      }
 
-      setLoading(false);
-      isLoadingRef.current = false;
-    }, 300);
-  }, [data.length, hasMore, initialVisibleCount]);
+      // Simulate async loading
+      setTimeout(
+        () => {
+          setDisplayCount((prevCount) => {
+            const newCount = prevCount + initialVisibleCount;
+            return Math.min(newCount, data.length);
+          });
+
+          setLoading(false);
+          isLoadingRef.current = false;
+        },
+        isPrefetch ? 100 : 300,
+      ); // Faster for prefetch
+    },
+    [data.length, hasMore, initialVisibleCount],
+  );
 
   // Handle scroll event on the window
   useEffect(() => {
     const handleScroll = () => {
       if (isLoadingRef.current || !hasMore) return;
 
-      // Calculate which item we're currently viewing
+      // Calculate current scroll position
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
       const documentHeight = document.body.offsetHeight;
 
-      // Check if we've scrolled to 70% of the current list
-      const scrollPercentage = (scrollY + windowHeight) / documentHeight;
-      if (scrollPercentage > 0.7) {
-        loadMoreItems();
+      // Calculate the percentage of content viewed
+      const scrollPercentage = ((scrollY + windowHeight) / documentHeight) * 100;
+
+      // Determine if we should load or prefetch based on configured thresholds
+      const shouldLoad = scrollPercentage >= mergedConfig.loadThresholdPercent;
+      const shouldPrefetch =
+        scrollPercentage >= mergedConfig.prefetchThresholdPercent &&
+        scrollPercentage < mergedConfig.loadThresholdPercent;
+
+      if (shouldLoad) {
+        // Load more items with visible loading indicator
+        loadMoreItems(false);
+      } else if (shouldPrefetch) {
+        // Prefetch items without showing loading indicator
+        loadMoreItems(true);
       }
     };
 
-    // Add scroll listener to window
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Add scroll listener to window with debounce
+    const debouncedHandleScroll = debounce(handleScroll, 150);
+    window.addEventListener('scroll', debouncedHandleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', debouncedHandleScroll);
+      if (window.debounceTimer) {
+        clearTimeout(window.debounceTimer);
+      }
     };
-  }, [hasMore, loadMoreItems]);
+  }, [
+    hasMore,
+    loadMoreItems,
+    mergedConfig.loadThresholdPercent,
+    mergedConfig.prefetchThresholdPercent,
+  ]);
 
   return (
     <div className={clsx(styles.cardsContainer, className)}>
@@ -144,7 +179,11 @@ const LastStatusCards = ({ data, className }: LastStatusCardsProps) => {
         </div>
       ))}
 
-      {loading && <div className={styles.loadingIndicator}>Cargando más dispositivos...</div>}
+      {loading && (
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingIndicator}></div>
+        </div>
+      )}
 
       {hasMore && !loading && (
         <div className={styles.scrollHint}>
