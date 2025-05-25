@@ -23,6 +23,16 @@ export interface VirtualizedListConfig {
   loadThresholdPercent: number;
   /** Percentage of items viewed to start prefetching (0-100, should be less than loadThresholdPercent) */
   prefetchThresholdPercent: number;
+  /** Whether to use remaining items count instead of percentage for load threshold */
+  useRemainingItemsThreshold: boolean;
+  /** Number of remaining items before loading more (only used if useRemainingItemsThreshold is true) */
+  remainingItemsThreshold: number;
+  /** Whether to prioritize pixel-based thresholds over percentage-based ones */
+  pixelBasedThreshold?: boolean;
+  /** Number of pixels from bottom to trigger load (used when pixelBasedThreshold is true) */
+  pixelBasedLoadThreshold?: number;
+  /** Number of pixels from bottom to trigger prefetch (used when pixelBasedThreshold is true) */
+  pixelBasedPrefetchThreshold?: number;
 }
 
 // Default configuration for virtualized lists
@@ -39,6 +49,11 @@ export const DEFAULT_VIRTUALIZED_CONFIG: VirtualizedListConfig = {
   scrollThreshold: 100,
   loadThresholdPercent: 90,
   prefetchThresholdPercent: 75,
+  useRemainingItemsThreshold: false,
+  remainingItemsThreshold: 5,
+  pixelBasedThreshold: false,
+  pixelBasedLoadThreshold: 300,
+  pixelBasedPrefetchThreshold: 600,
 };
 
 // For backward compatibility

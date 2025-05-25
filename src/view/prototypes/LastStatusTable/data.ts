@@ -89,7 +89,7 @@ const generateTimestamp = () => {
 };
 
 // Generate dummy data with 150 rows
-export const generateDummyData = (count = 150): DeviceData[] => {
+export const generateDummyData = (count = 15000): DeviceData[] => {
   const data: DeviceData[] = [];
 
   for (let i = 0; i < count; i++) {
