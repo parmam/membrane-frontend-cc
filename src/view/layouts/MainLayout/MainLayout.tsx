@@ -1,6 +1,7 @@
 import { FunctionComponent, ReactNode, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
+import useWindowSize from '@hooks/useWindowSize';
 import useTheme from '@theme/useTheme';
 import Box from '@view/elements/Box';
 import MainHeader from '@view/prototypes/Headers/MainHeader/MainHeader';
@@ -15,19 +16,13 @@ interface MainLayoutProps {
 const MainLayout: FunctionComponent<MainLayoutProps> = () => {
   const theme = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const { isMobile } = useWindowSize(768);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-      if (window.innerWidth > 768) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    if (!isMobile) {
+      setIsMobileMenuOpen(false);
+    }
+  }, [isMobile]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

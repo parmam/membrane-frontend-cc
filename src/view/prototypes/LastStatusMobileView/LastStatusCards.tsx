@@ -74,6 +74,7 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
   const requestIdRef = useRef(0); // Para identificar cada solicitud de carga
   const didInitialMountRef = useRef(false);
   const lastLoadTimeRef = useRef(0); // Referencia para controlar la frecuencia de cargas
+  const initialLoadCompleteRef = useRef(false); // Referencia para la primera carga
   const MIN_LOAD_INTERVAL = 800; // Intervalo mínimo entre cargas en ms
 
   // Restablecer displayCount cuando cambia itemsPerPage o los datos
@@ -83,6 +84,7 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
         `[LastStatusCards] Restablecer displayCount debido a cambios en configuración: ${initialVisibleCount}`,
       );
       setDisplayCount(initialVisibleCount);
+      initialLoadCompleteRef.current = false;
     } else {
       didInitialMountRef.current = true;
     }
@@ -106,7 +108,12 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
       }
 
       // Limitar la frecuencia de cargas para evitar sobrecargas
-      if (!isPrefetch && now - lastLoadTimeRef.current < MIN_LOAD_INTERVAL) {
+      // Excepción: permitir siempre la primera carga
+      if (
+        !isPrefetch &&
+        now - lastLoadTimeRef.current < MIN_LOAD_INTERVAL &&
+        initialLoadCompleteRef.current
+      ) {
         console.log(
           `[LastStatusCards][${requestId}] Demasiadas cargas seguidas, ignorando esta solicitud (última carga hace ${now - lastLoadTimeRef.current}ms)`,
         );
@@ -165,6 +172,9 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
         setTimeout(() => {
           setLoading(false);
           isLoadingRef.current = false;
+          // Marcar que la primera carga ha completado
+          initialLoadCompleteRef.current = true;
+
           console.log(
             `[LastStatusCards][${requestId}] Carga finalizada, indicador de carga oculto`,
           );
@@ -178,7 +188,7 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
   useEffect(() => {
     // Función interna para verificar el scroll
     const checkIfNearBottom = () => {
-      if (isLoadingRef.current || !hasMore) {
+      if (isLoadingRef.current || (!hasMore && initialLoadCompleteRef.current)) {
         return;
       }
 
@@ -192,9 +202,17 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
       const direction = scrollY > lastScrollTop ? 'down' : scrollY < lastScrollTop ? 'up' : 'none';
 
       // Si la diferencia es muy pequeña, considerarlo como "sin cambio" para evitar detecciones falsas
-      const MIN_SCROLL_DELTA = 5;
+      // Durante la primera carga, ser más permisivo con el umbral
+      const MIN_SCROLL_DELTA = initialLoadCompleteRef.current ? 5 : 1;
       const scrollDelta = Math.abs(scrollY - lastScrollTop);
-      const effectiveDirection = scrollDelta < MIN_SCROLL_DELTA ? 'none' : direction;
+      // Si estamos en la primera carga, forzar dirección "down" o "none" para evitar falsos "up"
+      const effectiveDirection = !initialLoadCompleteRef.current
+        ? scrollDelta < MIN_SCROLL_DELTA
+          ? 'none'
+          : 'down'
+        : scrollDelta < MIN_SCROLL_DELTA
+          ? 'none'
+          : direction;
 
       // Update last scroll position
       window.lastScrollTop = scrollY;
@@ -218,9 +236,12 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
 
       // Priorizar umbral de píxeles si está activado
       // Requerir dirección hacia abajo para evitar cargas innecesarias
-      const shouldLoad = pixelBasedThresholdEnabled
-        ? hasViewedThresholdPixels && effectiveDirection === 'down'
-        : hasViewedThresholdPercent && effectiveDirection === 'down';
+      // En la primera carga, ser más permisivo
+      const shouldLoad = !initialLoadCompleteRef.current
+        ? hasViewedThresholdPixels || hasViewedThresholdPercent
+        : pixelBasedThresholdEnabled
+          ? hasViewedThresholdPixels && effectiveDirection === 'down'
+          : hasViewedThresholdPercent && effectiveDirection === 'down';
 
       // Determinar si debemos prefetch
       const shouldPrefetchByPercent =
@@ -241,17 +262,24 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
           `\n→ Modo píxeles: ${pixelBasedThresholdEnabled ? 'ACTIVADO' : 'DESACTIVADO'}, umbralCarga=${pixelBasedLoadThreshold}px, umbralPrefetch=${pixelBasedPrefetchThreshold}px` +
           `\n→ Criterios de carga: porcentaje=${hasViewedThresholdPercent}(${scrollPercentage.toFixed(2)}% >= ${mergedConfig.loadThresholdPercent}%), píxeles=${hasViewedThresholdPixels}(${remainingScrollSpace}px <= ${pixelBasedLoadThreshold}px)` +
           `\n→ Criterios de prefetch: porcentaje=${shouldPrefetchByPercent}, píxeles=${shouldPrefetchByPixels}` +
-          `\n→ Estado: shouldLoad=${shouldLoad}, shouldPrefetch=${shouldPrefetch}, hasMore=${hasMore}(${displayCount}/${data.length}), isLoading=${isLoadingRef.current}`,
+          `\n→ Estado: shouldLoad=${shouldLoad}, shouldPrefetch=${shouldPrefetch}, hasMore=${hasMore}(${displayCount}/${data.length}), isLoading=${isLoadingRef.current}, primeraVez=${!initialLoadCompleteRef.current}`,
       );
 
       // Verificar el tiempo desde la última carga para evitar cargas muy seguidas
       const now = Date.now();
       const timeSinceLastLoad = now - lastLoadTimeRef.current;
-      const canTriggerLoad = timeSinceLastLoad >= MIN_LOAD_INTERVAL;
+      // Ser más permisivo en la primera carga
+      const canTriggerLoad =
+        !initialLoadCompleteRef.current || timeSinceLastLoad >= MIN_LOAD_INTERVAL;
 
-      if (effectiveDirection === 'down' && shouldLoad && hasMore && canTriggerLoad) {
+      if (
+        (effectiveDirection === 'down' && shouldLoad && hasMore && canTriggerLoad) ||
+        !initialLoadCompleteRef.current
+      ) {
         let triggerReason = 'desconocido';
-        if (pixelBasedThresholdEnabled && hasViewedThresholdPixels) {
+        if (!initialLoadCompleteRef.current) {
+          triggerReason = 'primera carga';
+        } else if (pixelBasedThresholdEnabled && hasViewedThresholdPixels) {
           triggerReason = `umbral de píxeles (${remainingScrollSpace}px <= ${pixelBasedLoadThreshold}px)`;
         } else if (hasViewedThresholdPercent) {
           triggerReason = `porcentaje de scroll (${scrollPercentage.toFixed(2)}% >= ${mergedConfig.loadThresholdPercent}%)`;
@@ -292,7 +320,7 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
     console.log('[LastStatusCards] Registrando evento de scroll en window');
     window.addEventListener('scroll', throttledCheckScroll, { passive: true });
 
-    // Verificación inicial después de montar
+    // Verificación inicial después de montar - esto asegura que se haga la primera carga
     setTimeout(() => {
       console.log(
         '[LastStatusCards] Realizando verificación inicial de scroll después del montaje',

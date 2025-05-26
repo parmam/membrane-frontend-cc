@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import useWindowSize from '@hooks/useWindowSize';
 import { VirtualizedTable } from '@view/elements/Table';
 import { VirtualizedListConfig } from '@view/elements/Table/config';
 import LastStatusCards from '@view/prototypes/LastStatusMobileView/LastStatusCards';
@@ -10,20 +11,8 @@ import clsx from 'clsx';
 import styles from './LastStatusTable.module.css';
 import { DeviceData, dummyDeviceData } from './data';
 
-// Extender el tipo Window para permitir el timeout en este componente
-declare global {
-  interface Window {
-    resizeTimer?: ReturnType<typeof setTimeout>;
-  }
-}
-
 // Media query para detección de móviles
 const MOBILE_BREAKPOINT = 768;
-
-// Verificar si es vista móvil
-const isMobileViewport = () => {
-  return typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT;
-};
 
 interface LastStatusTableProps {
   data?: DeviceData[];
@@ -49,7 +38,7 @@ const LastStatusTable = ({
   className,
   config = {},
 }: LastStatusTableProps) => {
-  const [isMobileView, setIsMobileView] = useState(isMobileViewport());
+  const { isMobile } = useWindowSize(MOBILE_BREAKPOINT);
 
   // Crear configuración una sola vez para evitar re-renderizados innecesarios
   const mergedConfig = useMemo(() => {
@@ -58,45 +47,6 @@ const LastStatusTable = ({
     console.log('[LastStatusTable] Configuración final:', merged);
     return merged;
   }, [config]);
-
-  // Detectar vista móvil al cargar y en resize
-  useEffect(() => {
-    const checkMobileView = () => {
-      const shouldBeMobile = isMobileViewport();
-
-      if (shouldBeMobile !== isMobileView) {
-        console.log(
-          `[LastStatusTable] Cambiando a vista ${shouldBeMobile ? 'móvil' : 'escritorio'}`,
-        );
-        setIsMobileView(shouldBeMobile);
-      }
-    };
-
-    // Comprobar al inicio
-    checkMobileView();
-
-    // Función para manejar cambios de tamaño con throttling
-    const handleResize = () => {
-      if (window.resizeTimer) {
-        clearTimeout(window.resizeTimer);
-      }
-
-      window.resizeTimer = setTimeout(() => {
-        checkMobileView();
-      }, 100);
-    };
-
-    // Agregar listener para resize
-    window.addEventListener('resize', handleResize);
-
-    // Limpieza al desmontar
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (window.resizeTimer) {
-        clearTimeout(window.resizeTimer);
-      }
-    };
-  }, [isMobileView]);
 
   // Función para renderizar la cabecera de la tabla
   const renderHead = () => (
@@ -179,7 +129,7 @@ const LastStatusTable = ({
   );
 
   // Si es vista móvil, renderizamos el componente LastStatusCards
-  if (isMobileView) {
+  if (isMobile) {
     console.log('[LastStatusTable] Renderizando vista móvil');
     return <LastStatusCards data={data} className={className} config={mergedConfig} />;
   }

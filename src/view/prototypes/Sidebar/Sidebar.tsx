@@ -1,8 +1,9 @@
 import { useI18n } from '@/i18n';
 
-import { FunctionComponent, useEffect, useState } from 'react';
+import { ComponentType, FC, FunctionComponent, SVGProps, useEffect, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import useTheme from '@theme/useTheme';
 import Box from '@view/elements/Box';
@@ -11,7 +12,7 @@ import Typography from '@view/elements/Typography';
 import clsx from 'clsx';
 
 import styles from './Sidebar.module.css';
-import { sidebarItemGroups, sidebarItems } from './model';
+import { IconType, sidebarItemGroups, sidebarItems } from './model';
 
 // Route translations between languages
 const routeTranslations: Record<string, Record<string, string>> = {
@@ -41,6 +42,16 @@ const routeTranslations: Record<string, Record<string, string>> = {
     '/admin/models': '/admin/modelos',
     '/admin/firmwares': '/admin/firmwares',
   },
+};
+
+// Verificador para comprobar si un icono es un objeto con componentes Solid y Outlined
+const isCustomIcon = (
+  icon: IconType,
+): icon is {
+  Solid: FC<SVGProps<SVGElement>> | string;
+  Outlined: FC<SVGProps<SVGElement>> | string;
+} => {
+  return icon && typeof icon === 'object' && 'Solid' in icon && 'Outlined' in icon;
 };
 
 const Sidebar: FunctionComponent = () => {
@@ -152,6 +163,42 @@ const Sidebar: FunctionComponent = () => {
     return path;
   };
 
+  // Renderiza el icono según el tipo (FontAwesome o personalizado SVG)
+  const renderIcon = (icon: IconType, isActive: boolean) => {
+    if (isCustomIcon(icon)) {
+      // Si es un icono personalizado SVG
+      const IconComponent = isActive ? icon.Solid : icon.Outlined;
+
+      // Si el componente es un string, no lo renderizamos
+      if (typeof IconComponent === 'string') {
+        console.error(
+          'El componente de icono es un string, no un componente React:',
+          IconComponent,
+        );
+        return null;
+      }
+
+      return (
+        <Icon
+          customSize='large'
+          svgIcon={IconComponent}
+          color='inherit'
+          className={isActive ? styles.activeIcon : undefined}
+        />
+      );
+    } else {
+      // Si es un icono FontAwesome
+      return (
+        <Icon
+          customSize='large'
+          icon={icon as IconDefinition}
+          color='inherit'
+          className={isActive ? styles.activeIcon : undefined}
+        />
+      );
+    }
+  };
+
   return (
     <Box className={styles.sidebar}>
       <Box flexDirection='column' className={styles.menuContainer}>
@@ -167,9 +214,7 @@ const Sidebar: FunctionComponent = () => {
                 clsx(styles.menuItem, { [styles.menuItemActive]: isActive })
               }
             >
-              <Box className={styles.menuItemIcon}>
-                <Icon icon={item.icon} color='inherit' />
-              </Box>
+              <Box className={styles.menuItemIcon}>{renderIcon(item.icon, isActive)}</Box>
               <Typography variant='body2' color='inherit'>
                 {t(item.translationKey)}
               </Typography>
@@ -184,7 +229,7 @@ const Sidebar: FunctionComponent = () => {
               onClick={() => toggleGroup(group.id)}
             >
               <Box className={styles.menuItemIcon}>
-                <Icon icon={group.icon} color='inherit' />
+                {renderIcon(group.icon, expandedGroups[group.id])}
               </Box>
               <Box
                 className={styles.groupHeader}
@@ -203,6 +248,8 @@ const Sidebar: FunctionComponent = () => {
               <Box className={styles.submenu} flexDirection='column'>
                 {group.items.map((item) => {
                   const path = getLocalizedPath(item.path);
+                  const isActive = location.pathname === path;
+
                   return (
                     <NavLink
                       key={item.id}
@@ -211,9 +258,7 @@ const Sidebar: FunctionComponent = () => {
                         clsx(styles.submenuItem, { [styles.menuItemActive]: isActive })
                       }
                     >
-                      <Box className={styles.menuItemIcon}>
-                        <Icon icon={item.icon} color='inherit' />
-                      </Box>
+                      <Box className={styles.menuItemIcon}>{renderIcon(item.icon, isActive)}</Box>
                       <Typography variant='body2' color='inherit'>
                         {t(item.translationKey)}
                       </Typography>

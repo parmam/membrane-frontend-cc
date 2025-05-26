@@ -52,9 +52,36 @@
 
 .menuItemIcon {
   margin-right: 10px;
-  width: 20px;
+  min-width: 32px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.1));
+}
+
+/* Estilos para iconos activos e inactivos */
+.activeIcon {
+  transition: all 0.2s ease;
+}
+
+/* Mejorar la visibilidad de los iconos outlined cuando no están activos */
+.menuItem:not(.menuItemActive) .menuItemIcon svg {
+  filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.6));
+  opacity: 0.95;
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease;
+}
+
+/* Estilos específicos para los iconos del submenú de Products */
+.submenuItem .menuItemIcon svg {
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.7)) !important;
+  opacity: 1 !important;
+}
+
+.menuItem:not(.menuItemActive):hover .menuItemIcon svg {
+  opacity: 1;
+  filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.7));
 }
 
 .submenu {
