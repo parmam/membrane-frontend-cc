@@ -1,16 +1,24 @@
 .icon {
   display: inline-block;
   vertical-align: middle;
+  width: auto;
+  height: auto;
 }
 
 .small {
   font-size: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .medium {
   font-size: 24px;
+  width: 24px;
+  height: 24px;
 }
 
 .large {
   font-size: 32px;
+  width: 32px;
+  height: 32px;
 }

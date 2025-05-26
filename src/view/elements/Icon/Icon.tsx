@@ -19,12 +19,19 @@ const Icon: FunctionComponent<IconProps> = ({
   customSize = 'medium',
   className,
   svgIcon: SvgIcon,
+  style,
   ...props
 }) => {
+  // Definir estilos base según el tamaño
+  const sizeStyle: CSSProperties = {};
+
   if (SvgIcon) {
     return (
       <SvgIcon
         className={clsx(styles.icon, customSize && styles[customSize], className)}
+        style={{ ...sizeStyle, ...style }}
+        width='1em'
+        height='1em'
         {...(props as SVGProps<SVGElement>)}
       />
     );
@@ -33,6 +40,9 @@ const Icon: FunctionComponent<IconProps> = ({
   return (
     <FontAwesomeIcon
       className={clsx(styles.icon, customSize && styles[customSize], className)}
+      style={{ ...sizeStyle, ...style }}
+      width='1em'
+      height='1em'
       {...(props as FontAwesomeIconProps)}
     />
   );
