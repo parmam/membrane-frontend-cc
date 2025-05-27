@@ -21,10 +21,13 @@
       "no": "No",
       "filters": "Filtros",
       "resetFilters": "Restablecer filtros",
-      "showing": "Mostrando {{count}} de {{total}} dispositivos",
+      "showing": "Mostrando {{count}} de {{total}} elementos",
       "scrollForMore": "Desplázate para ver más ({{visible}} de {{total}})",
       "collapse": "Colapsar",
-      "expand": "Expandir"
+      "expand": "Expandir",
+      "name": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico"
     },
     "theme": {
       "light": "Modo Claro",
@@ -36,21 +39,21 @@
       "login": "Iniciar Sesión",
       "register": "Registrarse",
       "logout": "Cerrar Sesión",
-      "email": "Correo Electrónico",
+      "email": "Correo electrónico",
       "password": "Contraseña",
       "confirmPassword": "Confirmar Contraseña",
       "businessName": "Nombre de la Empresa",
       "phoneNumber": "Número de Teléfono",
-      "forgotPassword": "¿Olvidó su Contraseña?",
-      "dontHaveAccount": "¿No tiene una cuenta?",
-      "alreadyHaveAccount": "¿Ya tiene una cuenta?",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "dontHaveAccount": "¿No tienes una cuenta?",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta?",
       "createAccount": "Crear Cuenta",
       "emailPlaceholder": "correo@ejemplo.com",
       "passwordPlaceholder": "••••••••",
       "recoverPassword": "Recuperar Contraseña",
       "resetPassword": "Restablecer Contraseña",
-      "recoverPasswordMessage": "Ingrese su dirección de correo electrónico y le enviaremos un enlace para restablecer su contraseña.",
-      "passwordResetSent": "Si existe una cuenta con el correo electrónico {{email}}, recibirá un enlace para restablecer su contraseña. Por favor, revise su correo.",
+      "recoverPasswordMessage": "Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
+      "passwordResetSent": "Si existe una cuenta con el correo {{email}}, recibirás un enlace para restablecer tu contraseña. Por favor, revisa tu correo.",
       "backToSignIn": "Volver a Iniciar Sesión"
     },
     "validation": {
@@ -61,7 +64,7 @@
       "required": "Este campo es obligatorio"
     },
     "currency": {
-      "selectCrypto": "Seleccione una criptomoneda"
+      "selectCrypto": "Seleccionar una criptomoneda"
     },
     "transaction": {
       "buy": "Comprar",
@@ -71,7 +74,7 @@
       "home": "Inicio",
       "dashboard": "Dashboard",
       "monitoring": "Monitoreo",
-      "latestStates": "Últimos Estados",
+      "latestStates": "Estados Recientes",
       "administration": "Administración",
       "products": "Productos",
       "users": "Usuarios",
@@ -94,7 +97,7 @@
       "selectYear": "Seleccionar año"
     },
     "latestStates": {
-      "title": "Estado de los dispositivos",
+      "title": "Estado de Dispositivos",
       "subtitle": "Monitoreo en tiempo real de todos los dispositivos en la red",
       "allDevices": "Todos los dispositivos",
       "allTypes": "Todos los tipos",
@@ -102,8 +105,26 @@
       "allSites": "Todos los sitios",
       "allStatuses": "Todos los estados"
     },
+    "users": {
+      "filters": {
+        "enterName": "Ingrese nombre",
+        "enterLastName": "Ingrese apellido",
+        "enterEmail": "Ingrese correo electrónico",
+        "allProfiles": "Todos los perfiles",
+        "allStatuses": "Todos los estados"
+      },
+      "actions": {
+        "title": "ACCIONES",
+        "edit": "Editar",
+        "delete": "Eliminar"
+      },
+      "status": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      }
+    },
     "monitoring": {
-      "title": "Monitoreo del Sistema",
+      "title": "Monitoreo de Sistema",
       "subtitle": "Monitoreo en tiempo real del estado y métricas de dispositivos",
       "fecha": "Fecha",
       "dispositivo": "Dispositivo",
@@ -112,7 +133,7 @@
       "estado": "Estado",
       "verImagen": "Ver Imagen",
       "plano": "Plano",
-      "uptime": "Tiempo Activo",
+      "uptime": "Tiempo activo",
       "allDevices": "Todos los dispositivos",
       "allLocations": "Todas las ubicaciones",
       "allStatuses": "Todos los estados",
@@ -131,8 +152,8 @@
         "description": "Vista detallada de datos de monitoreo del sistema y alertas"
       },
       "users": {
-        "title": "Usuarios",
-        "subtitle": "Esta es la página de gestión de usuarios."
+        "title": "Gestión de Usuarios",
+        "subtitle": "Ver y administrar todos los usuarios en el sistema"
       },
       "roles": {
         "title": "Roles",

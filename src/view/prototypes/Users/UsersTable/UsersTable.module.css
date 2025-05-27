@@ -1,0 +1,248 @@
+.usersTableWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background-paper);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.tableContainer {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  position: relative;
+}
+
+/* Scrollbar styles for the table container */
+.tableContainer::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tableContainer::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track, rgba(0, 0, 0, 0.1));
+  border-radius: 4px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb, rgba(87, 72, 49, 0.5));
+  border-radius: 4px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-main);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.tableHeadCell {
+  position: sticky;
+  top: 0;
+  padding: 16px;
+  font-weight: 600;
+  text-align: left;
+  background-color: var(--color-background-paper);
+  color: var(--color-text-primary);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.tableRow {
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.tableRow:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tableCell {
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profilesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.profileBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-contrastText);
+}
+
+.statusIndicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 70px;
+}
+
+.statusActive {
+  background-color: rgba(24, 210, 43, 0.2);
+  color: var(--color-success-main);
+}
+
+.statusInactive {
+  background-color: rgba(211, 47, 47, 0.2);
+  color: var(--color-error-main);
+}
+
+.actionsContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.actionsButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 5px 10px;
+  transition: color 0.2s;
+  border-radius: 4px;
+}
+
+.actionsButton:hover {
+  color: var(--color-text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.actionsDropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: var(--color-background-paper);
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  min-width: 120px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.actionItem {
+  display: block;
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  padding: 10px 15px;
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.actionItem:hover {
+  background-color: var(--color-action-hover);
+}
+
+.loadingRow {
+  background-color: transparent;
+  width: 100%;
+}
+
+.loadingCell {
+  padding: 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.loadingIndicator {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  position: relative;
+  margin: 20px auto;
+}
+
+.loadingIndicator::after {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--color-primary-light, #6b9080);
+  animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.scrollHint {
+  text-align: center;
+  padding: 12px;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  opacity: 0.7;
+  position: sticky;
+  bottom: 0;
+  background-color: var(--color-background-paper);
+  border-top: 1px solid var(--color-divider);
+  animation: fadeInOut 2s infinite;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* Media query for responsiveness in the cards */
+@media (max-width: 480px) {
+  .profilesList {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

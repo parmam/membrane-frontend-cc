@@ -21,10 +21,13 @@
       "no": "No",
       "filters": "Filters",
       "resetFilters": "Reset filters",
-      "showing": "Showing {{count}} of {{total}} devices",
+      "showing": "Showing {{count}} of {{total}} items",
       "scrollForMore": "Scroll down to see more ({{visible}} of {{total}})",
       "collapse": "Collapse",
-      "expand": "Expand"
+      "expand": "Expand",
+      "name": "Name",
+      "lastName": "Last Name",
+      "email": "Email"
     },
     "theme": {
       "light": "Light Mode",
@@ -102,6 +105,24 @@
       "allSites": "All sites",
       "allStatuses": "All statuses"
     },
+    "users": {
+      "filters": {
+        "enterName": "Enter name",
+        "enterLastName": "Enter last name",
+        "enterEmail": "Enter email",
+        "allProfiles": "All profiles",
+        "allStatuses": "All statuses"
+      },
+      "actions": {
+        "title": "ACTIONS",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      }
+    },
     "monitoring": {
       "title": "System Monitoring",
       "subtitle": "Real-time monitoring of device status and metrics",
@@ -131,8 +152,8 @@
         "description": "Detailed view of system monitoring data and alerts"
       },
       "users": {
-        "title": "Users",
-        "subtitle": "This is the users management page."
+        "title": "Users Management",
+        "subtitle": "View and manage all users in the system"
       },
       "roles": {
         "title": "Roles",

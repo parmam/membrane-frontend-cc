@@ -1,0 +1,205 @@
+.cardsContainer {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.mobileHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.mobileCount {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  background-color: rgba(255, 255, 255, 0.08);
+  padding: 6px 12px;
+  border-radius: 100px;
+}
+
+.card {
+  background-color: var(--color-background-paper);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+  padding: 16px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.userName {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.cardBody {
+  margin-bottom: 16px;
+}
+
+.infoRow {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.infoLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.infoValue {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+.profilesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.profileBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-contrastText);
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: center;
+}
+
+.statusIndicator {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.statusActive {
+  background-color: rgba(24, 210, 43, 0.2);
+  color: var(--color-success-main);
+}
+
+.statusInactive {
+  background-color: rgba(211, 47, 47, 0.2);
+  color: var(--color-error-main);
+}
+
+.actionsContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.actionsButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 5px 10px;
+  transition: color 0.2s;
+  border-radius: 4px;
+}
+
+.actionsButton:hover {
+  color: var(--color-text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.actionsDropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: var(--color-background-paper);
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  min-width: 120px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.actionItem {
+  display: block;
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  padding: 10px 15px;
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.actionItem:hover {
+  background-color: var(--color-action-hover);
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.loadingIndicator {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  position: relative;
+}
+
+.loadingIndicator::after {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--color-primary-light, #6b9080);
+  animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.scrollHint {
+  text-align: center;
+  padding: 12px;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin: 10px 0;
+}

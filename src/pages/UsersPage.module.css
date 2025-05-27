@@ -1,0 +1,32 @@
+.resultsInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0;
+  padding: 0 1rem;
+}
+
+.resultCount {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+/* Add mobile specific styles */
+@media (max-width: 768px) {
+  .pageHeader {
+    position: sticky;
+    top: 0;
+    background-color: var(--color-background-default);
+    padding-bottom: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 8px;
+    z-index: 10;
+  }
+
+  .pageContent {
+    padding-top: 0.5rem;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+}
