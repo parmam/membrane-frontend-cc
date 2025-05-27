@@ -21,7 +21,10 @@
       "no": "No",
       "filters": "Filters",
       "resetFilters": "Reset filters",
-      "showing": "Showing {{count}} of {{total}} devices"
+      "showing": "Showing {{count}} of {{total}} devices",
+      "scrollForMore": "Scroll down to see more ({{visible}} of {{total}})",
+      "collapse": "Collapse",
+      "expand": "Expand"
     },
     "theme": {
       "light": "Light Mode",
@@ -99,6 +102,24 @@
       "allSites": "All sites",
       "allStatuses": "All statuses"
     },
+    "monitoring": {
+      "title": "System Monitoring",
+      "subtitle": "Real-time monitoring of device status and metrics",
+      "fecha": "Date",
+      "dispositivo": "Device",
+      "critico": "Critical",
+      "ubicacion": "Location",
+      "estado": "Status",
+      "verImagen": "View Image",
+      "plano": "Floor Plan",
+      "uptime": "Uptime",
+      "allDevices": "All devices",
+      "allLocations": "All locations",
+      "allStatuses": "All statuses",
+      "allFloorPlans": "All floor plans",
+      "location": "Location",
+      "floorPlan": "Floor Plan"
+    },
     "pages": {
       "dashboard": {
         "title": "Dashboard",
@@ -106,7 +127,8 @@
       },
       "monitoring": {
         "title": "Monitoring",
-        "subtitle": "This is the system monitoring page."
+        "subtitle": "Real-time system monitoring and device status tracking",
+        "description": "Detailed view of system monitoring data and alerts"
       },
       "users": {
         "title": "Users",

@@ -1,3 +1,5 @@
+import LastStatusCards from '@/view/prototypes/LastStatus/LastStatusMobileView/LastStatusCards';
+
 import { useEffect, useMemo, useState } from 'react';
 
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
@@ -5,7 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useWindowSize from '@hooks/useWindowSize';
 import { VirtualizedTable } from '@view/elements/Table';
 import { VirtualizedListConfig } from '@view/elements/Table/config';
-import LastStatusCards from '@view/prototypes/LastStatusMobileView/LastStatusCards';
 import clsx from 'clsx';
 
 import styles from './LastStatusTable.module.css';

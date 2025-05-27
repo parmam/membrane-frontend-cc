@@ -1,0 +1,185 @@
+.filtersWrapper {
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.filtersContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+  background-color: var(--color-background-paper);
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: visible;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    margin-bottom 0.3s ease;
+  max-height: 500px;
+  opacity: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.filtersContainer.collapsed {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  opacity: 0;
+}
+
+.filtersContainer.expanded {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.filtersRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  position: relative;
+}
+
+.filterGroup {
+  flex: 1;
+  min-width: 180px;
+  position: relative;
+}
+
+.filtersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: var(--color-background-paper);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 8px;
+}
+
+.filtersTitleContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filtersTitle {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.activeFilterBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background-color: var(--color-primary-main);
+  color: white;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.filtersHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resetButton {
+  background-color: transparent;
+  border: none;
+  color: var(--color-primary-main);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: var(--transition-hover);
+  border-radius: 4px;
+}
+
+.resetButton:hover {
+  background-color: rgba(189, 121, 11, 0.1);
+}
+
+.resetButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(189, 121, 11, 0.2);
+}
+
+.toggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.toggleButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.toggleIcon {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.toggleIcon.expanded {
+  transform: rotate(180deg);
+}
+
+/* Date selector specific styling */
+.dateFilterGroup {
+  position: relative;
+  z-index: 10 !important;
+}
+
+@media (max-width: 768px) {
+  .filtersContainer {
+    gap: 12px;
+    overflow: visible !important;
+  }
+
+  .filtersContainer.expanded {
+    max-height: 1000px;
+    overflow: visible !important;
+  }
+
+  .filtersRow {
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .filterGroup {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Ensure date selector is always on top in mobile */
+  .dateFilterGroup {
+    position: relative;
+    z-index: 100 !important;
+  }
+
+  .filtersHeader {
+    padding: 12px;
+  }
+}

@@ -21,7 +21,10 @@
       "no": "No",
       "filters": "Filtros",
       "resetFilters": "Restablecer filtros",
-      "showing": "Mostrando {{count}} de {{total}} dispositivos"
+      "showing": "Mostrando {{count}} de {{total}} dispositivos",
+      "scrollForMore": "Desplázate para ver más ({{visible}} de {{total}})",
+      "collapse": "Colapsar",
+      "expand": "Expandir"
     },
     "theme": {
       "light": "Modo Claro",
@@ -99,6 +102,24 @@
       "allSites": "Todos los sitios",
       "allStatuses": "Todos los estados"
     },
+    "monitoring": {
+      "title": "Monitoreo del Sistema",
+      "subtitle": "Monitoreo en tiempo real del estado y métricas de dispositivos",
+      "fecha": "Fecha",
+      "dispositivo": "Dispositivo",
+      "critico": "Crítico",
+      "ubicacion": "Ubicación",
+      "estado": "Estado",
+      "verImagen": "Ver Imagen",
+      "plano": "Plano",
+      "uptime": "Tiempo Activo",
+      "allDevices": "Todos los dispositivos",
+      "allLocations": "Todas las ubicaciones",
+      "allStatuses": "Todos los estados",
+      "allFloorPlans": "Todos los planos",
+      "location": "Ubicación",
+      "floorPlan": "Plano"
+    },
     "pages": {
       "dashboard": {
         "title": "Dashboard",
@@ -106,7 +127,8 @@
       },
       "monitoring": {
         "title": "Monitoreo",
-        "subtitle": "Esta es la página de monitoreo del sistema."
+        "subtitle": "Monitoreo en tiempo real del sistema y seguimiento del estado de dispositivos",
+        "description": "Vista detallada de datos de monitoreo del sistema y alertas"
       },
       "users": {
         "title": "Usuarios",

@@ -1,0 +1,422 @@
+.monitoringTableWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background-paper);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.tableContainer {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  position: relative;
+}
+
+/* Mobile container */
+.mobileContainer {
+  background-color: var(--color-background-default);
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Cards container */
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 16px;
+  width: 100%;
+}
+
+/* Device card styles */
+.deviceCard {
+  background-color: var(--color-background-paper);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  border-left: 4px solid transparent;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.deviceCard:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.criticalCard {
+  border-left: 4px solid var(--color-error-main);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.cardStatus {
+  display: flex;
+  justify-content: flex-start;
+  margin: 4px 0 8px 0;
+}
+
+.cardDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+
+.cardDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cardDetailLabel {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.cardDetailValue {
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.loadingCardContainer {
+  padding: 24px;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
+/* Scrollbar styles for the table container */
+.tableContainer::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tableContainer::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track, rgba(0, 0, 0, 0.1));
+  border-radius: 4px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb, rgba(87, 72, 49, 0.5));
+  border-radius: 4px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-main);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.tableHeadCell {
+  position: sticky;
+  top: 0;
+  padding: 16px;
+  font-weight: 600;
+  text-align: left;
+  background-color: var(--color-background-paper);
+  color: var(--color-text-primary);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.tableRow {
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.tableRow:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tableCell {
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.criticalRow {
+  background-color: rgba(244, 67, 54, 0.15);
+}
+
+.criticalRow:hover {
+  background-color: rgba(244, 67, 54, 0.2);
+}
+
+.criticalIcon {
+  color: var(--color-error-main);
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.viewImageLink {
+  color: var(--color-primary-main);
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: rgba(189, 121, 11, 0.1);
+  transition: background-color 0.2s ease;
+  display: inline-block;
+  text-align: center;
+}
+
+.viewImageLink:hover {
+  background-color: rgba(189, 121, 11, 0.2);
+}
+
+.statusIndicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 90px;
+}
+
+.statusOnline {
+  background-color: rgba(24, 210, 43, 0.2);
+  color: var(--color-success-main);
+}
+
+.statusOffline {
+  background-color: rgba(211, 47, 47, 0.2);
+  color: var(--color-error-main);
+}
+
+.statusWarning {
+  background-color: rgba(255, 154, 78, 0.2);
+  color: var(--color-secondary-main);
+}
+
+.statusMaintenance {
+  background-color: rgba(3, 169, 244, 0.2);
+  color: #03a9f4;
+}
+
+.statusDegraded {
+  background-color: rgba(156, 39, 176, 0.2);
+  color: #9c27b0;
+}
+
+.statusRestarting {
+  background-color: rgba(33, 150, 243, 0.2);
+  color: #2196f3;
+}
+
+.statusOverloaded {
+  background-color: rgba(233, 30, 99, 0.2);
+  color: #e91e63;
+}
+
+.loadingRow {
+  background-color: transparent;
+  width: 100%;
+}
+
+.loadingCell {
+  padding: 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.loadingIndicator {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  position: relative;
+  margin: 20px auto;
+}
+
+.loadingIndicator::after {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--color-primary-light, #6b9080);
+  animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.scrollHint {
+  text-align: center;
+  padding: 12px;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  opacity: 0.7;
+  position: sticky;
+  bottom: 0;
+  background-color: var(--color-background-paper);
+  border-top: 1px solid var(--color-divider);
+  animation: fadeInOut 2s infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* Media query for responsiveness in the cards */
+@media (max-width: 480px) {
+  .mobileContainer {
+    padding: 12px;
+  }
+
+  .cardContainer {
+    gap: 12px;
+  }
+
+  .cardDetails {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .deviceCard {
+    padding: 16px;
+  }
+
+  .cardTitle {
+    font-size: 1.1rem;
+  }
+
+  .cardDetail {
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .cardDetail:last-child {
+    border-bottom: none;
+  }
+
+  .cardDetailLabel {
+    font-size: 0.7rem;
+  }
+
+  .cardDetailValue {
+    font-size: 0.95rem;
+  }
+}
+
+/* Mobile specific styles */
+@media (max-width: 768px) {
+  .scrollHint {
+    margin: 8px;
+    border-radius: 8px;
+    padding: 14px;
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .loadingIndicator {
+    padding: 8px 0;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .loadingIndicator::before {
+    width: 22px;
+    height: 22px;
+    border-width: 3px;
+  }
+}
+
+/* Mobile header */
+.mobileHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px 16px 4px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobileCount {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.08);
+  padding: 6px 12px;
+  border-radius: 100px;
+}

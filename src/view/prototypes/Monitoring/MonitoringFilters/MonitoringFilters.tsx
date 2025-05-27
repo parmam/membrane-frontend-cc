@@ -1,38 +1,42 @@
+import {
+  deviceTypes,
+  floorPlans,
+  locations,
+  statusOptions,
+} from '@/view/prototypes/Monitoring/MonitoringTable/data';
+
 import { FunctionComponent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import DateSelector from '@view/components/DateSelector/DateSelector';
 import Option from '@view/elements/Option/Option';
 import Select from '@view/elements/Select/Select';
-import { brands, deviceTypes, sites, statusOptions } from '@view/prototypes/LastStatusTable/data';
 
-import styles from './LatestStatesFilters.module.css';
+import styles from './MonitoringFilters.module.css';
 
-interface LatestStatesFiltersProps {
+interface MonitoringFiltersProps {
   onFilterChange?: (filters: FilterState) => void;
 }
 
 interface FilterState {
   device: string;
-  type: string;
-  brand: string;
-  site: string;
-  lastStatus: string;
+  location: string;
+  status: string;
   critical: string;
+  floorPlan: string;
   startDate: string | null;
   endDate: string | null;
 }
 
-const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props) => {
+const MonitoringFilters: FunctionComponent<MonitoringFiltersProps> = (props) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
   const [filters, setFilters] = useState<FilterState>({
     device: '',
-    type: '',
-    brand: '',
-    site: '',
-    lastStatus: '',
+    location: '',
+    status: '',
     critical: '',
+    floorPlan: '',
     startDate: null,
     endDate: null,
   });
@@ -67,11 +71,10 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
   const resetFilters = () => {
     const resetValues: FilterState = {
       device: '',
-      type: '',
-      brand: '',
-      site: '',
-      lastStatus: '',
+      location: '',
+      status: '',
       critical: '',
+      floorPlan: '',
       startDate: null,
       endDate: null,
     };
@@ -130,7 +133,7 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
               value={filters.device}
               onChange={(value: string) => handleFilterChange('device', value)}
             >
-              <Option value=''>{t('latestStates.allDevices')}</Option>
+              <Option value=''>{t('monitoring.allDevices')}</Option>
               {/* In a real case, this could be a dynamic list of devices */}
               <Option value='Device-1000'>Device-1000</Option>
               <Option value='Device-1001'>Device-1001</Option>
@@ -140,59 +143,26 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
 
           <div className={styles.filterGroup}>
             <Select
-              label={t('common.type')}
-              value={filters.type}
-              onChange={(value: string) => handleFilterChange('type', value)}
+              label={t('monitoring.location')}
+              value={filters.location}
+              onChange={(value: string) => handleFilterChange('location', value)}
             >
-              <Option value=''>{t('latestStates.allTypes')}</Option>
-              {deviceTypes.map((type: string) => (
-                <Option key={type} value={type}>
-                  {type}
+              <Option value=''>{t('monitoring.allLocations')}</Option>
+              {locations.map((location: string) => (
+                <Option key={location} value={location}>
+                  {location}
                 </Option>
               ))}
             </Select>
           </div>
 
-          <div className={styles.filterGroup}>
-            <Select
-              label={t('common.brand')}
-              value={filters.brand}
-              onChange={(value: string) => handleFilterChange('brand', value)}
-            >
-              <Option value=''>{t('latestStates.allBrands')}</Option>
-              {brands.map((brand: string) => (
-                <Option key={brand} value={brand}>
-                  {brand}
-                </Option>
-              ))}
-            </Select>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <Select
-              label={t('common.site')}
-              value={filters.site}
-              onChange={(value: string) => handleFilterChange('site', value)}
-            >
-              <Option value=''>{t('latestStates.allSites')}</Option>
-              {sites.map((site: string) => (
-                <Option key={site} value={site}>
-                  {site}
-                </Option>
-              ))}
-            </Select>
-          </div>
-        </div>
-
-        {/* Second row of filters */}
-        <div className={styles.filtersRow}>
           <div className={styles.filterGroup}>
             <Select
               label={t('common.status')}
-              value={filters.lastStatus}
-              onChange={(value: string) => handleFilterChange('lastStatus', value)}
+              value={filters.status}
+              onChange={(value: string) => handleFilterChange('status', value)}
             >
-              <Option value=''>{t('latestStates.allStatuses')}</Option>
+              <Option value=''>{t('monitoring.allStatuses')}</Option>
               {statusOptions.map((status: string) => (
                 <Option key={status} value={status}>
                   {status}
@@ -212,6 +182,24 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
               <Option value='false'>{t('common.no')}</Option>
             </Select>
           </div>
+        </div>
+
+        {/* Second row of filters */}
+        <div className={styles.filtersRow}>
+          <div className={styles.filterGroup}>
+            <Select
+              label={t('monitoring.floorPlan')}
+              value={filters.floorPlan}
+              onChange={(value: string) => handleFilterChange('floorPlan', value)}
+            >
+              <Option value=''>{t('monitoring.allFloorPlans')}</Option>
+              {floorPlans.map((plan: string) => (
+                <Option key={plan} value={plan}>
+                  {plan}
+                </Option>
+              ))}
+            </Select>
+          </div>
 
           <div
             className={`${styles.filterGroup} ${styles.dateFilterGroup}`}
@@ -225,7 +213,8 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
             />
           </div>
 
-          {/* Empty space to balance distribution */}
+          {/* Empty spaces to balance distribution */}
+          <div className={styles.filterGroup}></div>
           <div className={styles.filterGroup}></div>
         </div>
       </div>
@@ -233,4 +222,4 @@ const LatestStatesFilters: FunctionComponent<LatestStatesFiltersProps> = (props)
   );
 };
 
-export default LatestStatesFilters;
+export default MonitoringFilters;

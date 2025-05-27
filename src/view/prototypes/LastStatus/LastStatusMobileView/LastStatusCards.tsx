@@ -1,9 +1,10 @@
+import { DeviceData } from '@/view/prototypes/LastStatus/LastStatusTable/data';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DEFAULT_VIRTUALIZED_CONFIG, VirtualizedListConfig } from '@view/elements/Table/config';
-import { DeviceData } from '@view/prototypes/LastStatusTable/data';
 import clsx from 'clsx';
 
 import styles from './LastStatusCards.module.css';
