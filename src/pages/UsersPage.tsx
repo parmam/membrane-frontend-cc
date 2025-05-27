@@ -4,6 +4,7 @@ import { FunctionComponent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ContentTitles from '@view/components/ContentTitles/ContentTitles';
+import SearchBar from '@view/components/SearchBar';
 import UsersFilters from '@view/prototypes/Users/UsersFilters/UsersFilters';
 import UsersTable from '@view/prototypes/Users/UsersTable/UsersTable';
 
@@ -81,7 +82,7 @@ const UsersPage: FunctionComponent = () => {
       <div className={styles.pageHeader}>
         <ContentTitles title={t('pages.users.title')} subtitle={t('pages.users.subtitle')} />
         <UsersFilters onFilterChange={handleFilterChange} />
-
+        <SearchBar />
         <div className={styles.resultsInfo}>
           <span className={styles.resultCount}>
             {t('common.showing', { count: filteredData.length, total: totalUsers })}
