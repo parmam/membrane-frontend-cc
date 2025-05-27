@@ -70,12 +70,6 @@ function VirtualizedTable<T>({
   // Merge provided config with default config, memoized to prevent unnecessary rerenders
   const mergedConfig = useMemo(() => {
     const merged = { ...DEFAULT_VIRTUALIZED_CONFIG, ...config };
-
-    // Log configuration at initialization
-    console.log(
-      `[VirtualizedTable] Inicialización con configuración: useRemainingItemsThreshold=${merged.useRemainingItemsThreshold}, remainingItemsThreshold=${merged.remainingItemsThreshold}, loadThresholdPercent=${merged.loadThresholdPercent}, prefetchThresholdPercent=${merged.prefetchThresholdPercent}, containerHeight=${merged.containerHeight}px, itemsPerPage=${merged.itemsPerPage}, pixelBasedThreshold=${merged.pixelBasedThreshold}`,
-    );
-
     return merged;
   }, [config]);
 
@@ -104,9 +98,6 @@ function VirtualizedTable<T>({
   // Restablecer displayCount cuando cambia itemsPerPage o los datos
   useEffect(() => {
     if (didInitialMountRef.current) {
-      console.log(
-        `[VirtualizedTable] Restablecer displayCount debido a cambios en configuración: ${initialVisibleCount}`,
-      );
       setDisplayCount(initialVisibleCount);
       initialLoadCompleteRef.current = false;
     } else {
@@ -122,9 +113,6 @@ function VirtualizedTable<T>({
 
       // Verificar si podemos cargar más elementos
       if (isLoadingRef.current || displayCount >= data.length) {
-        console.log(
-          `[VirtualizedTable][${requestId}] No se pueden cargar más elementos: isLoading=${isLoadingRef.current}, displayCount=${displayCount}/${data.length}`,
-        );
         return;
       }
 
@@ -135,9 +123,6 @@ function VirtualizedTable<T>({
         now - lastLoadTimeRef.current < MIN_LOAD_INTERVAL &&
         initialLoadCompleteRef.current
       ) {
-        console.log(
-          `[VirtualizedTable][${requestId}] Demasiadas cargas seguidas, ignorando esta solicitud (última carga hace ${now - lastLoadTimeRef.current}ms)`,
-        );
         return;
       }
 
@@ -150,7 +135,6 @@ function VirtualizedTable<T>({
       // Solo mostrar indicador de carga para cargas regulares, no para prefetch
       if (!isPrefetch) {
         setLoading(true);
-        console.log(`[VirtualizedTable][${requestId}] Mostrando indicador de carga`);
       }
 
       // Calculamos cuántos elementos más cargar
@@ -159,33 +143,21 @@ function VirtualizedTable<T>({
       const availableItems = data.length - displayCount;
       const itemsToActuallyLoad = Math.min(itemsToLoad, availableItems);
 
-      console.log(
-        `[VirtualizedTable][${requestId}] ${isPrefetch ? 'PREFETCH' : 'CARGA'} de elementos: displayCount=${displayCount}, dataLength=${data.length}, cargaré ${itemsToActuallyLoad} elementos de ${availableItems} disponibles`,
-      );
-
       // Verificamos si hay elementos para cargar
       if (itemsToActuallyLoad <= 0) {
         isLoadingRef.current = false;
         setLoading(false);
-        console.log(`[VirtualizedTable][${requestId}] No hay elementos nuevos para cargar`);
         return;
       }
 
       // Guardar scroll actual antes de cargar
       const currentScrollTop = containerRef.current?.scrollTop || 0;
-      console.log(
-        `[VirtualizedTable][${requestId}] Posición de scroll actual: ${currentScrollTop}px`,
-      );
 
       // Para prefetch, cargamos inmediatamente para mejorar la experiencia
       if (isPrefetch) {
-        console.log(`[VirtualizedTable][${requestId}] Ejecutando prefetch inmediato`);
         setDisplayCount((prevCount) => {
           const newCount = prevCount + itemsToLoad;
           const finalCount = Math.min(newCount, data.length);
-          console.log(
-            `[VirtualizedTable][${requestId}] Prefetch completado: ${prevCount} → ${finalCount} elementos`,
-          );
           return finalCount;
         });
 
@@ -195,9 +167,6 @@ function VirtualizedTable<T>({
         setTimeout(() => {
           if (containerRef.current) {
             containerRef.current.scrollTop = currentScrollTop;
-            console.log(
-              `[VirtualizedTable][${requestId}] Scroll restaurado a ${currentScrollTop}px después de prefetch`,
-            );
           }
         }, 50);
 
@@ -205,45 +174,30 @@ function VirtualizedTable<T>({
       }
 
       // Para cargas normales, simulamos una carga asíncrona
-      console.log(`[VirtualizedTable][${requestId}] Iniciando carga asíncrona (300ms)`);
       setTimeout(() => {
         // Asegurarnos de que el componente sigue montado antes de actualizar el estado
         setDisplayCount((prevCount) => {
           const newCount = prevCount + itemsToLoad;
           const finalCount = Math.min(newCount, data.length);
-          console.log(
-            `[VirtualizedTable][${requestId}] Actualizando displayCount: ${prevCount} → ${finalCount} elementos`,
-          );
           return finalCount;
         });
 
         // Finalizar carga después de un pequeño retraso para que el usuario vea el indicador
-        console.log(`[VirtualizedTable][${requestId}] Esperando 200ms para finalizar la carga`);
         setTimeout(() => {
           setLoading(false);
           isLoadingRef.current = false;
           // Marcar que la primera carga ha completado
           initialLoadCompleteRef.current = true;
 
-          console.log(
-            `[VirtualizedTable][${requestId}] Carga finalizada, indicador de carga oculto`,
-          );
-
           // Restaurar posición de scroll
           if (containerRef.current) {
             containerRef.current.scrollTop = currentScrollTop;
-            console.log(
-              `[VirtualizedTable][${requestId}] Scroll restaurado a ${currentScrollTop}px después de carga`,
-            );
           }
 
           // Verificar si debemos cargar más (en caso de que el usuario siga desplazándose rápidamente)
           // pero hacerlo con menos frecuencia para evitar cargas en cadena
           if (containerRef.current) {
             setTimeout(() => {
-              console.log(
-                `[VirtualizedTable][${requestId}] Verificando si se necesitan más elementos después de la carga`,
-              );
               if (checkIfNearBottomRef.current) {
                 checkIfNearBottomRef.current();
               }
@@ -258,7 +212,6 @@ function VirtualizedTable<T>({
   // Verificar si estamos cerca del final del scroll
   const checkIfNearBottom = useCallback(() => {
     if (!containerRef.current) {
-      console.log('[VirtualizedTable] No se puede verificar scroll: containerRef.current es null');
       return;
     }
 
@@ -266,7 +219,6 @@ function VirtualizedTable<T>({
 
     // Ensure we have valid measurements
     if (scrollHeight <= 0 || clientHeight <= 0) {
-      console.log('[VirtualizedTable] Dimensiones inválidas: scrollHeight o clientHeight <= 0');
       return;
     }
 
@@ -342,15 +294,6 @@ function VirtualizedTable<T>({
       ? shouldPrefetchByPixels && effectiveDirection === 'down' && !shouldLoad
       : shouldPrefetchByPercent && effectiveDirection === 'down' && !shouldLoad;
 
-    // Registrar en consola los valores de scroll para depuración
-    console.log(
-      `[VirtualizedTable] SCROLL CHECK: dirección=${effectiveDirection} (delta=${scrollDelta}px), scrollTop=${scrollTop}px, scrollHeight=${scrollHeight}px, clientHeight=${clientHeight}px, scrollPercentage=${scrollPercentage.toFixed(2)}%, espacioRestante=${remainingScrollSpace}px` +
-        `\n→ Modo píxeles: ${pixelBasedThresholdEnabled ? 'ACTIVADO' : 'DESACTIVADO'}, umbralCarga=${pixelBasedLoadThreshold}px, umbralPrefetch=${pixelBasedPrefetchThreshold}px` +
-        `\n→ Criterios de carga: porcentaje=${hasViewedThresholdPercent}(${scrollPercentage.toFixed(2)}% >= ${mergedConfig.loadThresholdPercent}%), píxeles=${hasViewedThresholdPixels}(${remainingScrollSpace}px <= ${pixelBasedLoadThreshold}px)` +
-        `\n→ Criterios de prefetch: porcentaje=${shouldPrefetchByPercent}, píxeles=${shouldPrefetchByPixels}` +
-        `\n→ Estado: shouldLoad=${shouldLoad}, shouldPrefetch=${shouldPrefetch}, canLoadMore=${canLoadMore}(${displayCount}/${data.length}), isLoading=${isLoadingRef.current}, primeraVez=${!initialLoadCompleteRef.current}`,
-    );
-
     // Verificar el tiempo desde la última carga para evitar cargas muy seguidas
     const now = Date.now();
     const timeSinceLastLoad = now - lastLoadTimeRef.current;
@@ -370,19 +313,6 @@ function VirtualizedTable<T>({
       canLoadMore &&
       canTriggerLoad
     ) {
-      let triggerReason = 'desconocido';
-      if (!initialLoadCompleteRef.current) {
-        triggerReason = 'primera carga';
-      } else if (shouldLoadByRemainingItems) {
-        triggerReason = `elementos restantes (${remainingItems} <= ${mergedConfig.remainingItemsThreshold})`;
-      } else if (pixelBasedThresholdEnabled && hasViewedThresholdPixels) {
-        triggerReason = `umbral de píxeles (${remainingScrollSpace}px <= ${pixelBasedLoadThreshold}px)`;
-      } else if (hasViewedThresholdPercent) {
-        triggerReason = `porcentaje de scroll (${scrollPercentage.toFixed(2)}% >= ${mergedConfig.loadThresholdPercent}%)`;
-      }
-
-      console.log(`[VirtualizedTable] ⚡ CARGANDO MÁS ELEMENTOS debido a: ${triggerReason}`);
-
       // Force update the state first to avoid race conditions
       setIsNearBottom(true);
       loadMoreItems(false); // Carga normal
@@ -394,27 +324,11 @@ function VirtualizedTable<T>({
       !isLoadingRef.current &&
       canTriggerLoad
     ) {
-      let prefetchReason = 'desconocido';
-      if (pixelBasedThresholdEnabled && shouldPrefetchByPixels) {
-        prefetchReason = `umbral de píxeles (${remainingScrollSpace}px <= ${pixelBasedPrefetchThreshold}px)`;
-      } else if (shouldPrefetchByPercent) {
-        prefetchReason = `porcentaje de scroll (${scrollPercentage.toFixed(2)}% >= ${mergedConfig.prefetchThresholdPercent}%)`;
-      }
-
-      console.log(`[VirtualizedTable] 🔄 PREFETCH DE ELEMENTOS debido a: ${prefetchReason}`);
-
       // Prefetch - cargamos más elementos sin mostrar indicador de carga
       loadMoreItems(true); // Prefetch
     } else if ((shouldLoad || shouldLoadByRemainingItems) !== isNearBottom) {
       // Actualizar el estado si cambia
-      console.log(
-        `[VirtualizedTable] Actualizando estado isNearBottom: ${isNearBottom} → ${shouldLoad || shouldLoadByRemainingItems}`,
-      );
       setIsNearBottom(shouldLoad || shouldLoadByRemainingItems);
-    } else if (!canTriggerLoad && shouldLoad) {
-      console.log(
-        `[VirtualizedTable] Ignorando carga porque pasó poco tiempo desde la última (${timeSinceLastLoad}ms < ${MIN_LOAD_INTERVAL}ms)`,
-      );
     }
   }, [
     data.length,
@@ -433,13 +347,11 @@ function VirtualizedTable<T>({
   // Update the ref whenever the function changes
   useEffect(() => {
     checkIfNearBottomRef.current = checkIfNearBottom;
-    console.log('[VirtualizedTable] Función checkIfNearBottom actualizada en referencia');
   }, [checkIfNearBottom]);
 
   // Versión con throttle del checkIfNearBottom para mejor rendimiento
   const throttledCheckIfNearBottom = useCallback(
     throttle(() => {
-      console.log('[VirtualizedTable] Ejecutando verificación de scroll con throttle (200ms)');
       checkIfNearBottom();
     }, 200), // 200ms de throttle para limitar la frecuencia de verificaciones
     [checkIfNearBottom],
@@ -449,51 +361,27 @@ function VirtualizedTable<T>({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) {
-      console.log(
-        '[VirtualizedTable] No se pueden registrar eventos de scroll: contenedor no disponible',
-      );
       return;
     }
 
-    // Log container dimensions once for debugging
-    console.log(
-      `[VirtualizedTable] DIMENSIONES DEL CONTENEDOR: altura=${container.offsetHeight}px, clientHeight=${container.clientHeight}px, scrollHeight=${container.scrollHeight}px, estilo={height:${container.style.height}, maxHeight:${container.style.maxHeight}, overflowY:${container.style.overflowY}}`,
-    );
-
     // Implementación directa del evento de scroll con throttling para mejor rendimiento
     const handleScroll = () => {
-      // Log basic scroll info
-      if (container) {
-        const scrollPercentage = (
-          ((container.scrollTop + container.clientHeight) / container.scrollHeight) *
-          100
-        ).toFixed(2);
-        console.log(
-          `[VirtualizedTable] EVENTO SCROLL: scrollTop=${container.scrollTop}px, scrollHeight=${container.scrollHeight}px, clientHeight=${container.clientHeight}px, scrollPercentage=${scrollPercentage}%`,
-        );
-      }
-
       // Usamos el método con throttle para evitar demasiadas verificaciones
       throttledCheckIfNearBottom();
     };
 
     // Registrar el evento de scroll directamente
-    console.log('[VirtualizedTable] Registrando evento de scroll en el contenedor');
     container.addEventListener('scroll', handleScroll, { passive: true });
 
     // Hacer una comprobación inicial después de montar
     setTimeout(() => {
       if (containerRef.current) {
-        console.log(
-          '[VirtualizedTable] Realizando verificación inicial de scroll después del montaje',
-        );
         checkIfNearBottom();
       }
     }, 100);
 
     // Limpieza
     return () => {
-      console.log('[VirtualizedTable] Limpiando eventos de scroll');
       container.removeEventListener('scroll', handleScroll);
 
       // Limpiar el debounce timer si existe
@@ -509,20 +397,15 @@ function VirtualizedTable<T>({
     const handleResize = debounce(() => {
       // Forzar un nuevo cálculo después de que se redimensione la ventana
       if (containerRef.current) {
-        console.log(
-          '[VirtualizedTable] Redimensionamiento de ventana detectado, verificando scroll',
-        );
         checkIfNearBottom();
       }
     }, 200);
 
     // Registrar evento de redimensionamiento
-    console.log('[VirtualizedTable] Registrando evento de redimensionamiento de ventana');
     window.addEventListener('resize', handleResize);
 
     // Limpieza
     return () => {
-      console.log('[VirtualizedTable] Limpiando evento de redimensionamiento');
       window.removeEventListener('resize', handleResize);
       if (window.debounceTimer) {
         clearTimeout(window.debounceTimer);
@@ -532,16 +415,11 @@ function VirtualizedTable<T>({
 
   // Hacer una comprobación cada vez que cambia displayCount para manejar carga continua si es necesario
   useEffect(() => {
-    console.log(`[VirtualizedTable] displayCount cambió a ${displayCount}/${data.length}`);
-
     // Si acabamos de cargar más elementos, verificar si necesitamos cargar aún más
     // Pero lo hacemos con menos frecuencia para evitar cargas en cadena
     if (containerRef.current && displayCount < data.length && !isLoadingRef.current) {
       // Esperar un momento antes de verificar para evitar cargas múltiples simultáneas
       const timer = setTimeout(() => {
-        console.log(
-          '[VirtualizedTable] Verificando si se necesitan más elementos después de cambiar displayCount',
-        );
         checkIfNearBottom();
       }, 300); // Aumentado a 300ms para dar más tiempo entre verificaciones
 
@@ -580,10 +458,6 @@ function VirtualizedTable<T>({
         </tfoot>
       )}
     </>
-  );
-
-  console.log(
-    `[VirtualizedTable] Renderizando tabla con ${visibleData.length}/${data.length} elementos, hasMore=${hasMore}, loading=${loading}`,
   );
 
   return (

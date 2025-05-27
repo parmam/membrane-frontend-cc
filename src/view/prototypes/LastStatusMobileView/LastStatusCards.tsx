@@ -58,11 +58,6 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
   // Merge provided config with default config, memoized para evitar re-renders innecesarios
   const mergedConfig = useMemo(() => {
     const merged = { ...DEFAULT_VIRTUALIZED_CONFIG, ...config };
-
-    console.log(
-      `[LastStatusCards] Inicialización con configuración: loadThresholdPercent=${merged.loadThresholdPercent}%, prefetchThresholdPercent=${merged.prefetchThresholdPercent}%, itemsPerPage=${merged.itemsPerPage}, pixelBasedThreshold=${merged.pixelBasedThreshold}`,
-    );
-
     return merged;
   }, [config]);
 
@@ -80,9 +75,6 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
   // Restablecer displayCount cuando cambia itemsPerPage o los datos
   useEffect(() => {
     if (didInitialMountRef.current) {
-      console.log(
-        `[LastStatusCards] Restablecer displayCount debido a cambios en configuración: ${initialVisibleCount}`,
-      );
       setDisplayCount(initialVisibleCount);
       initialLoadCompleteRef.current = false;
     } else {
@@ -101,9 +93,6 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
       const now = Date.now();
 
       if (isLoadingRef.current || !hasMore) {
-        console.log(
-          `[LastStatusCards][${requestId}] No se pueden cargar más elementos: isLoading=${isLoadingRef.current}, hasMore=${hasMore}`,
-        );
         return;
       }
 
@@ -114,9 +103,6 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
         now - lastLoadTimeRef.current < MIN_LOAD_INTERVAL &&
         initialLoadCompleteRef.current
       ) {
-        console.log(
-          `[LastStatusCards][${requestId}] Demasiadas cargas seguidas, ignorando esta solicitud (última carga hace ${now - lastLoadTimeRef.current}ms)`,
-        );
         return;
       }
 
@@ -130,25 +116,16 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
       const availableItems = data.length - displayCount;
       const itemsToActuallyLoad = Math.min(itemsToLoad, availableItems);
 
-      console.log(
-        `[LastStatusCards][${requestId}] ${isPrefetch ? 'PREFETCH' : 'CARGA'} de elementos: displayCount=${displayCount}, dataLength=${data.length}, cargaré ${itemsToActuallyLoad} elementos de ${availableItems} disponibles`,
-      );
-
       // Only show loading indicator for regular loads, not for prefetch
       if (!isPrefetch) {
         setLoading(true);
-        console.log(`[LastStatusCards][${requestId}] Mostrando indicador de carga`);
       }
 
       // Para prefetch, cargamos inmediatamente
       if (isPrefetch) {
-        console.log(`[LastStatusCards][${requestId}] Ejecutando prefetch inmediato`);
         setDisplayCount((prevCount) => {
           const newCount = prevCount + itemsToLoad;
           const finalCount = Math.min(newCount, data.length);
-          console.log(
-            `[LastStatusCards][${requestId}] Prefetch completado: ${prevCount} → ${finalCount} elementos`,
-          );
           return finalCount;
         });
 
@@ -157,27 +134,18 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
       }
 
       // Simulate async loading for regular loads
-      console.log(`[LastStatusCards][${requestId}] Iniciando carga asíncrona (300ms)`);
       setTimeout(() => {
         setDisplayCount((prevCount) => {
           const newCount = prevCount + itemsToLoad;
           const finalCount = Math.min(newCount, data.length);
-          console.log(
-            `[LastStatusCards][${requestId}] Actualizando displayCount: ${prevCount} → ${finalCount} elementos`,
-          );
           return finalCount;
         });
 
-        console.log(`[LastStatusCards][${requestId}] Esperando 100ms para finalizar la carga`);
         setTimeout(() => {
           setLoading(false);
           isLoadingRef.current = false;
           // Marcar que la primera carga ha completado
           initialLoadCompleteRef.current = true;
-
-          console.log(
-            `[LastStatusCards][${requestId}] Carga finalizada, indicador de carga oculto`,
-          );
         }, 100);
       }, 300);
     },
@@ -257,14 +225,6 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
         ? shouldPrefetchByPixels && effectiveDirection === 'down' && !shouldLoad
         : shouldPrefetchByPercent && effectiveDirection === 'down' && !shouldLoad;
 
-      console.log(
-        `[LastStatusCards] SCROLL CHECK: dirección=${effectiveDirection} (delta=${scrollDelta}px), scrollY=${scrollY}px, windowHeight=${windowHeight}px, documentHeight=${documentHeight}px, scrollPercentage=${scrollPercentage.toFixed(2)}%, espacioRestante=${remainingScrollSpace}px` +
-          `\n→ Modo píxeles: ${pixelBasedThresholdEnabled ? 'ACTIVADO' : 'DESACTIVADO'}, umbralCarga=${pixelBasedLoadThreshold}px, umbralPrefetch=${pixelBasedPrefetchThreshold}px` +
-          `\n→ Criterios de carga: porcentaje=${hasViewedThresholdPercent}(${scrollPercentage.toFixed(2)}% >= ${mergedConfig.loadThresholdPercent}%), píxeles=${hasViewedThresholdPixels}(${remainingScrollSpace}px <= ${pixelBasedLoadThreshold}px)` +
-          `\n→ Criterios de prefetch: porcentaje=${shouldPrefetchByPercent}, píxeles=${shouldPrefetchByPixels}` +
-          `\n→ Estado: shouldLoad=${shouldLoad}, shouldPrefetch=${shouldPrefetch}, hasMore=${hasMore}(${displayCount}/${data.length}), isLoading=${isLoadingRef.current}, primeraVez=${!initialLoadCompleteRef.current}`,
-      );
-
       // Verificar el tiempo desde la última carga para evitar cargas muy seguidas
       const now = Date.now();
       const timeSinceLastLoad = now - lastLoadTimeRef.current;
@@ -276,16 +236,6 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
         (effectiveDirection === 'down' && shouldLoad && hasMore && canTriggerLoad) ||
         !initialLoadCompleteRef.current
       ) {
-        let triggerReason = 'desconocido';
-        if (!initialLoadCompleteRef.current) {
-          triggerReason = 'primera carga';
-        } else if (pixelBasedThresholdEnabled && hasViewedThresholdPixels) {
-          triggerReason = `umbral de píxeles (${remainingScrollSpace}px <= ${pixelBasedLoadThreshold}px)`;
-        } else if (hasViewedThresholdPercent) {
-          triggerReason = `porcentaje de scroll (${scrollPercentage.toFixed(2)}% >= ${mergedConfig.loadThresholdPercent}%)`;
-        }
-
-        console.log(`[LastStatusCards] ⚡ CARGANDO MÁS ELEMENTOS debido a: ${triggerReason}`);
         loadMoreItems(false); // Carga normal
       } else if (
         effectiveDirection === 'down' &&
@@ -294,43 +244,25 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
         !isLoadingRef.current &&
         canTriggerLoad
       ) {
-        let prefetchReason = 'desconocido';
-        if (pixelBasedThresholdEnabled && shouldPrefetchByPixels) {
-          prefetchReason = `umbral de píxeles (${remainingScrollSpace}px <= ${pixelBasedPrefetchThreshold}px)`;
-        } else if (shouldPrefetchByPercent) {
-          prefetchReason = `porcentaje de scroll (${scrollPercentage.toFixed(2)}% >= ${mergedConfig.prefetchThresholdPercent}%)`;
-        }
-
-        console.log(`[LastStatusCards] 🔄 PREFETCH DE ELEMENTOS debido a: ${prefetchReason}`);
         loadMoreItems(true); // Prefetch
-      } else if (!canTriggerLoad && shouldLoad) {
-        console.log(
-          `[LastStatusCards] Ignorando carga porque pasó poco tiempo desde la última (${timeSinceLastLoad}ms < ${MIN_LOAD_INTERVAL}ms)`,
-        );
       }
     };
 
     // Versión con throttle para mejorar el rendimiento
     const throttledCheckScroll = throttle(() => {
-      console.log('[LastStatusCards] Ejecutando verificación de scroll con throttle (200ms)');
       checkIfNearBottom();
     }, 200);
 
     // Add scroll listener to window
-    console.log('[LastStatusCards] Registrando evento de scroll en window');
     window.addEventListener('scroll', throttledCheckScroll, { passive: true });
 
     // Verificación inicial después de montar - esto asegura que se haga la primera carga
     setTimeout(() => {
-      console.log(
-        '[LastStatusCards] Realizando verificación inicial de scroll después del montaje',
-      );
       checkIfNearBottom();
     }, 100);
 
     // Limpieza al desmontar
     return () => {
-      console.log('[LastStatusCards] Limpiando eventos de scroll');
       window.removeEventListener('scroll', throttledCheckScroll);
       if (window.debounceTimer) {
         clearTimeout(window.debounceTimer);
@@ -347,10 +279,6 @@ const LastStatusCards = ({ data, className, config = {} }: LastStatusCardsProps)
     data.length,
     displayCount,
   ]);
-
-  console.log(
-    `[LastStatusCards] Renderizando cards con ${visibleData.length}/${data.length} elementos, hasMore=${hasMore}, loading=${loading}`,
-  );
 
   return (
     <div className={clsx(styles.cardsContainer, className)}>

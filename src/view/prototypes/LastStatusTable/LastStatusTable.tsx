@@ -42,9 +42,7 @@ const LastStatusTable = ({
 
   // Crear configuración una sola vez para evitar re-renderizados innecesarios
   const mergedConfig = useMemo(() => {
-    console.log('[LastStatusTable] Recibida configuración externa:', config);
     const merged = { ...DEFAULT_TABLE_CONFIG, ...config };
-    console.log('[LastStatusTable] Configuración final:', merged);
     return merged;
   }, [config]);
 
@@ -130,13 +128,8 @@ const LastStatusTable = ({
 
   // Si es vista móvil, renderizamos el componente LastStatusCards
   if (isMobile) {
-    console.log('[LastStatusTable] Renderizando vista móvil');
     return <LastStatusCards data={data} className={className} config={mergedConfig} />;
   }
-
-  console.log(
-    `[LastStatusTable] Renderizando vista desktop con altura: ${mergedConfig.containerHeight}px`,
-  );
 
   // Vista de escritorio con tabla virtualizada
   return (
