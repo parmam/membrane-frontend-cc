@@ -8,6 +8,7 @@ import { faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons
 import useTheme from '@theme/useTheme';
 import Box from '@view/elements/Box';
 import Icon from '@view/elements/Icon';
+import AnimatedIcon from '@view/elements/Icon/AnimatedIcon';
 import Typography from '@view/elements/Typography';
 import clsx from 'clsx';
 
@@ -179,21 +180,27 @@ const Sidebar: FunctionComponent = () => {
       }
 
       return (
-        <Icon
+        <AnimatedIcon
           customSize='large'
           svgIcon={IconComponent}
           color='inherit'
           className={isActive ? styles.activeIcon : undefined}
+          animationType={isActive ? ['pulse', 'highlight'] : 'pulse'}
+          animationTrigger='hover'
+          isActive={isActive}
         />
       );
     } else {
       // Si es un icono FontAwesome
       return (
-        <Icon
+        <AnimatedIcon
           customSize='large'
           icon={icon as IconDefinition}
           color='inherit'
           className={isActive ? styles.activeIcon : undefined}
+          animationType={isActive ? ['pulse', 'highlight'] : 'pulse'}
+          animationTrigger='hover'
+          isActive={isActive}
         />
       );
     }
