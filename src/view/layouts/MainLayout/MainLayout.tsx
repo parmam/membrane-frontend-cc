@@ -38,7 +38,7 @@ const MainLayout: FunctionComponent<MainLayoutProps> = () => {
         <div
           className={`${styles.sidebarWrapper} ${isMobileMenuOpen ? styles.mobileMenuOpen : ''}`}
         >
-          <Sidebar />
+          <Sidebar onItemClick={isMobile ? toggleMobileMenu : undefined} />
           {isMobile && isMobileMenuOpen && (
             <div className={styles.backdrop} onClick={toggleMobileMenu}></div>
           )}

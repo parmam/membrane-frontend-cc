@@ -55,7 +55,11 @@ const isCustomIcon = (
   return icon && typeof icon === 'object' && 'Solid' in icon && 'Outlined' in icon;
 };
 
-const Sidebar: FunctionComponent = () => {
+interface SidebarProps {
+  onItemClick?: () => void;
+}
+
+const Sidebar: FunctionComponent<SidebarProps> = (props) => {
   const { t, language } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
@@ -217,6 +221,9 @@ const Sidebar: FunctionComponent = () => {
             <NavLink
               key={item.id}
               to={path}
+              onClick={() => {
+                props.onItemClick?.();
+              }}
               className={({ isActive }) =>
                 clsx(styles.menuItem, { [styles.menuItemActive]: isActive })
               }
@@ -261,6 +268,9 @@ const Sidebar: FunctionComponent = () => {
                     <NavLink
                       key={item.id}
                       to={path}
+                      onClick={() => {
+                        props.onItemClick?.();
+                      }}
                       className={({ isActive }) =>
                         clsx(styles.submenuItem, { [styles.menuItemActive]: isActive })
                       }
