@@ -1,21 +1,21 @@
 import { I18nProvider } from '@/i18n';
+import store from '@/store';
+
+import { Provider } from 'react-redux';
 
 import Routes from '@navigation/Routes';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@theme/ThemeProvider';
 import '@theme/theme.css';
-
-const queryClient = new QueryClient();
 
 function App() {
   return (
     <I18nProvider>
       <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
+        <Provider store={store}>
           <div className='app'>
             <Routes />
           </div>
-        </QueryClientProvider>
+        </Provider>
       </ThemeProvider>
     </I18nProvider>
   );
