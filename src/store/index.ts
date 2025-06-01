@@ -3,6 +3,7 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import authReducer from './reducers/authSlice';
 import connectionTypeReducer from './reducers/connectionTypeSlice';
+import deviceModelReducer from './reducers/deviceModelSlice';
 import deviceTypeReducer from './reducers/deviceTypeSlice';
 import deviceVendorReducer from './reducers/deviceVendorSlice';
 import groupReducer from './reducers/groupSlice';
@@ -26,6 +27,7 @@ const store = configureStore({
     connectionTypes: connectionTypeReducer,
     deviceTypes: deviceTypeReducer,
     deviceVendors: deviceVendorReducer,
+    deviceModels: deviceModelReducer,
     // Add other reducers here as they are created
   },
   // Middleware is automatically added by configureStore, including thunk.
