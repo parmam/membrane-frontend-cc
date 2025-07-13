@@ -1,145 +1,60 @@
-// src/store/actions/authActions.ts
-import {
-  LoginRequestDto,
-  UpdateCurrentUserRequestDto,
-  // UserDto // Not directly used in this file after conversion
-} from '@/services/auth/Auth.types';
-import { AuthService } from '@/services/auth/AuthService';
-import { UserModel, convertUserDtoToModel } from '@/services/auth/convertToAuth';
-
+// src/store/actions/newAuthActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-import {
-  authRequestFailure,
-  authRequestStart,
-  loginSuccess,
-  logoutSuccess,
-  setCurrentUser,
-  updateCurrentUserSuccess,
-} from '../reducers/authSlice';
+import { setAuthToken } from '../../api/client';
+import { AuthService } from '../../api/services';
+import type { LoginRequest, LoginResponse, ThunkApiConfig, User } from '../types/ApiTypes';
 
-// import { AppDispatch } from '../index'; // Not strictly needed for createAsyncThunk's dispatch typing here
+// ========================
+// LOGIN
+// ========================
 
-// Login User Thunk
-export const loginUser = createAsyncThunk(
-  'auth/loginUser',
-  async (loginData: LoginRequestDto, { dispatch }) => {
-    dispatch(authRequestStart());
+export const loginThunk = createAsyncThunk<LoginResponse, LoginRequest, ThunkApiConfig>(
+  'auth/loginThunk',
+  async (credentials, { rejectWithValue }) => {
     try {
-      const loginResponse = await AuthService.login(loginData);
-      const userModel = convertUserDtoToModel(loginResponse.user);
-      dispatch(loginSuccess({ token: loginResponse.accessToken, user: userModel }));
-      return userModel;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Login failed';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(authRequestFailure(errorMessage));
-      throw error;
+      const response = await AuthService.login(credentials);
+      return response as LoginResponse;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Login failed';
+      return rejectWithValue(message);
     }
   },
 );
 
-// Logout User Thunk
-export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, { dispatch }) => {
-  dispatch(authRequestStart());
-  try {
-    await AuthService.logout();
-    dispatch(logoutSuccess());
-  } catch (error: unknown) {
-    // Changed from any to unknown
-    let errorMessage = 'Logout failed';
-    if (typeof error === 'object' && error !== null && 'response' in error) {
-      const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
-      errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    dispatch(authRequestFailure(errorMessage));
-    throw error;
-  }
-});
+// ========================
+// GET CURRENT USER
+// ========================
 
-// Get Current User Thunk
-export const fetchCurrentUser = createAsyncThunk(
-  'auth/fetchCurrentUser',
-  async (_, { dispatch }) => {
-    dispatch(authRequestStart());
+export const getCurrentUserThunk = createAsyncThunk<User, void, ThunkApiConfig>(
+  'auth/getCurrentUserThunk',
+  async (_, { rejectWithValue }) => {
     try {
-      const userDto = await AuthService.getCurrentUser();
-      const userModel = convertUserDtoToModel(userDto);
-      dispatch(setCurrentUser(userModel));
-      return userModel;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to fetch user';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(authRequestFailure(errorMessage));
-      throw error;
+      const response = await AuthService.getCurrentUser();
+      return response as User;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to get current user';
+      return rejectWithValue(message);
     }
   },
 );
 
-// Update Current User Thunk
-export const updateUserProfile = createAsyncThunk(
-  'auth/updateUserProfile',
-  async (updateData: UpdateCurrentUserRequestDto, { dispatch }) => {
-    dispatch(authRequestStart());
+// ========================
+// LOGOUT
+// ========================
+
+export const logoutThunk = createAsyncThunk<void, void, ThunkApiConfig>(
+  'auth/logoutThunk',
+  async (_, { rejectWithValue }) => {
     try {
-      const updatedUserDto = await AuthService.updateCurrentUser(updateData);
-      const updatedUserModel = convertUserDtoToModel(updatedUserDto);
-      dispatch(updateCurrentUserSuccess(updatedUserModel));
-      return updatedUserModel;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to update profile';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(authRequestFailure(errorMessage));
-      throw error;
+      await AuthService.logout();
+      // Clear token from client
+      setAuthToken(null);
+    } catch (error) {
+      // Even if logout fails on server, we should clear local token
+      setAuthToken(null);
+      const message = error instanceof Error ? error.message : 'Logout failed';
+      return rejectWithValue(message);
     }
   },
 );
-
-// A version of login that does not use createAsyncThunk, for more control (alternative example)
-// import { AppDispatch } from '../index';
-// export const loginUserManual = (loginData: LoginRequestDto) => async (dispatch: AppDispatch) => {
-//   dispatch(authRequestStart());
-//   try {
-//     const loginResponse = await AuthService.login(loginData);
-//     const userModel = convertUserDtoToModel(loginResponse.user);
-//     dispatch(loginSuccess({ token: loginResponse.accessToken, user: userModel }));
-//   } catch (error: unknown) { // Changed from any to unknown
-//     let errorMessage = 'Login failed';
-//       if (typeof error === 'object' && error !== null && 'response' in error) {
-//         const axiosError = error as { response?: { data?: { message?: string } }, message?: string };
-//         errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-//       } else if (error instanceof Error) {
-//         errorMessage = error.message;
-//       }
-//     dispatch(authRequestFailure(errorMessage));
-//   }
-// };

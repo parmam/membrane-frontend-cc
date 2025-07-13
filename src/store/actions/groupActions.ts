@@ -1,193 +1,116 @@
-// src/store/actions/groupActions.ts
-import {
-  GetGroupsQueryParams,
-  GroupDto,
-  PaginatedGroupsResponseDto,
-  StoreGroupRequestDto,
-  UpdateGroupRequestDto,
-} from '@/services/group/Group.types';
-import { GroupService } from '@/services/group/GroupService';
-import { Group as GroupModel, convertGroupDtoToModel } from '@/services/group/convertToGroup';
-
+// src/store/actions/newGroupActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-import {
-  createGroupSuccess,
-  deleteGroupSuccess,
-  getGroupSuccess,
-  groupRequestFailure,
-  groupRequestStart,
-  listGroupsSuccess,
-  updateGroupSuccess,
-} from '../reducers/groupSlice';
+import { GroupService } from '../../api/services';
+import type {
+  CreateGroupRequest,
+  Group,
+  GroupQueryParams,
+  PaginatedResponse,
+  ThunkApiConfig,
+  UpdateGroupRequest,
+} from '../types/ApiTypes';
 
-export const fetchGroups = createAsyncThunk(
-  'groups/fetchGroups',
-  async (params: GetGroupsQueryParams = {}, { dispatch }) => {
-    dispatch(groupRequestStart());
+// =======================
+// GET GROUPS (PAGINATED)
+// =======================
+
+export const getGroupsThunk = createAsyncThunk<
+  PaginatedResponse<Group>,
+  GroupQueryParams | undefined,
+  ThunkApiConfig
+>('groups/getGroupsThunk', async (params, { rejectWithValue }) => {
+  try {
+    const response = await GroupService.getGroups(params);
+    return response as unknown as PaginatedResponse<Group>;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch groups';
+    return rejectWithValue(message);
+  }
+});
+
+// =======================
+// GET GROUP BY ID
+// =======================
+
+export const getGroupByIdThunk = createAsyncThunk<Group, string, ThunkApiConfig>(
+  'groups/getGroupByIdThunk',
+  async (id, { rejectWithValue }) => {
     try {
-      const response: PaginatedGroupsResponseDto = await GroupService.listGroups(params);
-      const groupModels: GroupModel[] = response.data.map(convertGroupDtoToModel);
-      dispatch(
-        listGroupsSuccess({
-          groups: groupModels,
-          total: response.total,
-          page: (params.offset || 0) / (params.limit || 10) + 1,
-          pageSize: params.limit || 10,
-        }),
-      );
-      return { groups: groupModels, total: response.total };
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to fetch groups';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(groupRequestFailure(errorMessage));
-      throw error;
+      const response = await GroupService.getGroupById(id);
+      return response as unknown as Group;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch group';
+      return rejectWithValue(message);
     }
   },
 );
 
-export const fetchGroupById = createAsyncThunk(
-  'groups/fetchGroupById',
-  async (groupId: string, { dispatch }) => {
-    dispatch(groupRequestStart());
+// =======================
+// CREATE GROUP
+// =======================
+
+export const createGroupThunk = createAsyncThunk<Group, CreateGroupRequest, ThunkApiConfig>(
+  'groups/createGroupThunk',
+  async (groupData, { rejectWithValue }) => {
     try {
-      const groupDto: GroupDto = await GroupService.findGroupById(groupId);
-      const groupModel: GroupModel = convertGroupDtoToModel(groupDto);
-      dispatch(getGroupSuccess(groupModel));
-      return groupModel;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to fetch group details';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(groupRequestFailure(errorMessage));
-      throw error;
+      const response = await GroupService.createGroup(groupData);
+      return response as unknown as Group;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create group';
+      return rejectWithValue(message);
     }
   },
 );
 
-export const createGroup = createAsyncThunk(
-  'groups/createGroup',
-  async (groupData: StoreGroupRequestDto, { dispatch }) => {
-    dispatch(groupRequestStart());
+// =======================
+// UPDATE GROUP
+// =======================
+
+export const updateGroupThunk = createAsyncThunk<
+  Group,
+  { id: string; groupData: UpdateGroupRequest },
+  ThunkApiConfig
+>('groups/updateGroupThunk', async ({ id, groupData }, { rejectWithValue }) => {
+  try {
+    const response = await GroupService.updateGroup(id, groupData);
+    return response as unknown as Group;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to update group';
+    return rejectWithValue(message);
+  }
+});
+
+// =======================
+// DELETE GROUP
+// =======================
+
+export const deleteGroupThunk = createAsyncThunk<string, string, ThunkApiConfig>(
+  'groups/deleteGroupThunk',
+  async (id, { rejectWithValue }) => {
     try {
-      const createdGroupDto: GroupDto = await GroupService.createGroup(groupData);
-      const createdGroupModel: GroupModel = convertGroupDtoToModel(createdGroupDto);
-      dispatch(createGroupSuccess(createdGroupModel));
-      return createdGroupModel;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to create group';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(groupRequestFailure(errorMessage));
-      throw error;
+      await GroupService.deleteGroup(id);
+      return id;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete group';
+      return rejectWithValue(message);
     }
   },
 );
 
-export const updateGroup = createAsyncThunk(
-  'groups/updateGroup',
-  async (
-    { groupId, groupData }: { groupId: string; groupData: UpdateGroupRequestDto },
-    { dispatch },
-  ) => {
-    dispatch(groupRequestStart());
-    try {
-      const updatedGroupDto: GroupDto = await GroupService.updateGroup(groupId, groupData);
-      const updatedGroupModel: GroupModel = convertGroupDtoToModel(updatedGroupDto);
-      dispatch(updateGroupSuccess(updatedGroupModel));
-      return updatedGroupModel;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to update group';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(groupRequestFailure(errorMessage));
-      throw error;
-    }
-  },
-);
+// =======================
+// RESTORE GROUP
+// =======================
 
-export const deleteGroup = createAsyncThunk(
-  'groups/deleteGroup',
-  async (groupId: string, { dispatch }) => {
-    dispatch(groupRequestStart());
+export const restoreGroupThunk = createAsyncThunk<Group, string, ThunkApiConfig>(
+  'groups/restoreGroupThunk',
+  async (id, { rejectWithValue }) => {
     try {
-      await GroupService.deleteGroup(groupId);
-      dispatch(deleteGroupSuccess(groupId));
-      return groupId;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to delete group';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(groupRequestFailure(errorMessage));
-      throw error;
-    }
-  },
-);
-
-export const restoreGroup = createAsyncThunk(
-  'groups/restoreGroup',
-  async (groupId: string, { dispatch }) => {
-    dispatch(groupRequestStart());
-    try {
-      const restoredGroupDto: GroupDto = await GroupService.restoreGroup(groupId);
-      const restoredGroupModel: GroupModel = convertGroupDtoToModel(restoredGroupDto);
-      dispatch(updateGroupSuccess(restoredGroupModel)); // Reuse update success for simplicity
-      return restoredGroupModel;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to restore group';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(groupRequestFailure(errorMessage));
-      throw error;
+      const response = await GroupService.restoreGroup(id);
+      return response as unknown as Group;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to restore group';
+      return rejectWithValue(message);
     }
   },
 );

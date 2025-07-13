@@ -1,226 +1,134 @@
-// src/store/actions/mapActions.ts
-import {
-  // File needs to be handled separately for createMap
-  AddDeviceToMapRequestDto,
-  DeviceOnMapDto,
-  // Assuming this is the response type for addDeviceToMap
-  GetMapsQueryParams,
-  MapDetailsDto,
-  PaginatedMapsResponseDto,
-  StoreMapRequestData, // Data part for createMap
-} from '@/services/map/Map.types';
-import { MapService } from '@/services/map/MapService';
-import {
-  DeviceOnMapModel,
-  MapListModel,
-  MapModel,
-  convertDeviceOnMapDtoToModel,
-  // Assuming this exists if AddDeviceToMapResponseDto is DeviceOnMapDto
-  convertMapDetailsDtoToModel,
-  convertMapListItemDtoToModel,
-} from '@/services/map/convertToMap';
-
+// src/store/actions/newMapActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-import {
-  addDeviceToMapSuccess,
-  createMapSuccess,
-  deleteMapSuccess,
-  getMapSuccess,
-  listMapsSuccess,
-  mapRequestFailure,
-  mapRequestStart,
-  removeDeviceFromMapSuccess,
-  updateMapSuccess, // We'll need an updateMap service method if it exists, or use getMapSuccess after update
-} from '../reducers/mapSlice';
+import { MapService } from '../../api/services';
+import type {
+  AddDeviceToMapRequest,
+  CreateMapRequest,
+  DeviceOnMap,
+  Map,
+  MapQueryParams,
+  PaginatedResponse,
+  ThunkApiConfig,
+} from '../types/ApiTypes';
 
-export const fetchMaps = createAsyncThunk(
-  'maps/fetchMaps',
-  async (params: GetMapsQueryParams = {}, { dispatch }) => {
-    dispatch(mapRequestStart());
-    try {
-      const response: PaginatedMapsResponseDto = await MapService.listMaps(params);
-      const mapModels: MapListModel[] = response.data.map(convertMapListItemDtoToModel);
-      dispatch(
-        listMapsSuccess({
-          maps: mapModels,
-          total: response.total,
-          page: (params.offset || 0) / (params.limit || 10) + 1,
-          pageSize: params.limit || 10,
-        }),
-      );
-      return { maps: mapModels, total: response.total };
-    } catch (error: unknown) {
-      let errorMessage = 'Failed to fetch maps';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(mapRequestFailure(errorMessage));
-      throw error;
-    }
-  },
-);
+// =======================
+// GET MAPS (PAGINATED)
+// =======================
 
-export const fetchMapById = createAsyncThunk(
-  'maps/fetchMapById',
-  async (mapId: string, { dispatch }) => {
-    dispatch(mapRequestStart());
-    try {
-      const mapDto: MapDetailsDto = await MapService.findMapById(mapId);
-      const mapModel: MapModel = convertMapDetailsDtoToModel(mapDto);
-      dispatch(getMapSuccess(mapModel));
-      return mapModel;
-    } catch (error: unknown) {
-      let errorMessage = 'Failed to fetch map details';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(mapRequestFailure(errorMessage));
-      throw error;
-    }
-  },
-);
-
-// Note: Map creation involves FormData, which is handled in the service.
-// The thunk will receive the data part and the File object.
-export const createMap = createAsyncThunk(
-  'maps/createMap',
-  async ({ mapData, file }: { mapData: StoreMapRequestData; file: File }, { dispatch }) => {
-    dispatch(mapRequestStart());
-    try {
-      const createdMapDto: MapDetailsDto = await MapService.createMap(mapData, file);
-      const createdMapModel: MapModel = convertMapDetailsDtoToModel(createdMapDto);
-      dispatch(createMapSuccess(createdMapModel));
-      return createdMapModel;
-    } catch (error: unknown) {
-      let errorMessage = 'Failed to create map';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(mapRequestFailure(errorMessage));
-      throw error;
-    }
-  },
-);
-
-// The Swagger doesn't explicitly list an "update map details" endpoint, only restore and add/remove devices.
-// If an update endpoint for map properties (name, placeId) existed, it would be here.
-// For now, restoreMap can serve as an example of an update-like operation.
-export const restoreMap = createAsyncThunk(
-  'maps/restoreMap',
-  async (mapId: string, { dispatch }) => {
-    dispatch(mapRequestStart());
-    try {
-      const restoredMapDto: MapDetailsDto = await MapService.restoreMap(mapId);
-      const restoredMapModel: MapModel = convertMapDetailsDtoToModel(restoredMapDto);
-      // Assuming restore brings it back to a state that can be considered an update
-      dispatch(updateMapSuccess(restoredMapModel));
-      return restoredMapModel;
-    } catch (error: unknown) {
-      let errorMessage = 'Failed to restore map';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(mapRequestFailure(errorMessage));
-      throw error;
-    }
-  },
-);
-
-export const deleteMap = createAsyncThunk('maps/deleteMap', async (mapId: string, { dispatch }) => {
-  dispatch(mapRequestStart());
+export const getMapsThunk = createAsyncThunk<
+  PaginatedResponse<Map>,
+  MapQueryParams | undefined,
+  ThunkApiConfig
+>('maps/getMapsThunk', async (params, { rejectWithValue }) => {
   try {
-    await MapService.deleteMap(mapId);
-    dispatch(deleteMapSuccess(mapId));
-    return mapId;
-  } catch (error: unknown) {
-    let errorMessage = 'Failed to delete map';
-    if (typeof error === 'object' && error !== null && 'response' in error) {
-      const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
-      errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    dispatch(mapRequestFailure(errorMessage));
-    throw error;
+    const response = await MapService.getMaps(params);
+    return response as unknown as PaginatedResponse<Map>;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch maps';
+    return rejectWithValue(message);
   }
 });
 
-export const addDeviceToMap = createAsyncThunk(
-  'maps/addDeviceToMap',
-  async (
-    { mapId, deviceData }: { mapId: string; deviceData: AddDeviceToMapRequestDto },
-    { dispatch },
-  ) => {
-    dispatch(mapRequestStart());
+// =======================
+// GET MAP BY ID
+// =======================
+
+export const getMapByIdThunk = createAsyncThunk<Map, string, ThunkApiConfig>(
+  'maps/getMapByIdThunk',
+  async (id, { rejectWithValue }) => {
     try {
-      // Assuming AddDeviceToMapResponseDto is equivalent to DeviceOnMapDto
-      const addedDeviceDto: DeviceOnMapDto = await MapService.addDeviceToMap(mapId, deviceData);
-      const addedDeviceModel: DeviceOnMapModel = convertDeviceOnMapDtoToModel(addedDeviceDto);
-      dispatch(addDeviceToMapSuccess({ mapId, deviceOnMap: addedDeviceModel }));
-      return { mapId, deviceOnMap: addedDeviceModel };
-    } catch (error: unknown) {
-      let errorMessage = 'Failed to add device to map';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(mapRequestFailure(errorMessage));
-      throw error;
+      const response = await MapService.getMapById(id);
+      return response as unknown as Map;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch map';
+      return rejectWithValue(message);
     }
   },
 );
 
-export const removeDeviceFromMap = createAsyncThunk(
-  'maps/removeDeviceFromMap',
-  async ({ mapId, deviceMapId }: { mapId: string; deviceMapId: string }, { dispatch }) => {
-    dispatch(mapRequestStart());
+// =======================
+// CREATE MAP
+// =======================
+
+export const createMapThunk = createAsyncThunk<Map, CreateMapRequest, ThunkApiConfig>(
+  'maps/createMapThunk',
+  async (mapData, { rejectWithValue }) => {
     try {
-      await MapService.removeDeviceFromMap(mapId, deviceMapId);
-      dispatch(removeDeviceFromMapSuccess({ mapId, deviceMapId }));
-      return { mapId, deviceMapId };
-    } catch (error: unknown) {
-      let errorMessage = 'Failed to remove device from map';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(mapRequestFailure(errorMessage));
-      throw error;
+      const response = await MapService.createMap(mapData);
+      return response as unknown as Map;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create map';
+      return rejectWithValue(message);
     }
   },
 );
+
+// =======================
+// DELETE MAP
+// =======================
+
+export const deleteMapThunk = createAsyncThunk<string, string, ThunkApiConfig>(
+  'maps/deleteMapThunk',
+  async (id, { rejectWithValue }) => {
+    try {
+      await MapService.deleteMap(id);
+      return id;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete map';
+      return rejectWithValue(message);
+    }
+  },
+);
+
+// =======================
+// RESTORE MAP
+// =======================
+
+export const restoreMapThunk = createAsyncThunk<Map, string, ThunkApiConfig>(
+  'maps/restoreMapThunk',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await MapService.restoreMap(id);
+      return response as unknown as Map;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to restore map';
+      return rejectWithValue(message);
+    }
+  },
+);
+
+// =======================
+// ADD DEVICE TO MAP
+// =======================
+
+export const addDeviceToMapThunk = createAsyncThunk<
+  DeviceOnMap,
+  { id: string; deviceData: AddDeviceToMapRequest },
+  ThunkApiConfig
+>('maps/addDeviceToMapThunk', async ({ id, deviceData }, { rejectWithValue }) => {
+  try {
+    const response = await MapService.addDeviceToMap(id, deviceData);
+    return response as unknown as DeviceOnMap;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to add device to map';
+    return rejectWithValue(message);
+  }
+});
+
+// =======================
+// REMOVE DEVICE FROM MAP
+// =======================
+
+export const removeDeviceFromMapThunk = createAsyncThunk<
+  void,
+  { mapId: string; deviceMapId: string },
+  ThunkApiConfig
+>('maps/removeDeviceFromMapThunk', async ({ mapId, deviceMapId }, { rejectWithValue }) => {
+  try {
+    await MapService.removeDeviceFromMap(mapId, deviceMapId);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to remove device from map';
+    return rejectWithValue(message);
+  }
+});

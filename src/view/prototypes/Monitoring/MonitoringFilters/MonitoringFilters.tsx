@@ -1,10 +1,3 @@
-import {
-  deviceTypes,
-  floorPlans,
-  locations,
-  statusOptions,
-} from '@/view/prototypes/Monitoring/MonitoringTable/data';
-
 import { FunctionComponent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,10 +5,15 @@ import DateSelector from '@view/components/DateSelector/DateSelector';
 import Option from '@view/elements/Option/Option';
 import Select from '@view/elements/Select/Select';
 
+import { Device, DeviceStatus, Place } from '../../../../store/types/ApiTypes';
 import styles from './MonitoringFilters.module.css';
 
 interface MonitoringFiltersProps {
   onFilterChange?: (filters: FilterState) => void;
+  devices?: Device[];
+  deviceStatus?: DeviceStatus[];
+  places?: Place[];
+  isLoading?: boolean;
 }
 
 interface FilterState {
@@ -40,6 +38,8 @@ const MonitoringFilters: FunctionComponent<MonitoringFiltersProps> = (props) => 
     startDate: null,
     endDate: null,
   });
+
+  const { devices = [], deviceStatus = [], places = [], isLoading = false } = props;
 
   const handleFilterChange = <K extends keyof FilterState>(field: K, value: FilterState[K]) => {
     const newFilters = {
@@ -132,12 +132,14 @@ const MonitoringFilters: FunctionComponent<MonitoringFiltersProps> = (props) => 
               label={t('common.device')}
               value={filters.device}
               onChange={(value: string) => handleFilterChange('device', value)}
+              disabled={isLoading}
             >
               <Option value=''>{t('monitoring.allDevices')}</Option>
-              {/* In a real case, this could be a dynamic list of devices */}
-              <Option value='Device-1000'>Device-1000</Option>
-              <Option value='Device-1001'>Device-1001</Option>
-              <Option value='Device-1002'>Device-1002</Option>
+              {devices.map((device: Device) => (
+                <Option key={device.id} value={device.id}>
+                  {device.name}
+                </Option>
+              ))}
             </Select>
           </div>
 
@@ -146,11 +148,12 @@ const MonitoringFilters: FunctionComponent<MonitoringFiltersProps> = (props) => 
               label={t('monitoring.location')}
               value={filters.location}
               onChange={(value: string) => handleFilterChange('location', value)}
+              disabled={isLoading}
             >
               <Option value=''>{t('monitoring.allLocations')}</Option>
-              {locations.map((location: string) => (
-                <Option key={location} value={location}>
-                  {location}
+              {places.map((place: Place) => (
+                <Option key={place.id} value={place.id}>
+                  {place.name}
                 </Option>
               ))}
             </Select>
@@ -161,11 +164,12 @@ const MonitoringFilters: FunctionComponent<MonitoringFiltersProps> = (props) => 
               label={t('common.status')}
               value={filters.status}
               onChange={(value: string) => handleFilterChange('status', value)}
+              disabled={isLoading}
             >
               <Option value=''>{t('monitoring.allStatuses')}</Option>
-              {statusOptions.map((status: string) => (
-                <Option key={status} value={status}>
-                  {status}
+              {deviceStatus.map((status: DeviceStatus) => (
+                <Option key={status.id} value={status.id}>
+                  {status.name}
                 </Option>
               ))}
             </Select>
@@ -176,6 +180,7 @@ const MonitoringFilters: FunctionComponent<MonitoringFiltersProps> = (props) => 
               label={t('common.critical')}
               value={filters.critical}
               onChange={(value: string) => handleFilterChange('critical', value)}
+              disabled={isLoading}
             >
               <Option value=''>{t('common.all')}</Option>
               <Option value='true'>{t('common.yes')}</Option>
@@ -191,31 +196,33 @@ const MonitoringFilters: FunctionComponent<MonitoringFiltersProps> = (props) => 
               label={t('monitoring.floorPlan')}
               value={filters.floorPlan}
               onChange={(value: string) => handleFilterChange('floorPlan', value)}
+              disabled={isLoading}
             >
               <Option value=''>{t('monitoring.allFloorPlans')}</Option>
-              {floorPlans.map((plan: string) => (
-                <Option key={plan} value={plan}>
-                  {plan}
+              {places.map((place: Place) => (
+                <Option key={`floor-${place.id}`} value={place.id}>
+                  {place.name} Floor Plan
                 </Option>
               ))}
             </Select>
           </div>
 
-          <div
-            className={`${styles.filterGroup} ${styles.dateFilterGroup}`}
-            style={{ zIndex: 999 }}
-          >
+          <div className={styles.filterGroup}>
             <DateSelector
+              label={t('monitoring.dateRange')}
               startDate={filters.startDate}
               endDate={filters.endDate}
               onDateChange={handleDateChange}
-              label={t('dateSelector.dateRange')}
             />
           </div>
 
-          {/* Empty spaces to balance distribution */}
-          <div className={styles.filterGroup}></div>
-          <div className={styles.filterGroup}></div>
+          {isLoading && (
+            <div className={styles.filterGroup}>
+              <div style={{ padding: '1rem', textAlign: 'center' }}>
+                <span>Loading filters...</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { useAuth } from '@/hooks/useAuth';
+
 import { FunctionComponent, ReactNode, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
@@ -15,8 +17,18 @@ interface MainLayoutProps {
 
 const MainLayout: FunctionComponent<MainLayoutProps> = () => {
   const theme = useTheme();
+  const { getCurrentUser, token } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isMobile } = useWindowSize(768);
+
+  // Cargar datos del usuario al iniciar si hay token
+  useEffect(() => {
+    if (token) {
+      getCurrentUser().catch((error) => {
+        console.error('Error loading user data:', error);
+      });
+    }
+  }, [token, getCurrentUser]);
 
   useEffect(() => {
     if (!isMobile) {

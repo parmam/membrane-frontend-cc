@@ -1,193 +1,116 @@
-// src/store/actions/placeActions.ts
-import {
-  GetPlacesQueryParams,
-  PaginatedPlacesResponseDto,
-  PlaceDto,
-  StorePlaceRequestDto,
-  UpdatePlaceRequestDto,
-} from '@/services/place/Place.types';
-import { PlaceService } from '@/services/place/PlaceService';
-import { Place as PlaceModel, convertPlaceDtoToModel } from '@/services/place/convertToPlace';
-
+// src/store/actions/newPlaceActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-import {
-  createPlaceSuccess,
-  deletePlaceSuccess,
-  getPlaceSuccess,
-  listPlacesSuccess,
-  placeRequestFailure,
-  placeRequestStart,
-  updatePlaceSuccess,
-} from '../reducers/placeSlice';
+import { PlaceService } from '../../api/services';
+import type {
+  CreatePlaceRequest,
+  PaginatedResponse,
+  Place,
+  PlaceQueryParams,
+  ThunkApiConfig,
+  UpdatePlaceRequest,
+} from '../types/ApiTypes';
 
-export const fetchPlaces = createAsyncThunk(
-  'places/fetchPlaces',
-  async (params: GetPlacesQueryParams = {}, { dispatch }) => {
-    dispatch(placeRequestStart());
+// =======================
+// GET PLACES (PAGINATED)
+// =======================
+
+export const getPlacesThunk = createAsyncThunk<
+  PaginatedResponse<Place>,
+  PlaceQueryParams | undefined,
+  ThunkApiConfig
+>('places/getPlacesThunk', async (params, { rejectWithValue }) => {
+  try {
+    const response = await PlaceService.getPlaces(params);
+    return response as unknown as PaginatedResponse<Place>;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch places';
+    return rejectWithValue(message);
+  }
+});
+
+// =======================
+// GET PLACE BY ID
+// =======================
+
+export const getPlaceByIdThunk = createAsyncThunk<Place, string, ThunkApiConfig>(
+  'places/getPlaceByIdThunk',
+  async (id, { rejectWithValue }) => {
     try {
-      const response: PaginatedPlacesResponseDto = await PlaceService.listPlaces(params);
-      const placeModels: PlaceModel[] = response.data.map(convertPlaceDtoToModel);
-      dispatch(
-        listPlacesSuccess({
-          places: placeModels,
-          total: response.total,
-          page: (params.offset || 0) / (params.limit || 10) + 1,
-          pageSize: params.limit || 10,
-        }),
-      );
-      return { places: placeModels, total: response.total };
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to fetch places';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(placeRequestFailure(errorMessage));
-      throw error;
+      const response = await PlaceService.getPlaceById(id);
+      return response as unknown as Place;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch place';
+      return rejectWithValue(message);
     }
   },
 );
 
-export const fetchPlaceById = createAsyncThunk(
-  'places/fetchPlaceById',
-  async (placeId: string, { dispatch }) => {
-    dispatch(placeRequestStart());
+// =======================
+// CREATE PLACE
+// =======================
+
+export const createPlaceThunk = createAsyncThunk<Place, CreatePlaceRequest, ThunkApiConfig>(
+  'places/createPlaceThunk',
+  async (placeData, { rejectWithValue }) => {
     try {
-      const placeDto: PlaceDto = await PlaceService.findPlaceById(placeId);
-      const placeModel: PlaceModel = convertPlaceDtoToModel(placeDto);
-      dispatch(getPlaceSuccess(placeModel));
-      return placeModel;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to fetch place details';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(placeRequestFailure(errorMessage));
-      throw error;
+      const response = await PlaceService.createPlace(placeData);
+      return response as unknown as Place;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create place';
+      return rejectWithValue(message);
     }
   },
 );
 
-export const createPlace = createAsyncThunk(
-  'places/createPlace',
-  async (placeData: StorePlaceRequestDto, { dispatch }) => {
-    dispatch(placeRequestStart());
+// =======================
+// UPDATE PLACE
+// =======================
+
+export const updatePlaceThunk = createAsyncThunk<
+  Place,
+  { id: string; placeData: UpdatePlaceRequest },
+  ThunkApiConfig
+>('places/updatePlaceThunk', async ({ id, placeData }, { rejectWithValue }) => {
+  try {
+    const response = await PlaceService.updatePlace(id, placeData);
+    return response as unknown as Place;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to update place';
+    return rejectWithValue(message);
+  }
+});
+
+// =======================
+// DELETE PLACE
+// =======================
+
+export const deletePlaceThunk = createAsyncThunk<string, string, ThunkApiConfig>(
+  'places/deletePlaceThunk',
+  async (id, { rejectWithValue }) => {
     try {
-      const createdPlaceDto: PlaceDto = await PlaceService.createPlace(placeData);
-      const createdPlaceModel: PlaceModel = convertPlaceDtoToModel(createdPlaceDto);
-      dispatch(createPlaceSuccess(createdPlaceModel));
-      return createdPlaceModel;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to create place';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(placeRequestFailure(errorMessage));
-      throw error;
+      await PlaceService.deletePlace(id);
+      return id;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete place';
+      return rejectWithValue(message);
     }
   },
 );
 
-export const updatePlace = createAsyncThunk(
-  'places/updatePlace',
-  async (
-    { placeId, placeData }: { placeId: string; placeData: UpdatePlaceRequestDto },
-    { dispatch },
-  ) => {
-    dispatch(placeRequestStart());
-    try {
-      const updatedPlaceDto: PlaceDto = await PlaceService.updatePlace(placeId, placeData);
-      const updatedPlaceModel: PlaceModel = convertPlaceDtoToModel(updatedPlaceDto);
-      dispatch(updatePlaceSuccess(updatedPlaceModel));
-      return updatedPlaceModel;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to update place';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(placeRequestFailure(errorMessage));
-      throw error;
-    }
-  },
-);
+// =======================
+// RESTORE PLACE
+// =======================
 
-export const deletePlace = createAsyncThunk(
-  'places/deletePlace',
-  async (placeId: string, { dispatch }) => {
-    dispatch(placeRequestStart());
+export const restorePlaceThunk = createAsyncThunk<Place, string, ThunkApiConfig>(
+  'places/restorePlaceThunk',
+  async (id, { rejectWithValue }) => {
     try {
-      await PlaceService.deletePlace(placeId);
-      dispatch(deletePlaceSuccess(placeId));
-      return placeId;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to delete place';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(placeRequestFailure(errorMessage));
-      throw error;
-    }
-  },
-);
-
-export const restorePlace = createAsyncThunk(
-  'places/restorePlace',
-  async (placeId: string, { dispatch }) => {
-    dispatch(placeRequestStart());
-    try {
-      const restoredPlaceDto: PlaceDto = await PlaceService.restorePlace(placeId);
-      const restoredPlaceModel: PlaceModel = convertPlaceDtoToModel(restoredPlaceDto);
-      dispatch(updatePlaceSuccess(restoredPlaceModel)); // Reuse update success for simplicity
-      return restoredPlaceModel;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to restore place';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(placeRequestFailure(errorMessage));
-      throw error;
+      const response = await PlaceService.restorePlace(id);
+      return response as unknown as Place;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to restore place';
+      return rejectWithValue(message);
     }
   },
 );

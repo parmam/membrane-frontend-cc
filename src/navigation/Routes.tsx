@@ -1,3 +1,5 @@
+import ProtectedRoute from '@/components/ProtectedRoute';
+
 import { BrowserRouter, Navigate, Route, Routes as Router } from 'react-router-dom';
 
 import AuthPage from '@pages/AuthPage';
@@ -23,7 +25,14 @@ const Routes = () => {
         <Route path='/auth' element={<AuthPage />} />
 
         {/* Rutas protegidas por layout */}
-        <Route path='/' element={<MainLayout />}>
+        <Route
+          path='/'
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<HomePage />} />
 
           {/* Spanish routes */}

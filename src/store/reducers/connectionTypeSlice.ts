@@ -1,65 +1,85 @@
 // src/store/reducers/connectionTypeSlice.ts
-import { ConnectionTypeDto } from '@/services/connectiontype/ConnectionType.types';
-
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-// Assuming no specific frontend model transformation is strictly needed for this simple list,
-// DTO can be used directly in state.
+import { getConnectionTypesThunk } from '../actions/connectionTypeActions';
+import type { ConnectionType } from '../types/ApiTypes';
+import type { ConnectionTypeLoadingState } from '../types/LoadingTypes';
+
+// =======================
+// STATE INTERFACE
+// =======================
 
 export interface ConnectionTypeState {
-  list: ConnectionTypeDto[];
-  isLoading: boolean;
+  // Data
+  connectionTypes: ConnectionType[];
+
+  // Loading states
+  loading: ConnectionTypeLoadingState;
+
+  // Error state
   error: string | null;
-  // Pagination fields if API supports and is used, though GetConnectionTypesQueryParams exists
-  totalConnectionTypes: number;
-  currentPage: number;
-  pageSize: number;
 }
 
-const initialState: ConnectionTypeState = {
-  list: [],
-  isLoading: false,
-  error: null,
-  totalConnectionTypes: 0,
-  currentPage: 1,
-  pageSize: 10, // Or a larger default if typically all are fetched
+// =======================
+// INITIAL STATE
+// =======================
+
+const initialLoadingState: ConnectionTypeLoadingState = {
+  getConnectionTypesThunk: false,
 };
 
+const initialState: ConnectionTypeState = {
+  connectionTypes: [],
+  loading: initialLoadingState,
+  error: null,
+};
+
+// =======================
+// SLICE
+// =======================
+
 const connectionTypeSlice = createSlice({
-  name: 'connectionTypes', // Plural name
+  name: 'connectionTypes',
   initialState,
   reducers: {
-    connectionTypesRequestStart: (state) => {
-      state.isLoading = true;
-      state.error = null;
-    },
-    connectionTypesRequestFailure: (state, action: PayloadAction<string>) => {
-      state.isLoading = false;
-      state.error = action.payload;
-    },
-    listConnectionTypesSuccess: (
-      state,
-      action: PayloadAction<{
-        connectionTypes: ConnectionTypeDto[];
-        total: number;
-        page: number;
-        pageSize: number;
-      }>,
-    ) => {
-      state.isLoading = false;
-      state.list = action.payload.connectionTypes;
-      state.totalConnectionTypes = action.payload.total;
-      state.currentPage = action.payload.page;
-      state.pageSize = action.payload.pageSize;
+    clearConnectionTypeError: (state) => {
       state.error = null;
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getConnectionTypesThunk.pending, (state) => {
+        state.loading.getConnectionTypesThunk = true;
+        state.error = null;
+      })
+      .addCase(
+        getConnectionTypesThunk.fulfilled,
+        (state, action: PayloadAction<ConnectionType[]>) => {
+          state.loading.getConnectionTypesThunk = false;
+          state.connectionTypes = action.payload;
+        },
+      )
+      .addCase(getConnectionTypesThunk.rejected, (state, action) => {
+        state.loading.getConnectionTypesThunk = false;
+        state.error = action.payload || 'Failed to fetch connection types.';
+      });
+  },
 });
 
-export const {
-  connectionTypesRequestStart,
-  connectionTypesRequestFailure,
-  listConnectionTypesSuccess,
-} = connectionTypeSlice.actions;
+// =======================
+// EXPORTS
+// =======================
 
+// Actions
+export const { clearConnectionTypeError } = connectionTypeSlice.actions;
+
+// Selectors
+export const selectConnectionTypes = (state: { connectionTypes: ConnectionTypeState }) =>
+  state.connectionTypes.connectionTypes;
+export const selectConnectionTypeLoading = (state: { connectionTypes: ConnectionTypeState }) =>
+  state.connectionTypes.loading;
+export const selectConnectionTypeError = (state: { connectionTypes: ConnectionTypeState }) =>
+  state.connectionTypes.error;
+
+// Reducer
 export default connectionTypeSlice.reducer;

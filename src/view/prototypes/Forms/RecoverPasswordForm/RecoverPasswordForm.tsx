@@ -7,6 +7,7 @@ import { ValidationErrors, validateEmail } from '@utils/field-validations';
 import Box from '@view/elements/Box';
 import Button from '@view/elements/Button';
 import Input from '@view/elements/Input';
+import InputError from '@view/elements/InputError';
 
 interface RecoverPasswordFormProps {
   onLoginClick: () => void;
@@ -15,9 +16,12 @@ interface RecoverPasswordFormProps {
 const RecoverPasswordForm: FunctionComponent<RecoverPasswordFormProps> = (props) => {
   const theme = useTheme();
   const { t } = useI18n();
+  // const { resetPassword, isLoading, error } = useAuth(); // This functionality is not implemented with the new auth system
+
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const validateForm = () => {
     const newErrors: ValidationErrors = {};
@@ -32,11 +36,10 @@ const RecoverPasswordForm: FunctionComponent<RecoverPasswordFormProps> = (props)
     return isValid;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      // Handle password recovery logic here
-      console.log('Recover password for:', email);
+      setSuccessMessage('Password recovery is not implemented yet.');
       setSubmitted(true);
     }
   };
@@ -72,7 +75,7 @@ const RecoverPasswordForm: FunctionComponent<RecoverPasswordFormProps> = (props)
         ) : (
           <Box display='flex' flexDirection='column' alignItems='center' gap='1.5rem'>
             <p style={{ color: theme.palette.text.primary, textAlign: 'center' }}>
-              {t('auth.passwordResetSent', { email })}
+              {successMessage}
             </p>
           </Box>
         )}

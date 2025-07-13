@@ -38,13 +38,20 @@ const DEFAULT_TABLE_CONFIG: Partial<VirtualizedListConfig> = {
   pixelBasedPrefetchThreshold: 600,
 };
 
-const MonitoringTable = ({
-  data = dummyMonitoringData,
-  className,
-  config = {},
-}: MonitoringTableProps) => {
+const MonitoringTable = ({ data = [], className, config = {} }: MonitoringTableProps) => {
   const { t } = useTranslation();
   const { isMobile } = useWindowSize(MOBILE_BREAKPOINT);
+
+  console.log('🔍 MonitoringTable - Data received:', data.length, 'items');
+
+  // Use dummy data only if no real data is provided
+  const displayData = data.length > 0 ? data : dummyMonitoringData;
+  console.log(
+    '📊 MonitoringTable - Using:',
+    displayData.length > 0
+      ? `${displayData.length} items (${data.length > 0 ? 'real' : 'dummy'} data)`
+      : 'No data',
+  );
 
   // Create configuration once to avoid unnecessary re-renders
   const mergedConfig = useMemo(() => {
@@ -153,7 +160,7 @@ const MonitoringTable = ({
 
   // If mobile view, render the cards component
   if (isMobile) {
-    return <MonitoringCards data={data} className={className} config={mergedConfig} />;
+    return <MonitoringCards data={displayData} className={className} config={mergedConfig} />;
   }
 
   // Desktop view with virtualized table
@@ -163,7 +170,7 @@ const MonitoringTable = ({
       style={{ height: `${mergedConfig.containerHeight}px` }}
     >
       <VirtualizedTable
-        data={data}
+        data={displayData}
         className={styles.monitoringTableWrapper}
         containerClassName={styles.tableContainer}
         config={mergedConfig}

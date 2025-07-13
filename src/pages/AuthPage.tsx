@@ -1,6 +1,8 @@
+import { useAuth } from '@/hooks/useAuth';
 import { useI18n } from '@/i18n';
 
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import AuthLayout from '@view/layouts/AuthLayout/AuthLayout';
 import LoginForm from '@view/prototypes/Forms/LoginForm/LoginForm';
@@ -11,7 +13,16 @@ type AuthFormType = 'login' | 'register' | 'recover';
 
 const AuthPage: FunctionComponent = () => {
   const { t } = useI18n();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [formType, setFormType] = useState<AuthFormType>('login');
+
+  // Redirige a home si el usuario ya está autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSwitchForm = (type: AuthFormType) => {
     setFormType(type);
@@ -27,6 +38,11 @@ const AuthPage: FunctionComponent = () => {
         return t('auth.recoverPassword');
     }
   };
+
+  // Renderizado condicional sin early return para evitar hooks condicionales
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <AuthLayout title={getPageTitle()}>

@@ -1,97 +1,207 @@
 // src/store/reducers/groupSlice.ts
-// Assuming GroupDto and GroupListItemDto might be the same or similar for this entity
-import { GroupDto } from '@/services/group/Group.types';
-import { Group as GroupModel } from '@/services/group/convertToGroup';
-
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-// Renamed to avoid conflict
+import {
+  createGroupThunk,
+  deleteGroupThunk,
+  getGroupByIdThunk,
+  getGroupsThunk,
+  restoreGroupThunk,
+  updateGroupThunk,
+} from '../actions/groupActions';
+import type { Group, PaginatedResponse } from '../types/ApiTypes';
+import type { GroupLoadingState } from '../types/LoadingTypes';
+
+// =======================
+// STATE INTERFACE
+// =======================
 
 export interface GroupState {
-  list: GroupModel[];
-  selectedGroup: GroupModel | null;
-  isLoading: boolean;
-  error: string | null;
-  totalGroups: number;
+  // Data
+  groups: Group[];
+  selectedGroup: Group | null;
+
+  // Pagination
+  total: number;
   currentPage: number;
   pageSize: number;
+
+  // Loading states
+  loading: GroupLoadingState;
+
+  // Error state
+  error: string | null;
 }
 
-const initialState: GroupState = {
-  list: [],
-  selectedGroup: null,
-  isLoading: false,
-  error: null,
-  totalGroups: 0,
-  currentPage: 1,
-  pageSize: 10,
+// =======================
+// INITIAL STATE
+// =======================
+
+const initialLoadingState: GroupLoadingState = {
+  getGroupsThunk: false,
+  getGroupByIdThunk: false,
+  createGroupThunk: false,
+  updateGroupThunk: false,
+  deleteGroupThunk: false,
+  restoreGroupThunk: false,
 };
 
+const initialState: GroupState = {
+  groups: [],
+  selectedGroup: null,
+  total: 0,
+  currentPage: 1,
+  pageSize: 10,
+  loading: initialLoadingState,
+  error: null,
+};
+
+// =======================
+// SLICE
+// =======================
+
 const groupSlice = createSlice({
-  name: 'groups', // Changed from 'group' to 'groups' for plurality, common convention
+  name: 'groups',
   initialState,
   reducers: {
-    groupRequestStart: (state) => {
-      state.isLoading = true;
-      state.error = null;
+    clearSelectedGroup: (state) => {
+      state.selectedGroup = null;
     },
-    groupRequestFailure: (state, action: PayloadAction<string>) => {
-      state.isLoading = false;
-      state.error = action.payload;
-    },
-    listGroupsSuccess: (
-      state,
-      action: PayloadAction<{
-        groups: GroupModel[];
-        total: number;
-        page: number;
-        pageSize: number;
-      }>,
-    ) => {
-      state.isLoading = false;
-      state.list = action.payload.groups;
-      state.totalGroups = action.payload.total;
-      state.currentPage = action.payload.page;
-      state.pageSize = action.payload.pageSize;
-      state.error = null;
-    },
-    getGroupSuccess: (state, action: PayloadAction<GroupModel>) => {
-      state.isLoading = false;
-      state.selectedGroup = action.payload;
-      state.error = null;
-    },
-    createGroupSuccess: (state, action: PayloadAction<GroupModel>) => {
-      state.isLoading = false;
-      state.selectedGroup = action.payload; // Or add to list, then refetch/invalidate
-      state.error = null;
-    },
-    updateGroupSuccess: (state, action: PayloadAction<GroupModel>) => {
-      state.isLoading = false;
-      state.selectedGroup = action.payload;
-      state.list = state.list.map((group) =>
-        group.id === action.payload.id ? { ...group, ...action.payload } : group,
-      );
-      state.error = null;
-    },
-    deleteGroupSuccess: (state, action: PayloadAction<string /* groupId */>) => {
-      state.isLoading = false;
-      state.list = state.list.filter((group) => group.id !== action.payload);
-      if (state.selectedGroup?.id === action.payload) {
-        state.selectedGroup = null;
-      }
+    clearGroupError: (state) => {
       state.error = null;
     },
   },
+  extraReducers: (builder) => {
+    // GET ALL (paginated)
+    builder
+      .addCase(getGroupsThunk.pending, (state) => {
+        state.loading.getGroupsThunk = true;
+        state.error = null;
+      })
+      .addCase(
+        getGroupsThunk.fulfilled,
+        (state, action: PayloadAction<PaginatedResponse<Group>>) => {
+          state.loading.getGroupsThunk = false;
+          state.groups = action.payload.data;
+          state.total = action.payload.total;
+          state.currentPage = action.payload.offset / action.payload.limit + 1;
+          state.pageSize = action.payload.limit;
+        },
+      )
+      .addCase(getGroupsThunk.rejected, (state, action) => {
+        state.loading.getGroupsThunk = false;
+        state.error = (action.payload as string) || 'Failed to fetch groups.';
+      });
+
+    // GET BY ID
+    builder
+      .addCase(getGroupByIdThunk.pending, (state) => {
+        state.loading.getGroupByIdThunk = true;
+        state.error = null;
+      })
+      .addCase(getGroupByIdThunk.fulfilled, (state, action: PayloadAction<Group>) => {
+        state.loading.getGroupByIdThunk = false;
+        state.selectedGroup = action.payload;
+      })
+      .addCase(getGroupByIdThunk.rejected, (state, action) => {
+        state.loading.getGroupByIdThunk = false;
+        state.error = (action.payload as string) || 'Failed to fetch group.';
+      });
+
+    // CREATE
+    builder
+      .addCase(createGroupThunk.pending, (state) => {
+        state.loading.createGroupThunk = true;
+        state.error = null;
+      })
+      .addCase(createGroupThunk.fulfilled, (state, action: PayloadAction<Group>) => {
+        state.loading.createGroupThunk = false;
+        state.groups.unshift(action.payload);
+        state.total += 1;
+      })
+      .addCase(createGroupThunk.rejected, (state, action) => {
+        state.loading.createGroupThunk = false;
+        state.error = (action.payload as string) || 'Failed to create group.';
+      });
+
+    // UPDATE
+    builder
+      .addCase(updateGroupThunk.pending, (state) => {
+        state.loading.updateGroupThunk = true;
+        state.error = null;
+      })
+      .addCase(updateGroupThunk.fulfilled, (state, action: PayloadAction<Group>) => {
+        state.loading.updateGroupThunk = false;
+        const index = state.groups.findIndex((g) => g.id === action.payload.id);
+        if (index !== -1) {
+          state.groups[index] = action.payload;
+        }
+        if (state.selectedGroup?.id === action.payload.id) {
+          state.selectedGroup = action.payload;
+        }
+      })
+      .addCase(updateGroupThunk.rejected, (state, action) => {
+        state.loading.updateGroupThunk = false;
+        state.error = (action.payload as string) || 'Failed to update group.';
+      });
+
+    // DELETE
+    builder
+      .addCase(deleteGroupThunk.pending, (state) => {
+        state.loading.deleteGroupThunk = true;
+        state.error = null;
+      })
+      .addCase(deleteGroupThunk.fulfilled, (state, action: PayloadAction<string>) => {
+        state.loading.deleteGroupThunk = false;
+        state.groups = state.groups.filter((g) => g.id !== action.payload);
+        state.total -= 1;
+      })
+      .addCase(deleteGroupThunk.rejected, (state, action) => {
+        state.loading.deleteGroupThunk = false;
+        state.error = (action.payload as string) || 'Failed to delete group.';
+      });
+
+    // RESTORE
+    builder
+      .addCase(restoreGroupThunk.pending, (state) => {
+        state.loading.restoreGroupThunk = true;
+        state.error = null;
+      })
+      .addCase(restoreGroupThunk.fulfilled, (state, action: PayloadAction<Group>) => {
+        state.loading.restoreGroupThunk = false;
+        // Logic to handle restored item, e.g., refetch or add to list
+        const index = state.groups.findIndex((g) => g.id === action.payload.id);
+        if (index !== -1) {
+          state.groups[index] = action.payload;
+        } else {
+          state.groups.unshift(action.payload);
+          state.total += 1;
+        }
+      })
+      .addCase(restoreGroupThunk.rejected, (state, action) => {
+        state.loading.restoreGroupThunk = false;
+        state.error = (action.payload as string) || 'Failed to restore group.';
+      });
+  },
 });
 
-export const {
-  groupRequestStart,
-  groupRequestFailure,
-  listGroupsSuccess,
-  getGroupSuccess,
-  createGroupSuccess,
-  updateGroupSuccess,
-  deleteGroupSuccess,
-} = groupSlice.actions;
+// =======================
+// EXPORTS
+// =======================
 
+// Actions
+export const { clearSelectedGroup, clearGroupError } = groupSlice.actions;
+
+// Selectors
+export const selectGroups = (state: { groups: GroupState }) => state.groups.groups;
+export const selectSelectedGroup = (state: { groups: GroupState }) => state.groups.selectedGroup;
+export const selectGroupLoading = (state: { groups: GroupState }) => state.groups.loading;
+export const selectGroupError = (state: { groups: GroupState }) => state.groups.error;
+export const selectGroupPagination = (state: { groups: GroupState }) => ({
+  total: state.groups.total,
+  currentPage: state.groups.currentPage,
+  pageSize: state.groups.pageSize,
+});
+
+// Reducer
 export default groupSlice.reducer;

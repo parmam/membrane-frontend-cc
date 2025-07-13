@@ -1,6 +1,8 @@
+import { useAuth } from '@/hooks/useAuth';
 import { useI18n } from '@/i18n';
 
 import { FunctionComponent, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { faXmarkCircle } from '@fortawesome/free-regular-svg-icons/faXmarkCircle';
 import { faBars, faSignOutAlt, faUser, faUserCircle } from '@fortawesome/free-solid-svg-icons';
@@ -18,18 +20,21 @@ interface MainHeaderProps {
   onShowMenu?: () => void;
   onClose?: () => void;
   onBack?: () => void;
-  userName?: string;
-  userInitials?: string;
-  onLogout?: () => void;
   onProfile?: () => void;
 }
 
 const MainHeader: FunctionComponent<MainHeaderProps> = (props) => {
   const { t } = useI18n();
-  const userName = props.userName || 'Bruno Contartese';
-  const userInitials = props.userInitials || 'BC';
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Datos del usuario desde Redux o fallback
+  const userName = user ? `${user.firstName} ${user.lastName}` : 'Usuario';
+  const userInitials = user
+    ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
+    : 'U';
 
   // Close the dropdown when clicking outside
   useEffect(() => {
@@ -45,12 +50,13 @@ const MainHeader: FunctionComponent<MainHeaderProps> = (props) => {
     };
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsDropdownOpen(false);
-    if (props.onLogout) {
-      props.onLogout();
-    } else {
-      console.log('Logout clicked');
+    try {
+      await logout();
+      navigate('/auth', { replace: true });
+    } catch (error) {
+      console.error('Error during logout:', error);
     }
   };
 

@@ -1,194 +1,117 @@
-// src/store/actions/deviceVendorActions.ts
-// Assuming DeviceVendorDto is used directly as model for simplicity, no separate convertToDeviceVendor.ts needed for now
-import {
-  DeviceVendorDto,
-  GetDeviceVendorsQueryParams,
-  PaginatedDeviceVendorsResponseDto,
-  StoreDeviceVendorRequestDto,
-  UpdateDeviceVendorRequestDto,
-} from '@/services/devicevendor/DeviceVendor.types';
-import { DeviceVendorService } from '@/services/devicevendor/DeviceVendorService';
-
+// src/store/actions/newDeviceVendorActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-import {
-  createDeviceVendorSuccess,
-  deleteDeviceVendorSuccess,
-  deviceVendorRequestFailure,
-  deviceVendorRequestStart,
-  getDeviceVendorSuccess,
-  listDeviceVendorsSuccess,
-  updateDeviceVendorSuccess,
-} from '../reducers/deviceVendorSlice';
+import { DeviceVendorService } from '../../api/services';
+import type {
+  CreateDeviceVendorRequest,
+  DeviceVendor,
+  DeviceVendorQueryParams,
+  PaginatedResponse,
+  ThunkApiConfig,
+  UpdateDeviceVendorRequest,
+} from '../types/ApiTypes';
 
-export const fetchDeviceVendors = createAsyncThunk(
-  'deviceVendors/fetchDeviceVendors',
-  async (params: GetDeviceVendorsQueryParams = {}, { dispatch }) => {
-    dispatch(deviceVendorRequestStart());
+// =======================
+// GET DEVICE VENDORS (PAGINATED)
+// =======================
+
+export const getDeviceVendorsThunk = createAsyncThunk<
+  PaginatedResponse<DeviceVendor>,
+  DeviceVendorQueryParams | undefined,
+  ThunkApiConfig
+>('deviceVendors/getDeviceVendorsThunk', async (params, { rejectWithValue }) => {
+  try {
+    const response = await DeviceVendorService.getDeviceVendors(params);
+    return response as unknown as PaginatedResponse<DeviceVendor>;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch device vendors';
+    return rejectWithValue(message);
+  }
+});
+
+// =======================
+// GET DEVICE VENDOR BY ID
+// =======================
+
+export const getDeviceVendorByIdThunk = createAsyncThunk<DeviceVendor, string, ThunkApiConfig>(
+  'deviceVendors/getDeviceVendorByIdThunk',
+  async (id, { rejectWithValue }) => {
     try {
-      const response: PaginatedDeviceVendorsResponseDto =
-        await DeviceVendorService.listDeviceVendors(params);
-      dispatch(
-        listDeviceVendorsSuccess({
-          deviceVendors: response.data, // Assuming DTO is used as model
-          total: response.total,
-          page: (params.offset || 0) / (params.limit || 10) + 1,
-          pageSize: params.limit || 10,
-        }),
-      );
-      return response; // Or response.data if preferred
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to fetch device vendors';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(deviceVendorRequestFailure(errorMessage));
-      throw error;
+      const response = await DeviceVendorService.getDeviceVendorById(id);
+      return response as unknown as DeviceVendor;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch device vendor';
+      return rejectWithValue(message);
     }
   },
 );
 
-export const fetchDeviceVendorById = createAsyncThunk(
-  'deviceVendors/fetchDeviceVendorById',
-  async (vendorId: string, { dispatch }) => {
-    dispatch(deviceVendorRequestStart());
+// =======================
+// CREATE DEVICE VENDOR
+// =======================
+
+export const createDeviceVendorThunk = createAsyncThunk<
+  DeviceVendor,
+  CreateDeviceVendorRequest,
+  ThunkApiConfig
+>('deviceVendors/createDeviceVendorThunk', async (vendorData, { rejectWithValue }) => {
+  try {
+    const response = await DeviceVendorService.createDeviceVendor(vendorData);
+    return response as unknown as DeviceVendor;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to create device vendor';
+    return rejectWithValue(message);
+  }
+});
+
+// =======================
+// UPDATE DEVICE VENDOR
+// =======================
+
+export const updateDeviceVendorThunk = createAsyncThunk<
+  DeviceVendor,
+  { id: string; vendorData: UpdateDeviceVendorRequest },
+  ThunkApiConfig
+>('deviceVendors/updateDeviceVendorThunk', async ({ id, vendorData }, { rejectWithValue }) => {
+  try {
+    const response = await DeviceVendorService.updateDeviceVendor(id, vendorData);
+    return response as unknown as DeviceVendor;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to update device vendor';
+    return rejectWithValue(message);
+  }
+});
+
+// =======================
+// DELETE DEVICE VENDOR
+// =======================
+
+export const deleteDeviceVendorThunk = createAsyncThunk<string, string, ThunkApiConfig>(
+  'deviceVendors/deleteDeviceVendorThunk',
+  async (id, { rejectWithValue }) => {
     try {
-      const vendorDto: DeviceVendorDto = await DeviceVendorService.findDeviceVendorById(vendorId);
-      dispatch(getDeviceVendorSuccess(vendorDto)); // Assuming DTO is used as model
-      return vendorDto;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to fetch device vendor details';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(deviceVendorRequestFailure(errorMessage));
-      throw error;
+      await DeviceVendorService.deleteDeviceVendor(id);
+      return id;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete device vendor';
+      return rejectWithValue(message);
     }
   },
 );
 
-export const createDeviceVendor = createAsyncThunk(
-  'deviceVendors/createDeviceVendor',
-  async (vendorData: StoreDeviceVendorRequestDto, { dispatch }) => {
-    dispatch(deviceVendorRequestStart());
-    try {
-      const createdVendorDto: DeviceVendorDto =
-        await DeviceVendorService.createDeviceVendor(vendorData);
-      dispatch(createDeviceVendorSuccess(createdVendorDto)); // Assuming DTO is used as model
-      return createdVendorDto;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to create device vendor';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(deviceVendorRequestFailure(errorMessage));
-      throw error;
-    }
-  },
-);
+// =======================
+// RESTORE DEVICE VENDOR
+// =======================
 
-export const updateDeviceVendor = createAsyncThunk(
-  'deviceVendors/updateDeviceVendor',
-  async (
-    { vendorId, vendorData }: { vendorId: string; vendorData: UpdateDeviceVendorRequestDto },
-    { dispatch },
-  ) => {
-    dispatch(deviceVendorRequestStart());
+export const restoreDeviceVendorThunk = createAsyncThunk<DeviceVendor, string, ThunkApiConfig>(
+  'deviceVendors/restoreDeviceVendorThunk',
+  async (id, { rejectWithValue }) => {
     try {
-      const updatedVendorDto: DeviceVendorDto = await DeviceVendorService.updateDeviceVendor(
-        vendorId,
-        vendorData,
-      );
-      dispatch(updateDeviceVendorSuccess(updatedVendorDto)); // Assuming DTO is used as model
-      return updatedVendorDto;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to update device vendor';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(deviceVendorRequestFailure(errorMessage));
-      throw error;
-    }
-  },
-);
-
-export const deleteDeviceVendor = createAsyncThunk(
-  'deviceVendors/deleteDeviceVendor',
-  async (vendorId: string, { dispatch }) => {
-    dispatch(deviceVendorRequestStart());
-    try {
-      await DeviceVendorService.deleteDeviceVendor(vendorId);
-      dispatch(deleteDeviceVendorSuccess(vendorId));
-      return vendorId;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to delete device vendor';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(deviceVendorRequestFailure(errorMessage));
-      throw error;
-    }
-  },
-);
-
-export const restoreDeviceVendor = createAsyncThunk(
-  'deviceVendors/restoreDeviceVendor',
-  async (vendorId: string, { dispatch }) => {
-    dispatch(deviceVendorRequestStart());
-    try {
-      const restoredVendorDto: DeviceVendorDto =
-        await DeviceVendorService.restoreDeviceVendor(vendorId);
-      dispatch(updateDeviceVendorSuccess(restoredVendorDto)); // Reuse update for simplicity
-      return restoredVendorDto;
-    } catch (error: unknown) {
-      // Changed from any to unknown
-      let errorMessage = 'Failed to restore device vendor';
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      dispatch(deviceVendorRequestFailure(errorMessage));
-      throw error;
+      const response = await DeviceVendorService.restoreDeviceVendor(id);
+      return response as unknown as DeviceVendor;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to restore device vendor';
+      return rejectWithValue(message);
     }
   },
 );

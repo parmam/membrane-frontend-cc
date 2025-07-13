@@ -1,38 +1,52 @@
 // src/store/index.ts
 import { configureStore } from '@reduxjs/toolkit';
 
+// Reducers
 import authReducer from './reducers/authSlice';
 import connectionTypeReducer from './reducers/connectionTypeSlice';
+import deviceFirmwareReducer from './reducers/deviceFirmwareSlice';
 import deviceModelReducer from './reducers/deviceModelSlice';
+import deviceMonitoringReducer from './reducers/deviceMonitoringSlice';
+import deviceReducer from './reducers/deviceSlice';
+import deviceStatusReducer from './reducers/deviceStatusSlice';
 import deviceTypeReducer from './reducers/deviceTypeSlice';
 import deviceVendorReducer from './reducers/deviceVendorSlice';
+import driverReducer from './reducers/driverSlice';
+import eventReducer from './reducers/eventSlice';
+import eventTypeReducer from './reducers/eventTypeSlice';
+import fileReducer from './reducers/fileSlice';
 import groupReducer from './reducers/groupSlice';
 import mapReducer from './reducers/mapSlice';
-import permissionsReducer from './reducers/permissionsSlice';
+import permissionReducer from './reducers/permissionSlice';
 import placeReducer from './reducers/placeSlice';
-import rolesReducer from './reducers/rolesSlice';
-import usersReducer from './reducers/usersSlice';
-
-// We will import rootReducer from a reducers file or combine reducers here later
+import roleReducer from './reducers/roleSlice';
+import shiftReducer from './reducers/shiftSlice';
+import userReducer from './reducers/userSlice';
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
-    users: usersReducer,
-    roles: rolesReducer,
-    permissions: permissionsReducer,
-    groups: groupReducer,
-    places: placeReducer,
-    maps: mapReducer,
-    connectionTypes: connectionTypeReducer,
-    deviceTypes: deviceTypeReducer,
-    deviceVendors: deviceVendorReducer,
+    users: userReducer,
+    roles: roleReducer,
+    permissions: permissionReducer,
     deviceModels: deviceModelReducer,
-    // Add other reducers here as they are created
+    devices: deviceReducer,
+    connectionTypes: connectionTypeReducer,
+    groups: groupReducer,
+    deviceFirmwares: deviceFirmwareReducer,
+    drivers: driverReducer,
+    eventTypes: eventTypeReducer,
+    shifts: shiftReducer,
+    events: eventReducer,
+    files: fileReducer,
+    maps: mapReducer,
+    places: placeReducer,
+    deviceVendors: deviceVendorReducer,
+    deviceTypes: deviceTypeReducer,
+    deviceStatus: deviceStatusReducer,
+    deviceMonitoring: deviceMonitoringReducer,
   },
-  // Middleware is automatically added by configureStore, including thunk.
-  // You can add more middleware here if needed.
-  // devTools: process.env.NODE_ENV !== 'production', // Enabled by default in dev mode
+  devTools: process.env.NODE_ENV !== 'production',
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
