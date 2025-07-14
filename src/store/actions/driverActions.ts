@@ -1,4 +1,4 @@
-// src/store/actions/newDriverActions.ts
+// src/store/actions/driverActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { DriverService } from '../../api/services';
@@ -8,6 +8,7 @@ import type {
   PaginatedResponse,
   ThunkApiConfig,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // =======================
 // GET DRIVERS (PAGINATED)
@@ -22,7 +23,6 @@ export const getDriversThunk = createAsyncThunk<
     const response = await DriverService.getDrivers(params);
     return response as unknown as PaginatedResponse<Driver>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch drivers';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });

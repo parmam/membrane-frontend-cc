@@ -1,4 +1,4 @@
-// src/store/actions/newMapActions.ts
+// src/store/actions/mapActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { MapService } from '../../api/services';
@@ -11,6 +11,7 @@ import type {
   PaginatedResponse,
   ThunkApiConfig,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // =======================
 // GET MAPS (PAGINATED)
@@ -25,8 +26,7 @@ export const getMapsThunk = createAsyncThunk<
     const response = await MapService.getMaps(params);
     return response as unknown as PaginatedResponse<Map>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch maps';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -41,8 +41,7 @@ export const getMapByIdThunk = createAsyncThunk<Map, string, ThunkApiConfig>(
       const response = await MapService.getMapById(id);
       return response as unknown as Map;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch map';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -58,8 +57,7 @@ export const createMapThunk = createAsyncThunk<Map, CreateMapRequest, ThunkApiCo
       const response = await MapService.createMap(mapData);
       return response as unknown as Map;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create map';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -75,8 +73,7 @@ export const deleteMapThunk = createAsyncThunk<string, string, ThunkApiConfig>(
       await MapService.deleteMap(id);
       return id;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete map';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -92,8 +89,7 @@ export const restoreMapThunk = createAsyncThunk<Map, string, ThunkApiConfig>(
       const response = await MapService.restoreMap(id);
       return response as unknown as Map;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to restore map';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -111,8 +107,7 @@ export const addDeviceToMapThunk = createAsyncThunk<
     const response = await MapService.addDeviceToMap(id, deviceData);
     return response as unknown as DeviceOnMap;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to add device to map';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -128,7 +123,6 @@ export const removeDeviceFromMapThunk = createAsyncThunk<
   try {
     await MapService.removeDeviceFromMap(mapId, deviceMapId);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to remove device from map';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });

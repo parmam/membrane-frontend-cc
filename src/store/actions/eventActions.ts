@@ -1,4 +1,4 @@
-// src/store/actions/newEventActions.ts
+// src/store/actions/eventActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { EventService } from '../../api/services';
@@ -10,6 +10,7 @@ import type {
   ThunkApiConfig,
   UpdateEventRequest,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // =======================
 // GET EVENTS (PAGINATED)
@@ -24,8 +25,7 @@ export const getEventsThunk = createAsyncThunk<
     const response = await EventService.getEvents(params);
     return response as unknown as PaginatedResponse<Event>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch events';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -40,8 +40,7 @@ export const getEventByIdThunk = createAsyncThunk<Event, string, ThunkApiConfig>
       const response = await EventService.getEventById(id);
       return response as unknown as Event;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch event';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -57,8 +56,7 @@ export const createEventThunk = createAsyncThunk<Event, CreateEventRequest, Thun
       const response = await EventService.createEvent(eventData);
       return response as unknown as Event;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create event';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -76,8 +74,7 @@ export const updateEventThunk = createAsyncThunk<
     const response = await EventService.updateEvent(id, eventData);
     return response as unknown as Event;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to update event';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -92,8 +89,7 @@ export const deleteEventThunk = createAsyncThunk<string, string, ThunkApiConfig>
       await EventService.deleteEvent(id);
       return id;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete event';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -109,8 +105,7 @@ export const restoreEventThunk = createAsyncThunk<Event, string, ThunkApiConfig>
       const response = await EventService.restoreEvent(id);
       return response as unknown as Event;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to restore event';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );

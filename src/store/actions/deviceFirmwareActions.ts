@@ -1,4 +1,4 @@
-// src/store/actions/newDeviceFirmwareActions.ts
+// src/store/actions/deviceFirmwareActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { DeviceFirmwareService } from '../../api/services';
@@ -10,6 +10,7 @@ import type {
   ThunkApiConfig,
   UpdateDeviceFirmwareRequest,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // =======================
 // GET DEVICE FIRMWARES (PAGINATED)
@@ -24,8 +25,7 @@ export const getDeviceFirmwaresThunk = createAsyncThunk<
     const response = await DeviceFirmwareService.getDeviceFirmwares(params);
     return response as unknown as PaginatedResponse<DeviceFirmware>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch device firmwares';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -40,8 +40,7 @@ export const getDeviceFirmwareByIdThunk = createAsyncThunk<DeviceFirmware, strin
       const response = await DeviceFirmwareService.getDeviceFirmwareById(id);
       return response as unknown as DeviceFirmware;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch device firmware';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -59,8 +58,7 @@ export const createDeviceFirmwareThunk = createAsyncThunk<
     const response = await DeviceFirmwareService.createDeviceFirmware(firmwareData);
     return response as unknown as DeviceFirmware;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to create device firmware';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -79,8 +77,7 @@ export const updateDeviceFirmwareThunk = createAsyncThunk<
       const response = await DeviceFirmwareService.updateDeviceFirmware(id, firmwareData);
       return response as unknown as DeviceFirmware;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update device firmware';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -96,8 +93,7 @@ export const deleteDeviceFirmwareThunk = createAsyncThunk<string, string, ThunkA
       await DeviceFirmwareService.deleteDeviceFirmware(id);
       return id;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete device firmware';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -113,8 +109,7 @@ export const restoreDeviceFirmwareThunk = createAsyncThunk<DeviceFirmware, strin
       const response = await DeviceFirmwareService.restoreDeviceFirmware(id);
       return response as unknown as DeviceFirmware;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to restore device firmware';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );

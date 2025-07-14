@@ -1,4 +1,4 @@
-// src/store/actions/newDeviceActions.ts
+// src/store/actions/deviceActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { DeviceService } from '../../api/services';
@@ -10,6 +10,7 @@ import type {
   ThunkApiConfig,
   UpdateDeviceRequest,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // ========================
 // GET DEVICES (PAGINATED)
@@ -24,8 +25,7 @@ export const getDevicesThunk = createAsyncThunk<
     const response = await DeviceService.getDevices(params);
     return response as unknown as PaginatedResponse<Device>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch devices';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -40,8 +40,7 @@ export const getDeviceByIdThunk = createAsyncThunk<Device, string, ThunkApiConfi
       const response = await DeviceService.getDeviceById(id);
       return response as unknown as Device;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch device';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -57,8 +56,7 @@ export const createDeviceThunk = createAsyncThunk<Device, CreateDeviceRequest, T
       const response = await DeviceService.createDevice(deviceData);
       return response as unknown as Device;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create device';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -76,8 +74,7 @@ export const updateDeviceThunk = createAsyncThunk<
     const response = await DeviceService.updateDevice(id, deviceData);
     return response as unknown as Device;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to update device';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -92,8 +89,7 @@ export const deleteDeviceThunk = createAsyncThunk<string, string, ThunkApiConfig
       await DeviceService.deleteDevice(id);
       return id;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete device';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -109,8 +105,7 @@ export const restoreDeviceThunk = createAsyncThunk<Device, string, ThunkApiConfi
       const response = await DeviceService.restoreDevice(id);
       return response as unknown as Device;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to restore device';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );

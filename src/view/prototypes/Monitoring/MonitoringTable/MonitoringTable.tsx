@@ -1,7 +1,4 @@
-import {
-  MonitoringData,
-  dummyMonitoringData,
-} from '@/view/prototypes/Monitoring/MonitoringTable/data';
+import { MonitoringData } from '@/models/MonitoringData';
 
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,16 +39,7 @@ const MonitoringTable = ({ data = [], className, config = {} }: MonitoringTableP
   const { t } = useTranslation();
   const { isMobile } = useWindowSize(MOBILE_BREAKPOINT);
 
-  console.log('🔍 MonitoringTable - Data received:', data.length, 'items');
-
-  // Use dummy data only if no real data is provided
-  const displayData = data.length > 0 ? data : dummyMonitoringData;
-  console.log(
-    '📊 MonitoringTable - Using:',
-    displayData.length > 0
-      ? `${displayData.length} items (${data.length > 0 ? 'real' : 'dummy'} data)`
-      : 'No data',
-  );
+  const displayData = data;
 
   // Create configuration once to avoid unnecessary re-renders
   const mergedConfig = useMemo(() => {

@@ -3,6 +3,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { getCurrentUserThunk, loginThunk, logoutThunk } from '../actions/authActions';
 import type { LoginResponse, User } from '../types/ApiTypes';
+import { AppErrorDto } from '../types/ErrorTypes';
 import type { AuthLoadingState } from '../types/LoadingTypes';
 
 // ========================
@@ -19,7 +20,7 @@ export interface AuthState {
   loading: AuthLoadingState;
 
   // Error state
-  error: string | null;
+  error: AppErrorDto | null;
 }
 
 // ========================
@@ -34,8 +35,8 @@ const initialLoadingState: AuthLoadingState = {
 
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem('authToken'),
-  isAuthenticated: !!localStorage.getItem('authToken'),
+  token: null, // Token will be loaded from localStorage via an action
+  isAuthenticated: false,
   loading: initialLoadingState,
   error: null,
 };
@@ -58,15 +59,10 @@ const authSlice = createSlice({
       state.user = null;
     },
 
-    // Set token manually (for token refresh scenarios)
+    // Set token manually (for loading from storage or refresh scenarios)
     setToken: (state, action: PayloadAction<string | null>) => {
       state.token = action.payload;
       state.isAuthenticated = !!action.payload;
-      if (action.payload) {
-        localStorage.setItem('authToken', action.payload);
-      } else {
-        localStorage.removeItem('authToken');
-      }
     },
 
     // Reset state (for logout)
@@ -88,22 +84,16 @@ const authSlice = createSlice({
       .addCase(loginThunk.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
         state.loading.loginThunk = false;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.token = action.payload.accessToken;
         state.isAuthenticated = true;
         state.error = null;
-
-        // Store token in localStorage
-        localStorage.setItem('authToken', action.payload.token);
       })
       .addCase(loginThunk.rejected, (state, action) => {
         state.loading.loginThunk = false;
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
-        state.error = action.payload || 'Login failed';
-
-        // Clear token from localStorage
-        localStorage.removeItem('authToken');
+        state.error = action.payload ?? null;
       })
 
       // ========================
@@ -120,13 +110,12 @@ const authSlice = createSlice({
       })
       .addCase(getCurrentUserThunk.rejected, (state, action) => {
         state.loading.getCurrentUserThunk = false;
-        state.error = action.payload || 'Failed to get current user';
+        state.error = action.payload ?? null;
 
         // If getting current user fails, token might be invalid
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
-        localStorage.removeItem('authToken');
       })
 
       // ========================
@@ -142,19 +131,15 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         state.error = null;
-
-        // Clear token from localStorage
-        localStorage.removeItem('authToken');
       })
       .addCase(logoutThunk.rejected, (state, action) => {
         state.loading.logoutThunk = false;
-        state.error = action.payload || 'Logout failed';
+        state.error = action.payload ?? null;
 
         // Even if logout fails, clear local state
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
-        localStorage.removeItem('authToken');
       });
   },
 });

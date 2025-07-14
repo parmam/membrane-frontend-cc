@@ -10,6 +10,7 @@ import {
   updateGroupThunk,
 } from '../actions/groupActions';
 import type { Group, PaginatedResponse } from '../types/ApiTypes';
+import { AppErrorDto } from '../types/ErrorTypes';
 import type { GroupLoadingState } from '../types/LoadingTypes';
 
 // =======================
@@ -30,7 +31,7 @@ export interface GroupState {
   loading: GroupLoadingState;
 
   // Error state
-  error: string | null;
+  error: AppErrorDto | null;
 }
 
 // =======================
@@ -90,7 +91,7 @@ const groupSlice = createSlice({
       )
       .addCase(getGroupsThunk.rejected, (state, action) => {
         state.loading.getGroupsThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch groups.';
+        state.error = action.payload ?? null;
       });
 
     // GET BY ID
@@ -105,7 +106,7 @@ const groupSlice = createSlice({
       })
       .addCase(getGroupByIdThunk.rejected, (state, action) => {
         state.loading.getGroupByIdThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch group.';
+        state.error = action.payload ?? null;
       });
 
     // CREATE
@@ -121,7 +122,7 @@ const groupSlice = createSlice({
       })
       .addCase(createGroupThunk.rejected, (state, action) => {
         state.loading.createGroupThunk = false;
-        state.error = (action.payload as string) || 'Failed to create group.';
+        state.error = action.payload ?? null;
       });
 
     // UPDATE
@@ -142,7 +143,7 @@ const groupSlice = createSlice({
       })
       .addCase(updateGroupThunk.rejected, (state, action) => {
         state.loading.updateGroupThunk = false;
-        state.error = (action.payload as string) || 'Failed to update group.';
+        state.error = action.payload ?? null;
       });
 
     // DELETE
@@ -158,7 +159,7 @@ const groupSlice = createSlice({
       })
       .addCase(deleteGroupThunk.rejected, (state, action) => {
         state.loading.deleteGroupThunk = false;
-        state.error = (action.payload as string) || 'Failed to delete group.';
+        state.error = action.payload ?? null;
       });
 
     // RESTORE
@@ -180,7 +181,7 @@ const groupSlice = createSlice({
       })
       .addCase(restoreGroupThunk.rejected, (state, action) => {
         state.loading.restoreGroupThunk = false;
-        state.error = (action.payload as string) || 'Failed to restore group.';
+        state.error = action.payload ?? null;
       });
   },
 });

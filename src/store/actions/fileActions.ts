@@ -1,4 +1,4 @@
-// src/store/actions/newFileActions.ts
+// src/store/actions/fileActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { FileService } from '../../api/services';
@@ -8,6 +8,7 @@ import type {
   PaginatedResponse,
   ThunkApiConfig,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // =======================
 // GET FILES (PAGINATED)
@@ -22,8 +23,7 @@ export const getFilesThunk = createAsyncThunk<
     const response = await FileService.getFiles(params);
     return response as unknown as PaginatedResponse<FileEntity>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch files';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -38,8 +38,7 @@ export const getFileByIdThunk = createAsyncThunk<FileEntity, string, ThunkApiCon
       const response = await FileService.getFileById(id);
       return response as unknown as FileEntity;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch file';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -55,8 +54,7 @@ export const uploadFileThunk = createAsyncThunk<FileEntity[], File[], ThunkApiCo
       const response = await FileService.uploadFile(files);
       return response as unknown as FileEntity[];
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to upload files';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -72,8 +70,7 @@ export const deleteFileThunk = createAsyncThunk<string, string, ThunkApiConfig>(
       await FileService.deleteFile(id);
       return id;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete file';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -89,8 +86,7 @@ export const restoreFileThunk = createAsyncThunk<FileEntity, string, ThunkApiCon
       const response = await FileService.restoreFile(id);
       return response as unknown as FileEntity;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to restore file';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );

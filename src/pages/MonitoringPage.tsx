@@ -1,12 +1,9 @@
 import { MonitoringData, convertDeviceMonitoringToMonitoringData } from '@/models/MonitoringData';
 import { AppDispatch, RootState } from '@/store';
-import { getDevicesThunk } from '@/store/actions/deviceActions';
-import { getDeviceMonitoringThunk } from '@/store/actions/deviceMonitoringActions';
-import { getDeviceStatusesThunk } from '@/store/actions/deviceStatusActions';
-import { getDeviceTypesThunk } from '@/store/actions/deviceTypeActions';
-import { getDeviceVendorsThunk } from '@/store/actions/deviceVendorActions';
-import { getGroupsThunk } from '@/store/actions/groupActions';
-import { getPlacesThunk } from '@/store/actions/placeActions';
+import {
+  getDeviceMonitoringThunk,
+  getMonitoringPageInitialDataThunk,
+} from '@/store/actions/deviceMonitoringActions';
 import MonitoringFilters from '@/view/prototypes/Monitoring/MonitoringFilters/MonitoringFilters';
 import MonitoringTable from '@/view/prototypes/Monitoring/MonitoringTable/MonitoringTable';
 
@@ -36,9 +33,6 @@ const MonitoringPage: FunctionComponent = () => {
   const deviceMonitoring = useSelector((state: RootState) => state.deviceMonitoring);
   const devices = useSelector((state: RootState) => state.devices);
   const deviceStatus = useSelector((state: RootState) => state.deviceStatus);
-  const deviceTypes = useSelector((state: RootState) => state.deviceTypes);
-  const deviceVendors = useSelector((state: RootState) => state.deviceVendors);
-  const groups = useSelector((state: RootState) => state.groups);
   const places = useSelector((state: RootState) => state.places);
 
   const [currentFilters, setCurrentFilters] = useState<FilterState>({
@@ -53,67 +47,25 @@ const MonitoringPage: FunctionComponent = () => {
 
   // Load initial data
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        // Load monitoring data with initial pagination
-        await dispatch(getDeviceMonitoringThunk({ limit: 10, offset: 0, withTrashed: 1 }));
-
-        // Load filter options data
-        await Promise.all([
-          dispatch(getDevicesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-          dispatch(getDeviceStatusesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-          dispatch(getDeviceTypesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-          dispatch(getDeviceVendorsThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-          dispatch(getGroupsThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-          dispatch(getPlacesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-        ]);
-      } catch (error) {
-        console.error('Error loading monitoring data:', error);
-      }
-    };
-
-    loadInitialData();
+    dispatch(getMonitoringPageInitialDataThunk());
   }, [dispatch]);
 
   // Convert monitoring data to display format with proper validation
   const monitoringData: MonitoringData[] = useMemo(() => {
-    console.log('🔍 MonitoringPage - Processing data...');
-    console.log('📊 Device monitoring state:', {
-      isLoading: deviceMonitoring.loading.getDeviceMonitoringThunk,
-      error: deviceMonitoring.error,
-      listLength: deviceMonitoring.monitoringData?.length || 0,
-      totalDeviceMonitoring: deviceMonitoring.total,
-    });
-
-    // Ensure deviceMonitoring.monitoringData exists and is an array before mapping
     if (!deviceMonitoring.monitoringData || !Array.isArray(deviceMonitoring.monitoringData)) {
-      console.warn(
-        '⚠️ deviceMonitoring.monitoringData is not available or not an array:',
-        deviceMonitoring.monitoringData,
-      );
       return [];
     }
-
-    console.log(
-      '✅ Converting device monitoring data, count:',
-      deviceMonitoring.monitoringData.length,
-    );
 
     try {
       const convertedData = deviceMonitoring.monitoringData.map(
         convertDeviceMonitoringToMonitoringData,
       );
-      console.log('✅ Successfully converted monitoring data:', convertedData.length, 'items');
       return convertedData;
     } catch (error) {
       console.error('❌ Error converting device monitoring data:', error);
       return [];
     }
-  }, [
-    deviceMonitoring.monitoringData,
-    deviceMonitoring.loading.getDeviceMonitoringThunk,
-    deviceMonitoring.error,
-  ]);
+  }, [deviceMonitoring.monitoringData]);
 
   const handleFilterChange = async (filters: FilterState) => {
     setCurrentFilters(filters);
@@ -164,17 +116,14 @@ const MonitoringPage: FunctionComponent = () => {
     }
   };
 
-  const isLoading =
-    deviceMonitoring.loading.getDeviceMonitoringThunk ||
-    devices.loading.getDevicesThunk ||
-    deviceStatus.loading.getDeviceStatusesThunk;
-  const error = deviceMonitoring.error || devices.error || deviceStatus.error;
+  const isLoading = deviceMonitoring.loading.getMonitoringPageInitialDataThunk;
+  const error = deviceMonitoring.error;
 
   if (error) {
     return (
       <div style={{ width: '100%', padding: '2rem', textAlign: 'center' }}>
         <h2>Error loading data</h2>
-        <p>{error}</p>
+        <p>{error.message}</p>
         <button
           onClick={() => window.location.reload()}
           style={{ padding: '0.5rem 1rem', marginTop: '1rem' }}

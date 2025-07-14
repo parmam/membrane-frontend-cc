@@ -12,6 +12,7 @@ import {
   updateUserThunk,
 } from '../actions/userActions';
 import type { PaginatedResponse, User } from '../types/ApiTypes';
+import { AppErrorDto } from '../types/ErrorTypes';
 import type { UserLoadingState } from '../types/LoadingTypes';
 
 // ========================
@@ -33,7 +34,7 @@ export interface UserState {
   loading: UserLoadingState;
 
   // Error state
-  error: string | null;
+  error: AppErrorDto | null;
 
   // Additional states
   hasPermission: boolean | null;
@@ -116,7 +117,7 @@ const userSlice = createSlice({
       })
       .addCase(getUsersThunk.rejected, (state, action) => {
         state.loading.getUsersThunk = false;
-        state.error = action.payload || 'Failed to fetch users';
+        state.error = action.payload ?? null;
       })
 
       // ========================
@@ -133,7 +134,7 @@ const userSlice = createSlice({
       })
       .addCase(getUserByIdThunk.rejected, (state, action) => {
         state.loading.getUserByIdThunk = false;
-        state.error = action.payload || 'Failed to fetch user';
+        state.error = action.payload ?? null;
       })
 
       // ========================
@@ -152,7 +153,7 @@ const userSlice = createSlice({
       })
       .addCase(createUserThunk.rejected, (state, action) => {
         state.loading.createUserThunk = false;
-        state.error = action.payload || 'Failed to create user';
+        state.error = action.payload ?? null;
       })
 
       // ========================
@@ -175,7 +176,7 @@ const userSlice = createSlice({
       })
       .addCase(updateUserThunk.rejected, (state, action) => {
         state.loading.updateUserThunk = false;
-        state.error = action.payload || 'Failed to update user';
+        state.error = action.payload ?? null;
       })
 
       // ========================
@@ -196,7 +197,7 @@ const userSlice = createSlice({
       })
       .addCase(deleteUserThunk.rejected, (state, action) => {
         state.loading.deleteUserThunk = false;
-        state.error = action.payload || 'Failed to delete user';
+        state.error = action.payload ?? null;
       })
 
       // ========================
@@ -220,7 +221,7 @@ const userSlice = createSlice({
       })
       .addCase(restoreUserThunk.rejected, (state, action) => {
         state.loading.restoreUserThunk = false;
-        state.error = action.payload || 'Failed to restore user';
+        state.error = action.payload ?? null;
       })
 
       // ========================
@@ -237,7 +238,7 @@ const userSlice = createSlice({
       })
       .addCase(hasPermissionToThunk.rejected, (state, action) => {
         state.loading.hasPermissionToThunk = false;
-        state.error = action.payload || 'Failed to check user permission';
+        state.error = action.payload ?? null;
       })
 
       // ========================
@@ -254,7 +255,7 @@ const userSlice = createSlice({
       })
       .addCase(searchUserByCredentialsThunk.rejected, (state, action) => {
         state.loading.searchUserByCredentialsThunk = false;
-        state.error = action.payload || 'Failed to search user by credentials';
+        state.error = action.payload ?? null;
       });
   },
 });

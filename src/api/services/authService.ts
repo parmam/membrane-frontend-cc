@@ -17,7 +17,7 @@ interface User {
 }
 
 interface LoginResponse {
-  token: string;
+  accessToken: string;
   user: User;
 }
 
@@ -29,11 +29,6 @@ export class AuthService {
       }),
     );
 
-    // Store token if login successful
-    if (response?.token) {
-      setAuthToken(response.token);
-    }
-
     return response;
   }
 
@@ -42,7 +37,7 @@ export class AuthService {
   }
 
   static async logout(): Promise<void> {
-    setAuthToken(null);
+    // Token is cleared in the thunk before this call
     await handleApiResponse(() => apiClient.POST('/auth/logout'));
   }
 }

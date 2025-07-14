@@ -88,97 +88,89 @@ export function isApplicationError(error: AppErrorDto): error is ApplicationErro
   );
 }
 
+// Expected data shape from API errors
+interface ApiErrorData {
+  message?: string;
+  error?: string;
+  validationErrors?: ValidationErrorDto[];
+  entity?: string;
+}
+
 // Error parsing utility
 export function parseError(error: unknown): AppErrorDto {
-  // Handle Axios errors
-  if (typeof error === 'object' && error !== null && 'response' in error) {
-    const axiosError = error as {
-      response?: {
-        status?: number;
-        data?: any;
-        statusText?: string;
-      };
-      request?: any;
-      message?: string;
-      code?: string;
+  // Handle openapi-fetch errors
+  if (typeof error === 'object' && error !== null && 'data' in error && 'status' in error) {
+    const apiError = error as {
+      status: number;
+      data: unknown;
+      statusText?: string;
     };
 
-    if (axiosError.response) {
-      const status = axiosError.response.status || 500;
-      const data = axiosError.response.data || {};
+    const status = apiError.status;
+    const data = (apiError.data || {}) as ApiErrorData;
 
-      // Handle authentication errors
-      if (status === 401) {
-        return {
-          message: data.message || 'Unauthorized access',
-          statusCode: 401,
-          type: 'unauthorized',
-        } as AuthErrorDto;
-      }
-
-      // Handle forbidden errors
-      if (status === 403) {
-        return {
-          message: data.message || 'Access forbidden',
-          statusCode: 403,
-          type: 'forbidden',
-        } as AuthErrorDto;
-      }
-
-      // Handle not found errors
-      if (status === 404) {
-        return {
-          message: data.message || 'Resource not found',
-          statusCode: 404,
-          type: 'not_found',
-          entity: data.entity,
-        } as BusinessErrorDto;
-      }
-
-      // Handle validation errors
-      if (status === 422) {
-        return {
-          message: data.message || 'Validation failed',
-          statusCode: 422,
-          error: data.error || 'Validation Error',
-          validationErrors: data.validationErrors || [],
-        } as ApiErrorResponseDto;
-      }
-
-      // Handle conflict errors
-      if (status === 409) {
-        return {
-          message: data.message || 'Conflict occurred',
-          statusCode: 409,
-          type: 'conflict',
-        } as BusinessErrorDto;
-      }
-
-      // Handle server errors
-      if (status >= 500) {
-        return {
-          message: data.message || 'Internal server error',
-          statusCode: status,
-          error: data.error || 'Server Error',
-        } as ApiErrorResponseDto;
-      }
-
-      // Generic API error
+    // Handle authentication errors
+    if (status === 401) {
       return {
-        message: data.message || axiosError.response.statusText || 'Request failed',
-        statusCode: status,
-        error: data.error || 'API Error',
+        message: data.message || 'Unauthorized access',
+        statusCode: 401,
+        type: 'unauthorized',
+      } as AuthErrorDto;
+    }
+
+    // Handle forbidden errors
+    if (status === 403) {
+      return {
+        message: data.message || 'Access forbidden',
+        statusCode: 403,
+        type: 'forbidden',
+      } as AuthErrorDto;
+    }
+
+    // Handle not found errors
+    if (status === 404) {
+      return {
+        message: data.message || 'Resource not found',
+        statusCode: 404,
+        type: 'not_found',
+        entity: data.entity,
+      } as BusinessErrorDto;
+    }
+
+    // Handle validation errors
+    if (status === 422) {
+      return {
+        message: data.message || 'Validation failed',
+        statusCode: 422,
+        error: data.error || 'Validation Error',
+        validationErrors: data.validationErrors || [],
       } as ApiErrorResponseDto;
     }
 
-    // Handle network errors
-    if (axiosError.request) {
+    // Handle conflict errors
+    if (status === 409) {
       return {
-        message: 'Network error or no response received',
-        type: 'network',
-        url: axiosError.request.responseURL,
-      } as NetworkErrorDto;
+        message: data.message || 'Conflict occurred',
+        statusCode: 409,
+        type: 'conflict',
+      } as BusinessErrorDto;
     }
+
+    // Handle server errors
+    if (status >= 500) {
+      return {
+        message: data.message || 'Internal server error',
+        statusCode: status,
+        error: data.error || 'Server Error',
+      } as ApiErrorResponseDto;
+    }
+
+    // Generic API error
+    return {
+      message: data.message || apiError.statusText || 'Request failed',
+      statusCode: status,
+      error: data.error || 'API Error',
+    } as ApiErrorResponseDto;
   }
 
   // Handle standard Error objects

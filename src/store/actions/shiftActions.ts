@@ -1,4 +1,4 @@
-// src/store/actions/newShiftActions.ts
+// src/store/actions/shiftActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { ShiftService } from '../../api/services';
@@ -10,6 +10,7 @@ import type {
   ThunkApiConfig,
   UpdateShiftRequest,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // =======================
 // GET SHIFTS (PAGINATED)
@@ -24,8 +25,7 @@ export const getShiftsThunk = createAsyncThunk<
     const response = await ShiftService.getShifts(params);
     return response as unknown as PaginatedResponse<Shift>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch shifts';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -40,8 +40,7 @@ export const getShiftByIdThunk = createAsyncThunk<Shift, string, ThunkApiConfig>
       const response = await ShiftService.getShiftById(id);
       return response as unknown as Shift;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch shift';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -57,8 +56,7 @@ export const createShiftThunk = createAsyncThunk<Shift, CreateShiftRequest, Thun
       const response = await ShiftService.createShift(shiftData);
       return response as unknown as Shift;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create shift';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -76,8 +74,7 @@ export const updateShiftThunk = createAsyncThunk<
     const response = await ShiftService.updateShift(id, shiftData);
     return response as unknown as Shift;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to update shift';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -92,8 +89,7 @@ export const deleteShiftThunk = createAsyncThunk<string, string, ThunkApiConfig>
       await ShiftService.deleteShift(id);
       return id;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete shift';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -109,8 +105,7 @@ export const restoreShiftThunk = createAsyncThunk<Shift, string, ThunkApiConfig>
       const response = await ShiftService.restoreShift(id);
       return response as unknown as Shift;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to restore shift';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );

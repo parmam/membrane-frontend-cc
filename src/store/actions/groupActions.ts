@@ -1,4 +1,4 @@
-// src/store/actions/newGroupActions.ts
+// src/store/actions/groupActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { GroupService } from '../../api/services';
@@ -10,6 +10,7 @@ import type {
   ThunkApiConfig,
   UpdateGroupRequest,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // =======================
 // GET GROUPS (PAGINATED)
@@ -24,8 +25,7 @@ export const getGroupsThunk = createAsyncThunk<
     const response = await GroupService.getGroups(params);
     return response as unknown as PaginatedResponse<Group>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch groups';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -40,8 +40,7 @@ export const getGroupByIdThunk = createAsyncThunk<Group, string, ThunkApiConfig>
       const response = await GroupService.getGroupById(id);
       return response as unknown as Group;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch group';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -57,8 +56,7 @@ export const createGroupThunk = createAsyncThunk<Group, CreateGroupRequest, Thun
       const response = await GroupService.createGroup(groupData);
       return response as unknown as Group;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create group';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -76,8 +74,7 @@ export const updateGroupThunk = createAsyncThunk<
     const response = await GroupService.updateGroup(id, groupData);
     return response as unknown as Group;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to update group';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -92,8 +89,7 @@ export const deleteGroupThunk = createAsyncThunk<string, string, ThunkApiConfig>
       await GroupService.deleteGroup(id);
       return id;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete group';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -109,8 +105,7 @@ export const restoreGroupThunk = createAsyncThunk<Group, string, ThunkApiConfig>
       const response = await GroupService.restoreGroup(id);
       return response as unknown as Group;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to restore group';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );

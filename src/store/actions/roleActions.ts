@@ -1,4 +1,4 @@
-// src/store/actions/newRoleActions.ts
+// src/store/actions/roleActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { RoleService } from '../../api/services';
@@ -10,6 +10,7 @@ import type {
   ThunkApiConfig,
   UpdateRoleRequest,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // ========================
 // GET ROLES (PAGINATED)
@@ -24,8 +25,7 @@ export const getRolesThunk = createAsyncThunk<
     const response = await RoleService.getRoles(params);
     return response as unknown as PaginatedResponse<Role>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch roles';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -40,8 +40,7 @@ export const getRoleByIdThunk = createAsyncThunk<Role, string, ThunkApiConfig>(
       const response = await RoleService.getRoleById(id);
       return response as unknown as Role;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch role';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -57,8 +56,7 @@ export const createRoleThunk = createAsyncThunk<Role, CreateRoleRequest, ThunkAp
       const response = await RoleService.createRole(roleData);
       return response as unknown as Role;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create role';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -76,8 +74,7 @@ export const updateRoleThunk = createAsyncThunk<
     const response = await RoleService.updateRole(id, roleData);
     return response as unknown as Role;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to update role';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -92,8 +89,7 @@ export const deleteRoleThunk = createAsyncThunk<string, string, ThunkApiConfig>(
       await RoleService.deleteRole(id);
       return id;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete role';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -109,8 +105,7 @@ export const restoreRoleThunk = createAsyncThunk<Role, string, ThunkApiConfig>(
       const response = await RoleService.restoreRole(id);
       return response as unknown as Role;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to restore role';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );

@@ -5,9 +5,11 @@ import {
   getDeviceMonitoringThunk,
   getLastStatusByIdThunk,
   getLastStatusThunk,
+  getMonitoringPageInitialDataThunk,
   getUptimeThunk,
 } from '../actions/deviceMonitoringActions';
 import type { DeviceMonitoring, PaginatedResponse } from '../types/ApiTypes';
+import { AppErrorDto } from '../types/ErrorTypes';
 import type { DeviceMonitoringLoadingState } from '../types/LoadingTypes';
 
 // =======================
@@ -29,7 +31,7 @@ export interface DeviceMonitoringState {
   loading: DeviceMonitoringLoadingState;
 
   // Error state
-  error: string | null;
+  error: AppErrorDto | null;
 }
 
 // =======================
@@ -41,6 +43,7 @@ const initialLoadingState: DeviceMonitoringLoadingState = {
   getLastStatusThunk: false,
   getLastStatusByIdThunk: false,
   getUptimeThunk: false,
+  getMonitoringPageInitialDataThunk: false,
 };
 
 const initialState: DeviceMonitoringState = {
@@ -85,7 +88,7 @@ const deviceMonitoringSlice = createSlice({
       )
       .addCase(getDeviceMonitoringThunk.rejected, (state, action) => {
         state.loading.getDeviceMonitoringThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch device monitoring.';
+        state.error = action.payload ?? null;
       });
 
     // GET LAST STATUS
@@ -100,7 +103,7 @@ const deviceMonitoringSlice = createSlice({
       })
       .addCase(getLastStatusThunk.rejected, (state, action) => {
         state.loading.getLastStatusThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch last status.';
+        state.error = action.payload ?? null;
       });
 
     // GET LAST STATUS BY ID
@@ -119,7 +122,7 @@ const deviceMonitoringSlice = createSlice({
       )
       .addCase(getLastStatusByIdThunk.rejected, (state, action) => {
         state.loading.getLastStatusByIdThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch last status by id.';
+        state.error = action.payload ?? null;
       });
 
     // GET UPTIME
@@ -134,7 +137,21 @@ const deviceMonitoringSlice = createSlice({
       })
       .addCase(getUptimeThunk.rejected, (state, action) => {
         state.loading.getUptimeThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch uptime.';
+        state.error = action.payload ?? null;
+      });
+
+    // GET MONITORING PAGE INITIAL DATA
+    builder
+      .addCase(getMonitoringPageInitialDataThunk.pending, (state) => {
+        state.loading.getMonitoringPageInitialDataThunk = true;
+        state.error = null;
+      })
+      .addCase(getMonitoringPageInitialDataThunk.fulfilled, (state) => {
+        state.loading.getMonitoringPageInitialDataThunk = false;
+      })
+      .addCase(getMonitoringPageInitialDataThunk.rejected, (state, action) => {
+        state.loading.getMonitoringPageInitialDataThunk = false;
+        state.error = action.payload ?? null;
       });
   },
 });

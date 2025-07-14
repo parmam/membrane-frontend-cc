@@ -1,8 +1,9 @@
-// src/store/actions/newConnectionTypeActions.ts
+// src/store/actions/connectionTypeActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { ConnectionTypeService } from '../../api/services';
 import type { ConnectionType, ConnectionTypeQueryParams, ThunkApiConfig } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // ========================
 // GET CONNECTION TYPES
@@ -17,7 +18,6 @@ export const getConnectionTypesThunk = createAsyncThunk<
     const response = await ConnectionTypeService.getConnectionTypes(params);
     return response as unknown as ConnectionType[];
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch connection types';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });

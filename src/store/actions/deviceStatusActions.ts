@@ -1,4 +1,4 @@
-// src/store/actions/newDeviceStatusActions.ts
+// src/store/actions/deviceStatusActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { DeviceStatusService } from '../../api/services';
@@ -8,6 +8,7 @@ import type {
   PaginatedResponse,
   ThunkApiConfig,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // =======================
 // GET DEVICE STATUSES (PAGINATED)
@@ -22,7 +23,6 @@ export const getDeviceStatusesThunk = createAsyncThunk<
     const response = await DeviceStatusService.getDeviceStatuses(params);
     return response as unknown as PaginatedResponse<DeviceStatus>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch device statuses';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });

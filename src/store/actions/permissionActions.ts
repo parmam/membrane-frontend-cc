@@ -1,8 +1,9 @@
-// src/store/actions/newPermissionActions.ts
+// src/store/actions/permissionActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { PermissionService } from '../../api/services';
 import type { Permission, PermissionQueryParams, ThunkApiConfig } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // ========================
 // GET PERMISSIONS
@@ -17,7 +18,6 @@ export const getPermissionsThunk = createAsyncThunk<
     const response = await PermissionService.getPermissions(params);
     return response as unknown as Permission[];
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch permissions';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });

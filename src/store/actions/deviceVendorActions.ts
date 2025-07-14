@@ -1,4 +1,4 @@
-// src/store/actions/newDeviceVendorActions.ts
+// src/store/actions/deviceVendorActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { DeviceVendorService } from '../../api/services';
@@ -10,6 +10,7 @@ import type {
   ThunkApiConfig,
   UpdateDeviceVendorRequest,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // =======================
 // GET DEVICE VENDORS (PAGINATED)
@@ -24,8 +25,7 @@ export const getDeviceVendorsThunk = createAsyncThunk<
     const response = await DeviceVendorService.getDeviceVendors(params);
     return response as unknown as PaginatedResponse<DeviceVendor>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch device vendors';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -40,8 +40,7 @@ export const getDeviceVendorByIdThunk = createAsyncThunk<DeviceVendor, string, T
       const response = await DeviceVendorService.getDeviceVendorById(id);
       return response as unknown as DeviceVendor;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch device vendor';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -59,8 +58,7 @@ export const createDeviceVendorThunk = createAsyncThunk<
     const response = await DeviceVendorService.createDeviceVendor(vendorData);
     return response as unknown as DeviceVendor;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to create device vendor';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -77,8 +75,7 @@ export const updateDeviceVendorThunk = createAsyncThunk<
     const response = await DeviceVendorService.updateDeviceVendor(id, vendorData);
     return response as unknown as DeviceVendor;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to update device vendor';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -93,8 +90,7 @@ export const deleteDeviceVendorThunk = createAsyncThunk<string, string, ThunkApi
       await DeviceVendorService.deleteDeviceVendor(id);
       return id;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete device vendor';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -110,8 +106,7 @@ export const restoreDeviceVendorThunk = createAsyncThunk<DeviceVendor, string, T
       const response = await DeviceVendorService.restoreDeviceVendor(id);
       return response as unknown as DeviceVendor;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to restore device vendor';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );

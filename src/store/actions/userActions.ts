@@ -1,4 +1,4 @@
-// src/store/actions/newUserActions.ts
+// src/store/actions/userActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { UserService } from '../../api/services';
@@ -12,6 +12,7 @@ import type {
   User,
   UserQueryParams,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // ========================
 // GET USERS (PAGINATED)
@@ -26,8 +27,7 @@ export const getUsersThunk = createAsyncThunk<
     const response = await UserService.getUsers(params);
     return response as unknown as PaginatedResponse<User>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch users';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -42,8 +42,7 @@ export const getUserByIdThunk = createAsyncThunk<User, string, ThunkApiConfig>(
       const response = await UserService.getUserById(id);
       return response as unknown as User;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch user';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -59,8 +58,7 @@ export const createUserThunk = createAsyncThunk<User, CreateUserRequest, ThunkAp
       const response = await UserService.createUser(userData);
       return response as unknown as User;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create user';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -78,8 +76,7 @@ export const updateUserThunk = createAsyncThunk<
     const response = await UserService.updateUser(id, userData);
     return response as unknown as User;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to update user';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -94,8 +91,7 @@ export const deleteUserThunk = createAsyncThunk<string, string, ThunkApiConfig>(
       await UserService.deleteUser(id);
       return id;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete user';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -111,8 +107,7 @@ export const restoreUserThunk = createAsyncThunk<User, string, ThunkApiConfig>(
       const response = await UserService.restoreUser(id);
       return response as unknown as User;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to restore user';
-      return rejectWithValue(message);
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -130,8 +125,7 @@ export const hasPermissionToThunk = createAsyncThunk<
     const response = await UserService.hasPermissionTo(id, permissionData);
     return response as unknown as boolean;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to check user permission';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -148,7 +142,6 @@ export const searchUserByCredentialsThunk = createAsyncThunk<
     const response = await UserService.searchUserByCredentials(credentials);
     return response as unknown as User;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to search user by credentials';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });

@@ -1,4 +1,4 @@
-// src/store/actions/newDeviceMonitoringActions.ts
+// src/store/actions/deviceMonitoringActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { DeviceMonitoringService } from '../../api/services';
@@ -11,6 +11,13 @@ import type {
   PaginatedResponse,
   ThunkApiConfig,
 } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
+import { getDevicesThunk } from './deviceActions';
+import { getDeviceStatusesThunk } from './deviceStatusActions';
+import { getDeviceTypesThunk } from './deviceTypeActions';
+import { getDeviceVendorsThunk } from './deviceVendorActions';
+import { getGroupsThunk } from './groupActions';
+import { getPlacesThunk } from './placeActions';
 
 // =======================
 // GET DEVICE MONITORING (PAGINATED)
@@ -25,8 +32,7 @@ export const getDeviceMonitoringThunk = createAsyncThunk<
     const response = await DeviceMonitoringService.getDeviceMonitoring(params);
     return response as unknown as PaginatedResponse<DeviceMonitoring>;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch device monitoring';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -43,8 +49,7 @@ export const getLastStatusThunk = createAsyncThunk<
     const response = await DeviceMonitoringService.getLastStatus(params);
     return response as unknown as DeviceMonitoring[];
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch last status';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -61,8 +66,7 @@ export const getLastStatusByIdThunk = createAsyncThunk<
     const response = await DeviceMonitoringService.getLastStatusById(deviceData);
     return response as unknown as DeviceMonitoring[];
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch last status by id';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
 
@@ -79,7 +83,29 @@ export const getUptimeThunk = createAsyncThunk<
     const response = await DeviceMonitoringService.getUptime(filters);
     return response;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch uptime';
-    return rejectWithValue(message);
+    return rejectWithValue(parseError(error));
   }
 });
+
+// =======================
+// GET MONITORING PAGE INITIAL DATA
+// =======================
+
+export const getMonitoringPageInitialDataThunk = createAsyncThunk<void, void, ThunkApiConfig>(
+  'deviceMonitoring/getMonitoringPageInitialDataThunk',
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      await Promise.all([
+        dispatch(getDeviceMonitoringThunk({ limit: 10, offset: 0, withTrashed: 1 })),
+        dispatch(getDevicesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
+        dispatch(getDeviceStatusesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
+        dispatch(getDeviceTypesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
+        dispatch(getDeviceVendorsThunk({ limit: 99, offset: 0, withTrashed: 0 })),
+        dispatch(getGroupsThunk({ limit: 99, offset: 0, withTrashed: 0 })),
+        dispatch(getPlacesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
+      ]);
+    } catch (error) {
+      return rejectWithValue(parseError(error));
+    }
+  },
+);

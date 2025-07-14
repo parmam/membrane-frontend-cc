@@ -1,9 +1,10 @@
-// src/store/actions/newAuthActions.ts
+// src/store/actions/authActions.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { setAuthToken } from '../../api/client';
 import { AuthService } from '../../api/services';
 import type { LoginRequest, LoginResponse, ThunkApiConfig, User } from '../types/ApiTypes';
+import { parseError } from '../types/ErrorTypes';
 
 // ========================
 // LOGIN
@@ -14,10 +15,15 @@ export const loginThunk = createAsyncThunk<LoginResponse, LoginRequest, ThunkApi
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await AuthService.login(credentials);
-      return response as LoginResponse;
+      // On successful login, set token for API client and store it
+      setAuthToken(response.accessToken);
+      localStorage.setItem('authToken', response.accessToken);
+      return response;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Login failed';
-      return rejectWithValue(message);
+      // Ensure token is cleared on failure
+      setAuthToken(null);
+      localStorage.removeItem('authToken');
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -31,10 +37,14 @@ export const getCurrentUserThunk = createAsyncThunk<User, void, ThunkApiConfig>(
   async (_, { rejectWithValue }) => {
     try {
       const response = await AuthService.getCurrentUser();
-      return response as User;
+      return response;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to get current user';
-      return rejectWithValue(message);
+      // If we can't get user, the token is likely invalid.
+      // The slice reducer will handle clearing the state.
+      // We also clear it from storage here.
+      setAuthToken(null);
+      localStorage.removeItem('authToken');
+      return rejectWithValue(parseError(error));
     }
   },
 );
@@ -47,14 +57,13 @@ export const logoutThunk = createAsyncThunk<void, void, ThunkApiConfig>(
   'auth/logoutThunk',
   async (_, { rejectWithValue }) => {
     try {
+      // Always clear local token first
+      localStorage.removeItem('authToken');
+      setAuthToken(null);
       await AuthService.logout();
-      // Clear token from client
-      setAuthToken(null);
     } catch (error) {
-      // Even if logout fails on server, we should clear local token
-      setAuthToken(null);
-      const message = error instanceof Error ? error.message : 'Logout failed';
-      return rejectWithValue(message);
+      // The local state is already cleared, just report the error
+      return rejectWithValue(parseError(error));
     }
   },
 );

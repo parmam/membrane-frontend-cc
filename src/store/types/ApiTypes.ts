@@ -1,5 +1,6 @@
 // src/store/types/ApiTypes.ts
 import type { components, operations } from '../../api/types';
+import { AppErrorDto } from './ErrorTypes';
 
 // ========================
 // COMMON TYPES
@@ -390,7 +391,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string;
+  accessToken: string;
   user: User;
 }
 
@@ -411,7 +412,7 @@ export interface ApiError {
 // ========================
 
 export interface ThunkApiConfig {
-  rejectValue: string;
+  rejectValue: AppErrorDto;
 }
 
 // Pagination helpers

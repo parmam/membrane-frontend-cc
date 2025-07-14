@@ -100,7 +100,8 @@ export type DeviceMonitoringLoadingActions =
   | 'getDeviceMonitoringThunk'
   | 'getLastStatusThunk'
   | 'getLastStatusByIdThunk'
-  | 'getUptimeThunk';
+  | 'getUptimeThunk'
+  | 'getMonitoringPageInitialDataThunk';
 
 export type DeviceStatusLoadingActions = 'getDeviceStatusesThunk';
 
@@ -269,6 +270,7 @@ export interface DeviceMonitoringLoadingState {
   getLastStatusThunk: boolean;
   getLastStatusByIdThunk: boolean;
   getUptimeThunk: boolean;
+  getMonitoringPageInitialDataThunk: boolean;
 }
 
 export interface DeviceStatusLoadingState {
