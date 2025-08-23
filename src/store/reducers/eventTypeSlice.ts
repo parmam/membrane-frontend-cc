@@ -1,210 +1,124 @@
 // src/store/reducers/eventTypeSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { Reducer } from 'redux';
 
+import { EventType, PaginatedResponse } from '../types/ApiTypes';
+import { AppErrorDto } from '../types/ErrorTypes';
 import {
-  createEventTypeThunk,
-  deleteEventTypeThunk,
-  getEventTypeByIdThunk,
-  getEventTypesThunk,
-  restoreEventTypeThunk,
-  updateEventTypeThunk,
-} from '../actions/eventTypeActions';
-import type { EventType, PaginatedResponse } from '../types/ApiTypes';
-import type { EventTypeLoadingState } from '../types/LoadingTypes';
+  EVENT_TYPE_CLEAR_ERROR,
+  EVENT_TYPE_CREATE_FAILED,
+  EVENT_TYPE_CREATE_START,
+  EVENT_TYPE_CREATE_SUCCESS,
+  EVENT_TYPE_DELETE_FAILED,
+  EVENT_TYPE_DELETE_START,
+  EVENT_TYPE_DELETE_SUCCESS,
+  EVENT_TYPE_GET_BY_ID_FAILED,
+  EVENT_TYPE_GET_BY_ID_START,
+  EVENT_TYPE_GET_BY_ID_SUCCESS,
+  EVENT_TYPE_GET_EVENT_TYPES_FAILED,
+  EVENT_TYPE_GET_EVENT_TYPES_START,
+  EVENT_TYPE_GET_EVENT_TYPES_SUCCESS,
+  EVENT_TYPE_RESTORE_FAILED,
+  EVENT_TYPE_RESTORE_START,
+  EVENT_TYPE_RESTORE_SUCCESS,
+  EVENT_TYPE_UPDATE_FAILED,
+  EVENT_TYPE_UPDATE_START,
+  EVENT_TYPE_UPDATE_SUCCESS,
+  EventTypeAction,
+  EventTypeState,
+  EventTypeStatus,
+  initialEventTypeState,
+} from '../types/EventTypeTypes';
 
-// =======================
-// STATE INTERFACE
-// =======================
+export const eventTypeReducer: Reducer<EventTypeState, EventTypeAction> = (
+  state = initialEventTypeState,
+  action,
+) => {
+  switch (action.type) {
+    case EVENT_TYPE_GET_EVENT_TYPES_START:
+      return { ...state, status: EventTypeStatus.Fetching, error: null };
+    case EVENT_TYPE_GET_EVENT_TYPES_SUCCESS:
+      return {
+        ...state,
+        eventTypes: action.payload.response.data,
+        total: action.payload.response.total,
+        currentPage: action.payload.response.offset / action.payload.response.limit + 1,
+        pageSize: action.payload.response.limit,
+        status: EventTypeStatus.Success,
+      };
+    case EVENT_TYPE_GET_EVENT_TYPES_FAILED:
+      return { ...state, status: EventTypeStatus.Failed, error: action.payload.error };
 
-export interface EventTypeState {
-  // Data
-  eventTypes: EventType[];
-  selectedEventType: EventType | null;
+    case EVENT_TYPE_GET_BY_ID_START:
+      return { ...state, status: EventTypeStatus.Fetching, error: null };
+    case EVENT_TYPE_GET_BY_ID_SUCCESS:
+      return {
+        ...state,
+        selectedEventType: action.payload.eventType,
+        status: EventTypeStatus.Success,
+      };
+    case EVENT_TYPE_GET_BY_ID_FAILED:
+      return { ...state, status: EventTypeStatus.Failed, error: action.payload.error };
 
-  // Pagination
-  total: number;
-  currentPage: number;
-  pageSize: number;
+    case EVENT_TYPE_CREATE_START:
+      return { ...state, status: EventTypeStatus.Creating, error: null };
+    case EVENT_TYPE_CREATE_SUCCESS:
+      return {
+        ...state,
+        eventTypes: [action.payload.eventType, ...state.eventTypes],
+        total: state.total + 1,
+        status: EventTypeStatus.Success,
+      };
+    case EVENT_TYPE_CREATE_FAILED:
+      return { ...state, status: EventTypeStatus.Failed, error: action.payload.error };
 
-  // Loading states
-  loading: EventTypeLoadingState;
+    case EVENT_TYPE_UPDATE_START:
+      return { ...state, status: EventTypeStatus.Updating, error: null };
+    case EVENT_TYPE_UPDATE_SUCCESS: {
+      const updatedEventTypes = state.eventTypes.map((et) =>
+        et.id === action.payload.eventType.id ? action.payload.eventType : et,
+      );
+      return {
+        ...state,
+        eventTypes: updatedEventTypes,
+        selectedEventType: action.payload.eventType,
+        status: EventTypeStatus.Success,
+      };
+    }
+    case EVENT_TYPE_UPDATE_FAILED:
+      return { ...state, status: EventTypeStatus.Failed, error: action.payload.error };
 
-  // Error state
-  error: string | null;
-}
+    case EVENT_TYPE_DELETE_START:
+      return { ...state, status: EventTypeStatus.Deleting, error: null };
+    case EVENT_TYPE_DELETE_SUCCESS: {
+      const filteredEventTypes = state.eventTypes.filter((et) => et.id !== action.payload.id);
+      return {
+        ...state,
+        eventTypes: filteredEventTypes,
+        total: state.total - 1,
+        status: EventTypeStatus.Success,
+      };
+    }
+    case EVENT_TYPE_DELETE_FAILED:
+      return { ...state, status: EventTypeStatus.Failed, error: action.payload.error };
 
-// =======================
-// INITIAL STATE
-// =======================
+    case EVENT_TYPE_RESTORE_START:
+      return { ...state, status: EventTypeStatus.Restoring, error: null };
+    case EVENT_TYPE_RESTORE_SUCCESS:
+      return {
+        ...state,
+        eventTypes: [action.payload.eventType, ...state.eventTypes],
+        total: state.total + 1,
+        status: EventTypeStatus.Success,
+      };
+    case EVENT_TYPE_RESTORE_FAILED:
+      return { ...state, status: EventTypeStatus.Failed, error: action.payload.error };
 
-const initialLoadingState: EventTypeLoadingState = {
-  getEventTypesThunk: false,
-  getEventTypeByIdThunk: false,
-  createEventTypeThunk: false,
-  updateEventTypeThunk: false,
-  deleteEventTypeThunk: false,
-  restoreEventTypeThunk: false,
+    case EVENT_TYPE_CLEAR_ERROR:
+      return { ...state, error: null };
+
+    default:
+      return state;
+  }
 };
 
-const initialState: EventTypeState = {
-  eventTypes: [],
-  selectedEventType: null,
-  total: 0,
-  currentPage: 1,
-  pageSize: 10,
-  loading: initialLoadingState,
-  error: null,
-};
-
-// =======================
-// SLICE
-// =======================
-
-const eventTypeSlice = createSlice({
-  name: 'eventTypes',
-  initialState,
-  reducers: {
-    clearSelectedEventType: (state) => {
-      state.selectedEventType = null;
-    },
-    clearEventTypeError: (state) => {
-      state.error = null;
-    },
-  },
-  extraReducers: (builder) => {
-    // GET ALL (paginated)
-    builder
-      .addCase(getEventTypesThunk.pending, (state) => {
-        state.loading.getEventTypesThunk = true;
-        state.error = null;
-      })
-      .addCase(
-        getEventTypesThunk.fulfilled,
-        (state, action: PayloadAction<PaginatedResponse<EventType>>) => {
-          state.loading.getEventTypesThunk = false;
-          state.eventTypes = action.payload.data;
-          state.total = action.payload.total;
-          state.currentPage = action.payload.offset / action.payload.limit + 1;
-          state.pageSize = action.payload.limit;
-        },
-      )
-      .addCase(getEventTypesThunk.rejected, (state, action) => {
-        state.loading.getEventTypesThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch event types.';
-      });
-
-    // GET BY ID
-    builder
-      .addCase(getEventTypeByIdThunk.pending, (state) => {
-        state.loading.getEventTypeByIdThunk = true;
-        state.error = null;
-      })
-      .addCase(getEventTypeByIdThunk.fulfilled, (state, action: PayloadAction<EventType>) => {
-        state.loading.getEventTypeByIdThunk = false;
-        state.selectedEventType = action.payload;
-      })
-      .addCase(getEventTypeByIdThunk.rejected, (state, action) => {
-        state.loading.getEventTypeByIdThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch event type.';
-      });
-
-    // CREATE
-    builder
-      .addCase(createEventTypeThunk.pending, (state) => {
-        state.loading.createEventTypeThunk = true;
-        state.error = null;
-      })
-      .addCase(createEventTypeThunk.fulfilled, (state, action: PayloadAction<EventType>) => {
-        state.loading.createEventTypeThunk = false;
-        state.eventTypes.unshift(action.payload);
-        state.total += 1;
-      })
-      .addCase(createEventTypeThunk.rejected, (state, action) => {
-        state.loading.createEventTypeThunk = false;
-        state.error = (action.payload as string) || 'Failed to create event type.';
-      });
-
-    // UPDATE
-    builder
-      .addCase(updateEventTypeThunk.pending, (state) => {
-        state.loading.updateEventTypeThunk = true;
-        state.error = null;
-      })
-      .addCase(updateEventTypeThunk.fulfilled, (state, action: PayloadAction<EventType>) => {
-        state.loading.updateEventTypeThunk = false;
-        const index = state.eventTypes.findIndex((et) => et.id === action.payload.id);
-        if (index !== -1) {
-          state.eventTypes[index] = action.payload;
-        }
-        if (state.selectedEventType?.id === action.payload.id) {
-          state.selectedEventType = action.payload;
-        }
-      })
-      .addCase(updateEventTypeThunk.rejected, (state, action) => {
-        state.loading.updateEventTypeThunk = false;
-        state.error = (action.payload as string) || 'Failed to update event type.';
-      });
-
-    // DELETE
-    builder
-      .addCase(deleteEventTypeThunk.pending, (state) => {
-        state.loading.deleteEventTypeThunk = true;
-        state.error = null;
-      })
-      .addCase(deleteEventTypeThunk.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading.deleteEventTypeThunk = false;
-        state.eventTypes = state.eventTypes.filter((et) => et.id !== action.payload);
-        state.total -= 1;
-      })
-      .addCase(deleteEventTypeThunk.rejected, (state, action) => {
-        state.loading.deleteEventTypeThunk = false;
-        state.error = (action.payload as string) || 'Failed to delete event type.';
-      });
-
-    // RESTORE
-    builder
-      .addCase(restoreEventTypeThunk.pending, (state) => {
-        state.loading.restoreEventTypeThunk = true;
-        state.error = null;
-      })
-      .addCase(restoreEventTypeThunk.fulfilled, (state, action: PayloadAction<EventType>) => {
-        state.loading.restoreEventTypeThunk = false;
-        const index = state.eventTypes.findIndex((et) => et.id === action.payload.id);
-        if (index !== -1) {
-          state.eventTypes[index] = action.payload;
-        } else {
-          state.eventTypes.unshift(action.payload);
-          state.total += 1;
-        }
-      })
-      .addCase(restoreEventTypeThunk.rejected, (state, action) => {
-        state.loading.restoreEventTypeThunk = false;
-        state.error = (action.payload as string) || 'Failed to restore event type.';
-      });
-  },
-});
-
-// =======================
-// EXPORTS
-// =======================
-
-// Actions
-export const { clearSelectedEventType, clearEventTypeError } = eventTypeSlice.actions;
-
-// Selectors
-export const selectEventTypes = (state: { eventTypes: EventTypeState }) =>
-  state.eventTypes.eventTypes;
-export const selectSelectedEventType = (state: { eventTypes: EventTypeState }) =>
-  state.eventTypes.selectedEventType;
-export const selectEventTypeLoading = (state: { eventTypes: EventTypeState }) =>
-  state.eventTypes.loading;
-export const selectEventTypeError = (state: { eventTypes: EventTypeState }) =>
-  state.eventTypes.error;
-export const selectEventTypePagination = (state: { eventTypes: EventTypeState }) => ({
-  total: state.eventTypes.total,
-  currentPage: state.eventTypes.currentPage,
-  pageSize: state.eventTypes.pageSize,
-});
-
-// Reducer
-export default eventTypeSlice.reducer;
+export default eventTypeReducer;

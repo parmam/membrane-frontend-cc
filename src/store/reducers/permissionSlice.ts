@@ -1,88 +1,38 @@
-// src/store/reducers/permissionSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+// src/store/reducers/permissionReducer.ts
+import { Reducer } from 'redux';
 
-import { getPermissionsThunk } from '../actions/permissionActions';
-import type { Permission } from '../types/ApiTypes';
-import type { PermissionLoadingState } from '../types/LoadingTypes';
+import { Permission } from '../types/ApiTypes';
+import {
+  PERMISSION_CLEAR_ERROR,
+  PERMISSION_GET_PERMISSIONS_FAILED,
+  PERMISSION_GET_PERMISSIONS_START,
+  PERMISSION_GET_PERMISSIONS_SUCCESS,
+  PermissionAction,
+  PermissionState,
+  PermissionStatus,
+  initialPermissionState,
+} from '../types/PermissionTypes';
 
-// ========================
-// STATE INTERFACE
-// ========================
-
-export interface PermissionState {
-  // Data
-  permissions: Permission[];
-
-  // Loading states
-  loading: PermissionLoadingState;
-
-  // Error state
-  error: string | null;
-}
-
-// ========================
-// INITIAL STATE
-// ========================
-
-const initialLoadingState: PermissionLoadingState = {
-  getPermissionsThunk: false,
+export const permissionReducer: Reducer<PermissionState, PermissionAction> = (
+  state = initialPermissionState,
+  action,
+) => {
+  switch (action.type) {
+    case PERMISSION_GET_PERMISSIONS_START:
+      return { ...state, status: PermissionStatus.Fetching, error: null };
+    case PERMISSION_GET_PERMISSIONS_SUCCESS:
+      return {
+        ...state,
+        permissions: action.payload.permissions,
+        status: PermissionStatus.Success,
+      };
+    case PERMISSION_GET_PERMISSIONS_FAILED:
+      return { ...state, status: PermissionStatus.Failed, error: action.payload.error };
+    case PERMISSION_CLEAR_ERROR:
+      return { ...state, error: null };
+    default:
+      return state;
+  }
 };
 
-const initialState: PermissionState = {
-  permissions: [],
-  loading: initialLoadingState,
-  error: null,
-};
-
-// ========================
-// SLICE
-// ========================
-
-const permissionSlice = createSlice({
-  name: 'permissions',
-  initialState,
-  reducers: {
-    // Clear error
-    clearError: (state) => {
-      state.error = null;
-    },
-
-    // Reset state
-    resetState: () => initialState,
-  },
-  extraReducers: (builder) => {
-    // ========================
-    // GET PERMISSIONS
-    // ========================
-    builder
-      .addCase(getPermissionsThunk.pending, (state) => {
-        state.loading.getPermissionsThunk = true;
-        state.error = null;
-      })
-      .addCase(getPermissionsThunk.fulfilled, (state, action: PayloadAction<Permission[]>) => {
-        state.loading.getPermissionsThunk = false;
-        state.permissions = action.payload;
-        state.error = null;
-      })
-      .addCase(getPermissionsThunk.rejected, (state, action) => {
-        state.loading.getPermissionsThunk = false;
-        state.error = action.payload || 'Failed to fetch permissions';
-      });
-  },
-});
-
-// ========================
-// ACTIONS & SELECTORS
-// ========================
-
-export const { clearError, resetState } = permissionSlice.actions;
-
-// Selectors
-export const selectPermissions = (state: { permissions: PermissionState }) =>
-  state.permissions.permissions;
-export const selectPermissionLoading = (state: { permissions: PermissionState }) =>
-  state.permissions.loading;
-export const selectPermissionError = (state: { permissions: PermissionState }) =>
-  state.permissions.error;
-
-export default permissionSlice.reducer;
+export default permissionReducer;

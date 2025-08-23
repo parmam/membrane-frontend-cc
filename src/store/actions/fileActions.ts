@@ -1,92 +1,154 @@
 // src/store/actions/fileActions.ts
-import { createAsyncThunk } from '@reduxjs/toolkit';
-
 import { FileService } from '../../api/services';
-import type {
-  FileEntity,
-  FileQueryParams,
-  PaginatedResponse,
-  ThunkApiConfig,
-} from '../types/ApiTypes';
+import { FileEntity, FileQueryParams, PaginatedResponse } from '../types/ApiTypes';
 import { parseError } from '../types/ErrorTypes';
+import { AppErrorDto } from '../types/ErrorTypes';
+import {
+  FILE_CLEAR_ERROR,
+  FILE_DELETE_FAILED,
+  FILE_DELETE_START,
+  FILE_DELETE_SUCCESS,
+  FILE_GET_BY_ID_FAILED,
+  FILE_GET_BY_ID_START,
+  FILE_GET_BY_ID_SUCCESS,
+  FILE_GET_FILES_FAILED,
+  FILE_GET_FILES_START,
+  FILE_GET_FILES_SUCCESS,
+  FILE_RESTORE_FAILED,
+  FILE_RESTORE_START,
+  FILE_RESTORE_SUCCESS,
+  FILE_UPLOAD_FAILED,
+  FILE_UPLOAD_START,
+  FILE_UPLOAD_SUCCESS,
+  FileAction,
+  FileThunk,
+} from '../types/FileTypes';
 
-// =======================
-// GET FILES (PAGINATED)
-// =======================
-
-export const getFilesThunk = createAsyncThunk<
-  PaginatedResponse<FileEntity>,
-  FileQueryParams | undefined,
-  ThunkApiConfig
->('files/getFilesThunk', async (params, { rejectWithValue }) => {
-  try {
-    const response = await FileService.getFiles(params);
-    return response as unknown as PaginatedResponse<FileEntity>;
-  } catch (error) {
-    return rejectWithValue(parseError(error));
-  }
+// Action Creators
+export const getFilesStart = (): FileAction => ({ type: FILE_GET_FILES_START });
+export const getFilesSuccess = (response: PaginatedResponse<FileEntity>): FileAction => ({
+  type: FILE_GET_FILES_SUCCESS,
+  payload: { response },
+});
+export const getFilesFailed = (error: AppErrorDto): FileAction => ({
+  type: FILE_GET_FILES_FAILED,
+  payload: { error },
 });
 
-// =======================
-// GET FILE BY ID
-// =======================
+export const getByIdStart = (): FileAction => ({ type: FILE_GET_BY_ID_START });
+export const getByIdSuccess = (file: FileEntity): FileAction => ({
+  type: FILE_GET_BY_ID_SUCCESS,
+  payload: { file },
+});
+export const getByIdFailed = (error: AppErrorDto): FileAction => ({
+  type: FILE_GET_BY_ID_FAILED,
+  payload: { error },
+});
 
-export const getFileByIdThunk = createAsyncThunk<FileEntity, string, ThunkApiConfig>(
-  'files/getFileByIdThunk',
-  async (id, { rejectWithValue }) => {
+export const uploadStart = (): FileAction => ({ type: FILE_UPLOAD_START });
+export const uploadSuccess = (files: FileEntity[]): FileAction => ({
+  type: FILE_UPLOAD_SUCCESS,
+  payload: { files },
+});
+export const uploadFailed = (error: AppErrorDto): FileAction => ({
+  type: FILE_UPLOAD_FAILED,
+  payload: { error },
+});
+
+export const deleteStart = (): FileAction => ({ type: FILE_DELETE_START });
+export const deleteSuccess = (id: string): FileAction => ({
+  type: FILE_DELETE_SUCCESS,
+  payload: { id },
+});
+export const deleteFailed = (error: AppErrorDto): FileAction => ({
+  type: FILE_DELETE_FAILED,
+  payload: { error },
+});
+
+export const restoreStart = (): FileAction => ({ type: FILE_RESTORE_START });
+export const restoreSuccess = (file: FileEntity): FileAction => ({
+  type: FILE_RESTORE_SUCCESS,
+  payload: { file },
+});
+export const restoreFailed = (error: AppErrorDto): FileAction => ({
+  type: FILE_RESTORE_FAILED,
+  payload: { error },
+});
+
+export const clearFileError = (): FileAction => ({ type: FILE_CLEAR_ERROR });
+
+// Thunks
+export const getFilesThunk =
+  (params?: FileQueryParams): FileThunk =>
+  async (dispatch) => {
+    dispatch(getFilesStart());
     try {
-      const response = await FileService.getFileById(id);
-      return response as unknown as FileEntity;
+      const response = (await FileService.getFiles(params)) ?? {
+        data: [],
+        total: 0,
+        limit: 10,
+        offset: 0,
+      };
+      dispatch(getFilesSuccess(response));
     } catch (error) {
-      return rejectWithValue(parseError(error));
+      dispatch(getFilesFailed(parseError(error)));
     }
-  },
-);
+  };
 
-// =======================
-// UPLOAD FILE
-// =======================
-
-export const uploadFileThunk = createAsyncThunk<FileEntity[], File[], ThunkApiConfig>(
-  'files/uploadFileThunk',
-  async (files, { rejectWithValue }) => {
+export const getFileByIdThunk =
+  (id: string): FileThunk =>
+  async (dispatch) => {
+    dispatch(getByIdStart());
     try {
-      const response = await FileService.uploadFile(files);
-      return response as unknown as FileEntity[];
+      const file = (await FileService.getFileById(id)) ?? {
+        id: '',
+        fileName: '',
+        createdAt: '',
+        updatedAt: '',
+      };
+      dispatch(getByIdSuccess(file));
     } catch (error) {
-      return rejectWithValue(parseError(error));
+      dispatch(getByIdFailed(parseError(error)));
     }
-  },
-);
+  };
 
-// =======================
-// DELETE FILE
-// =======================
+export const uploadFileThunk =
+  (files: File[]): FileThunk =>
+  async (dispatch) => {
+    dispatch(uploadStart());
+    try {
+      const uploadedFiles = (await FileService.uploadFile(files)) ?? [];
+      dispatch(uploadSuccess(uploadedFiles));
+    } catch (error) {
+      dispatch(uploadFailed(parseError(error)));
+    }
+  };
 
-export const deleteFileThunk = createAsyncThunk<string, string, ThunkApiConfig>(
-  'files/deleteFileThunk',
-  async (id, { rejectWithValue }) => {
+export const deleteFileThunk =
+  (id: string): FileThunk =>
+  async (dispatch) => {
+    dispatch(deleteStart());
     try {
       await FileService.deleteFile(id);
-      return id;
+      dispatch(deleteSuccess(id));
     } catch (error) {
-      return rejectWithValue(parseError(error));
+      dispatch(deleteFailed(parseError(error)));
     }
-  },
-);
+  };
 
-// =======================
-// RESTORE FILE
-// =======================
-
-export const restoreFileThunk = createAsyncThunk<FileEntity, string, ThunkApiConfig>(
-  'files/restoreFileThunk',
-  async (id, { rejectWithValue }) => {
+export const restoreFileThunk =
+  (id: string): FileThunk =>
+  async (dispatch) => {
+    dispatch(restoreStart());
     try {
-      const response = await FileService.restoreFile(id);
-      return response as unknown as FileEntity;
+      const file = (await FileService.restoreFile(id)) ?? {
+        id: '',
+        fileName: '',
+        createdAt: '',
+        updatedAt: '',
+      };
+      dispatch(restoreSuccess(file));
     } catch (error) {
-      return rejectWithValue(parseError(error));
+      dispatch(restoreFailed(parseError(error)));
     }
-  },
-);
+  };

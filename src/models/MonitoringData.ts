@@ -1,5 +1,5 @@
 // src/models/MonitoringData.ts
-import { DeviceMonitoring } from '../store/types/ApiTypes';
+import { DeviceMonitoring } from '@/store/types/ApiTypes';
 
 export interface MonitoringData {
   id: string;

@@ -1,222 +1,121 @@
-// src/store/reducers/deviceFirmwareSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+// src/store/reducers/deviceFirmwareReducer.ts
+import { Reducer } from 'redux';
 
+import { DeviceFirmware, PaginatedResponse } from '../types/ApiTypes';
 import {
-  createDeviceFirmwareThunk,
-  deleteDeviceFirmwareThunk,
-  getDeviceFirmwareByIdThunk,
-  getDeviceFirmwaresThunk,
-  restoreDeviceFirmwareThunk,
-  updateDeviceFirmwareThunk,
-} from '../actions/deviceFirmwareActions';
-import type { DeviceFirmware, PaginatedResponse } from '../types/ApiTypes';
-import type { DeviceFirmwareLoadingState } from '../types/LoadingTypes';
+  DEVICE_FIRMWARE_CLEAR_ERROR,
+  DEVICE_FIRMWARE_CREATE_FAILED,
+  DEVICE_FIRMWARE_CREATE_START,
+  DEVICE_FIRMWARE_CREATE_SUCCESS,
+  DEVICE_FIRMWARE_DELETE_FAILED,
+  DEVICE_FIRMWARE_DELETE_START,
+  DEVICE_FIRMWARE_DELETE_SUCCESS,
+  DEVICE_FIRMWARE_GET_BY_ID_FAILED,
+  DEVICE_FIRMWARE_GET_BY_ID_START,
+  DEVICE_FIRMWARE_GET_BY_ID_SUCCESS,
+  DEVICE_FIRMWARE_GET_FIRMWARES_FAILED,
+  DEVICE_FIRMWARE_GET_FIRMWARES_START,
+  DEVICE_FIRMWARE_GET_FIRMWARES_SUCCESS,
+  DEVICE_FIRMWARE_RESTORE_FAILED,
+  DEVICE_FIRMWARE_RESTORE_START,
+  DEVICE_FIRMWARE_RESTORE_SUCCESS,
+  DEVICE_FIRMWARE_UPDATE_FAILED,
+  DEVICE_FIRMWARE_UPDATE_START,
+  DEVICE_FIRMWARE_UPDATE_SUCCESS,
+  DeviceFirmwareAction,
+  DeviceFirmwareState,
+  DeviceFirmwareStatus,
+  initialDeviceFirmwareState,
+} from '../types/DeviceFirmwareTypes';
 
-// =======================
-// STATE INTERFACE
-// =======================
+export const deviceFirmwareReducer: Reducer<DeviceFirmwareState, DeviceFirmwareAction> = (
+  state = initialDeviceFirmwareState,
+  action,
+) => {
+  switch (action.type) {
+    case DEVICE_FIRMWARE_GET_FIRMWARES_START:
+      return { ...state, status: DeviceFirmwareStatus.Fetching, error: null };
+    case DEVICE_FIRMWARE_GET_FIRMWARES_SUCCESS:
+      return {
+        ...state,
+        firmwares: action.payload.response.data,
+        total: action.payload.response.total,
+        currentPage: action.payload.response.offset / action.payload.response.limit + 1,
+        pageSize: action.payload.response.limit,
+        status: DeviceFirmwareStatus.Success,
+      };
+    case DEVICE_FIRMWARE_GET_FIRMWARES_FAILED:
+      return { ...state, status: DeviceFirmwareStatus.Failed, error: action.payload.error };
 
-export interface DeviceFirmwareState {
-  // Data
-  firmwares: DeviceFirmware[];
-  selectedFirmware: DeviceFirmware | null;
+    case DEVICE_FIRMWARE_GET_BY_ID_START:
+      return { ...state, status: DeviceFirmwareStatus.Fetching, error: null };
+    case DEVICE_FIRMWARE_GET_BY_ID_SUCCESS:
+      return {
+        ...state,
+        selectedFirmware: action.payload.firmware,
+        status: DeviceFirmwareStatus.Success,
+      };
+    case DEVICE_FIRMWARE_GET_BY_ID_FAILED:
+      return { ...state, status: DeviceFirmwareStatus.Failed, error: action.payload.error };
 
-  // Pagination
-  total: number;
-  currentPage: number;
-  pageSize: number;
+    case DEVICE_FIRMWARE_CREATE_START:
+      return { ...state, status: DeviceFirmwareStatus.Creating, error: null };
+    case DEVICE_FIRMWARE_CREATE_SUCCESS:
+      return {
+        ...state,
+        firmwares: [action.payload.firmware, ...state.firmwares],
+        total: state.total + 1,
+        status: DeviceFirmwareStatus.Success,
+      };
+    case DEVICE_FIRMWARE_CREATE_FAILED:
+      return { ...state, status: DeviceFirmwareStatus.Failed, error: action.payload.error };
 
-  // Loading states
-  loading: DeviceFirmwareLoadingState;
+    case DEVICE_FIRMWARE_UPDATE_START:
+      return { ...state, status: DeviceFirmwareStatus.Updating, error: null };
+    case DEVICE_FIRMWARE_UPDATE_SUCCESS: {
+      const updatedFirmwares = state.firmwares.map((f) =>
+        f.id === action.payload.firmware.id ? action.payload.firmware : f,
+      );
+      return {
+        ...state,
+        firmwares: updatedFirmwares,
+        selectedFirmware: action.payload.firmware,
+        status: DeviceFirmwareStatus.Success,
+      };
+    }
+    case DEVICE_FIRMWARE_UPDATE_FAILED:
+      return { ...state, status: DeviceFirmwareStatus.Failed, error: action.payload.error };
 
-  // Error state
-  error: string | null;
-}
+    case DEVICE_FIRMWARE_DELETE_START:
+      return { ...state, status: DeviceFirmwareStatus.Deleting, error: null };
+    case DEVICE_FIRMWARE_DELETE_SUCCESS: {
+      const filteredFirmwares = state.firmwares.filter((f) => f.id !== action.payload.id);
+      return {
+        ...state,
+        firmwares: filteredFirmwares,
+        total: state.total - 1,
+        status: DeviceFirmwareStatus.Success,
+      };
+    }
+    case DEVICE_FIRMWARE_DELETE_FAILED:
+      return { ...state, status: DeviceFirmwareStatus.Failed, error: action.payload.error };
 
-// =======================
-// INITIAL STATE
-// =======================
+    case DEVICE_FIRMWARE_RESTORE_START:
+      return { ...state, status: DeviceFirmwareStatus.Restoring, error: null };
+    case DEVICE_FIRMWARE_RESTORE_SUCCESS:
+      return {
+        ...state,
+        firmwares: [action.payload.firmware, ...state.firmwares],
+        total: state.total + 1,
+        status: DeviceFirmwareStatus.Success,
+      };
+    case DEVICE_FIRMWARE_RESTORE_FAILED:
+      return { ...state, status: DeviceFirmwareStatus.Failed, error: action.payload.error };
 
-const initialLoadingState: DeviceFirmwareLoadingState = {
-  getDeviceFirmwaresThunk: false,
-  getDeviceFirmwareByIdThunk: false,
-  createDeviceFirmwareThunk: false,
-  updateDeviceFirmwareThunk: false,
-  deleteDeviceFirmwareThunk: false,
-  restoreDeviceFirmwareThunk: false,
+    case DEVICE_FIRMWARE_CLEAR_ERROR:
+      return { ...state, error: null };
+
+    default:
+      return state;
+  }
 };
-
-const initialState: DeviceFirmwareState = {
-  firmwares: [],
-  selectedFirmware: null,
-  total: 0,
-  currentPage: 1,
-  pageSize: 10,
-  loading: initialLoadingState,
-  error: null,
-};
-
-// =======================
-// SLICE
-// =======================
-
-const deviceFirmwareSlice = createSlice({
-  name: 'deviceFirmwares',
-  initialState,
-  reducers: {
-    clearSelectedFirmware: (state) => {
-      state.selectedFirmware = null;
-    },
-    clearFirmwareError: (state) => {
-      state.error = null;
-    },
-  },
-  extraReducers: (builder) => {
-    // GET ALL (paginated)
-    builder
-      .addCase(getDeviceFirmwaresThunk.pending, (state) => {
-        state.loading.getDeviceFirmwaresThunk = true;
-        state.error = null;
-      })
-      .addCase(
-        getDeviceFirmwaresThunk.fulfilled,
-        (state, action: PayloadAction<PaginatedResponse<DeviceFirmware>>) => {
-          state.loading.getDeviceFirmwaresThunk = false;
-          state.firmwares = action.payload.data;
-          state.total = action.payload.total;
-          state.currentPage = action.payload.offset / action.payload.limit + 1;
-          state.pageSize = action.payload.limit;
-        },
-      )
-      .addCase(getDeviceFirmwaresThunk.rejected, (state, action) => {
-        state.loading.getDeviceFirmwaresThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch firmwares.';
-      });
-
-    // GET BY ID
-    builder
-      .addCase(getDeviceFirmwareByIdThunk.pending, (state) => {
-        state.loading.getDeviceFirmwareByIdThunk = true;
-        state.error = null;
-      })
-      .addCase(
-        getDeviceFirmwareByIdThunk.fulfilled,
-        (state, action: PayloadAction<DeviceFirmware>) => {
-          state.loading.getDeviceFirmwareByIdThunk = false;
-          state.selectedFirmware = action.payload;
-        },
-      )
-      .addCase(getDeviceFirmwareByIdThunk.rejected, (state, action) => {
-        state.loading.getDeviceFirmwareByIdThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch firmware.';
-      });
-
-    // CREATE
-    builder
-      .addCase(createDeviceFirmwareThunk.pending, (state) => {
-        state.loading.createDeviceFirmwareThunk = true;
-        state.error = null;
-      })
-      .addCase(
-        createDeviceFirmwareThunk.fulfilled,
-        (state, action: PayloadAction<DeviceFirmware>) => {
-          state.loading.createDeviceFirmwareThunk = false;
-          state.firmwares.unshift(action.payload);
-          state.total += 1;
-        },
-      )
-      .addCase(createDeviceFirmwareThunk.rejected, (state, action) => {
-        state.loading.createDeviceFirmwareThunk = false;
-        state.error = (action.payload as string) || 'Failed to create firmware.';
-      });
-
-    // UPDATE
-    builder
-      .addCase(updateDeviceFirmwareThunk.pending, (state) => {
-        state.loading.updateDeviceFirmwareThunk = true;
-        state.error = null;
-      })
-      .addCase(
-        updateDeviceFirmwareThunk.fulfilled,
-        (state, action: PayloadAction<DeviceFirmware>) => {
-          state.loading.updateDeviceFirmwareThunk = false;
-          const index = state.firmwares.findIndex((f) => f.id === action.payload.id);
-          if (index !== -1) {
-            state.firmwares[index] = action.payload;
-          }
-          if (state.selectedFirmware?.id === action.payload.id) {
-            state.selectedFirmware = action.payload;
-          }
-        },
-      )
-      .addCase(updateDeviceFirmwareThunk.rejected, (state, action) => {
-        state.loading.updateDeviceFirmwareThunk = false;
-        state.error = (action.payload as string) || 'Failed to update firmware.';
-      });
-
-    // DELETE
-    builder
-      .addCase(deleteDeviceFirmwareThunk.pending, (state) => {
-        state.loading.deleteDeviceFirmwareThunk = true;
-        state.error = null;
-      })
-      .addCase(deleteDeviceFirmwareThunk.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading.deleteDeviceFirmwareThunk = false;
-        state.firmwares = state.firmwares.filter((f) => f.id !== action.payload);
-        state.total -= 1;
-      })
-      .addCase(deleteDeviceFirmwareThunk.rejected, (state, action) => {
-        state.loading.deleteDeviceFirmwareThunk = false;
-        state.error = (action.payload as string) || 'Failed to delete firmware.';
-      });
-
-    // RESTORE
-    builder
-      .addCase(restoreDeviceFirmwareThunk.pending, (state) => {
-        state.loading.restoreDeviceFirmwareThunk = true;
-        state.error = null;
-      })
-      .addCase(
-        restoreDeviceFirmwareThunk.fulfilled,
-        (state, action: PayloadAction<DeviceFirmware>) => {
-          state.loading.restoreDeviceFirmwareThunk = false;
-          const index = state.firmwares.findIndex((f) => f.id === action.payload.id);
-          if (index !== -1) {
-            state.firmwares[index] = action.payload;
-          } else {
-            state.firmwares.unshift(action.payload);
-            state.total += 1;
-          }
-        },
-      )
-      .addCase(restoreDeviceFirmwareThunk.rejected, (state, action) => {
-        state.loading.restoreDeviceFirmwareThunk = false;
-        state.error = (action.payload as string) || 'Failed to restore firmware.';
-      });
-  },
-});
-
-// =======================
-// EXPORTS
-// =======================
-
-// Actions
-export const { clearSelectedFirmware, clearFirmwareError } = deviceFirmwareSlice.actions;
-
-// Selectors
-export const selectFirmwares = (state: { deviceFirmwares: DeviceFirmwareState }) =>
-  state.deviceFirmwares.firmwares;
-export const selectSelectedFirmware = (state: { deviceFirmwares: DeviceFirmwareState }) =>
-  state.deviceFirmwares.selectedFirmware;
-export const selectFirmwareLoading = (state: { deviceFirmwares: DeviceFirmwareState }) =>
-  state.deviceFirmwares.loading;
-export const selectFirmwareError = (state: { deviceFirmwares: DeviceFirmwareState }) =>
-  state.deviceFirmwares.error;
-export const selectFirmwarePagination = (state: { deviceFirmwares: DeviceFirmwareState }) => ({
-  total: state.deviceFirmwares.total,
-  currentPage: state.deviceFirmwares.currentPage,
-  pageSize: state.deviceFirmwares.pageSize,
-});
-
-// Reducer
-export default deviceFirmwareSlice.reducer;

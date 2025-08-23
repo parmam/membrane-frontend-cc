@@ -1,181 +1,96 @@
 // src/store/reducers/fileSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { Reducer } from 'redux';
 
 import {
-  deleteFileThunk,
-  getFileByIdThunk,
-  getFilesThunk,
-  restoreFileThunk,
-  uploadFileThunk,
-} from '../actions/fileActions';
-import type { FileEntity, PaginatedResponse } from '../types/ApiTypes';
-import type { FileLoadingState } from '../types/LoadingTypes';
+  FILE_CLEAR_ERROR,
+  FILE_DELETE_FAILED,
+  FILE_DELETE_START,
+  FILE_DELETE_SUCCESS,
+  FILE_GET_BY_ID_FAILED,
+  FILE_GET_BY_ID_START,
+  FILE_GET_BY_ID_SUCCESS,
+  FILE_GET_FILES_FAILED,
+  FILE_GET_FILES_START,
+  FILE_GET_FILES_SUCCESS,
+  FILE_RESTORE_FAILED,
+  FILE_RESTORE_START,
+  FILE_RESTORE_SUCCESS,
+  FILE_UPLOAD_FAILED,
+  FILE_UPLOAD_START,
+  FILE_UPLOAD_SUCCESS,
+  FileAction,
+  FileState,
+  FileStatus,
+  initialFileState,
+} from '../types/FileTypes';
 
-// =======================
-// STATE INTERFACE
-// =======================
+export const fileReducer: Reducer<FileState, FileAction> = (state = initialFileState, action) => {
+  switch (action.type) {
+    case FILE_GET_FILES_START:
+      return { ...state, status: FileStatus.Fetching, error: null };
+    case FILE_GET_FILES_SUCCESS:
+      return {
+        ...state,
+        files: action.payload.response.data,
+        total: action.payload.response.total,
+        currentPage: action.payload.response.offset / action.payload.response.limit + 1,
+        pageSize: action.payload.response.limit,
+        status: FileStatus.Success,
+      };
+    case FILE_GET_FILES_FAILED:
+      return { ...state, status: FileStatus.Failed, error: action.payload.error };
 
-export interface FileState {
-  // Data
-  files: FileEntity[];
-  selectedFile: FileEntity | null;
+    case FILE_GET_BY_ID_START:
+      return { ...state, status: FileStatus.Fetching, error: null };
+    case FILE_GET_BY_ID_SUCCESS:
+      return { ...state, selectedFile: action.payload.file, status: FileStatus.Success };
+    case FILE_GET_BY_ID_FAILED:
+      return { ...state, status: FileStatus.Failed, error: action.payload.error };
 
-  // Pagination
-  total: number;
-  currentPage: number;
-  pageSize: number;
+    case FILE_UPLOAD_START:
+      return { ...state, status: FileStatus.Uploading, error: null };
+    case FILE_UPLOAD_SUCCESS:
+      return {
+        ...state,
+        files: [...action.payload.files, ...state.files],
+        total: state.total + action.payload.files.length,
+        status: FileStatus.Success,
+      };
+    case FILE_UPLOAD_FAILED:
+      return { ...state, status: FileStatus.Failed, error: action.payload.error };
 
-  // Loading states
-  loading: FileLoadingState;
+    case FILE_DELETE_START:
+      return { ...state, status: FileStatus.Deleting, error: null };
+    case FILE_DELETE_SUCCESS: {
+      const filteredFiles = state.files.filter((f) => f.id !== action.payload.id);
+      return {
+        ...state,
+        files: filteredFiles,
+        total: state.total - 1,
+        status: FileStatus.Success,
+      };
+    }
+    case FILE_DELETE_FAILED:
+      return { ...state, status: FileStatus.Failed, error: action.payload.error };
 
-  // Error state
-  error: string | null;
-}
+    case FILE_RESTORE_START:
+      return { ...state, status: FileStatus.Restoring, error: null };
+    case FILE_RESTORE_SUCCESS:
+      return {
+        ...state,
+        files: [action.payload.file, ...state.files],
+        total: state.total + 1,
+        status: FileStatus.Success,
+      };
+    case FILE_RESTORE_FAILED:
+      return { ...state, status: FileStatus.Failed, error: action.payload.error };
 
-// =======================
-// INITIAL STATE
-// =======================
+    case FILE_CLEAR_ERROR:
+      return { ...state, error: null };
 
-const initialLoadingState: FileLoadingState = {
-  getFilesThunk: false,
-  getFileByIdThunk: false,
-  uploadFileThunk: false,
-  deleteFileThunk: false,
-  restoreFileThunk: false,
+    default:
+      return state;
+  }
 };
 
-const initialState: FileState = {
-  files: [],
-  selectedFile: null,
-  total: 0,
-  currentPage: 1,
-  pageSize: 10,
-  loading: initialLoadingState,
-  error: null,
-};
-
-// =======================
-// SLICE
-// =======================
-
-const fileSlice = createSlice({
-  name: 'files',
-  initialState,
-  reducers: {
-    clearSelectedFile: (state) => {
-      state.selectedFile = null;
-    },
-    clearFileError: (state) => {
-      state.error = null;
-    },
-  },
-  extraReducers: (builder) => {
-    // GET ALL (paginated)
-    builder
-      .addCase(getFilesThunk.pending, (state) => {
-        state.loading.getFilesThunk = true;
-        state.error = null;
-      })
-      .addCase(
-        getFilesThunk.fulfilled,
-        (state, action: PayloadAction<PaginatedResponse<FileEntity>>) => {
-          state.loading.getFilesThunk = false;
-          state.files = action.payload.data;
-          state.total = action.payload.total;
-          state.currentPage = action.payload.offset / action.payload.limit + 1;
-          state.pageSize = action.payload.limit;
-        },
-      )
-      .addCase(getFilesThunk.rejected, (state, action) => {
-        state.loading.getFilesThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch files.';
-      });
-
-    // GET BY ID
-    builder
-      .addCase(getFileByIdThunk.pending, (state) => {
-        state.loading.getFileByIdThunk = true;
-        state.error = null;
-      })
-      .addCase(getFileByIdThunk.fulfilled, (state, action: PayloadAction<FileEntity>) => {
-        state.loading.getFileByIdThunk = false;
-        state.selectedFile = action.payload;
-      })
-      .addCase(getFileByIdThunk.rejected, (state, action) => {
-        state.loading.getFileByIdThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch file.';
-      });
-
-    // UPLOAD
-    builder
-      .addCase(uploadFileThunk.pending, (state) => {
-        state.loading.uploadFileThunk = true;
-        state.error = null;
-      })
-      .addCase(uploadFileThunk.fulfilled, (state, action: PayloadAction<FileEntity[]>) => {
-        state.loading.uploadFileThunk = false;
-        state.files.unshift(...action.payload);
-        state.total += action.payload.length;
-      })
-      .addCase(uploadFileThunk.rejected, (state, action) => {
-        state.loading.uploadFileThunk = false;
-        state.error = (action.payload as string) || 'Failed to upload files.';
-      });
-
-    // DELETE
-    builder
-      .addCase(deleteFileThunk.pending, (state) => {
-        state.loading.deleteFileThunk = true;
-        state.error = null;
-      })
-      .addCase(deleteFileThunk.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading.deleteFileThunk = false;
-        state.files = state.files.filter((f) => f.id !== action.payload);
-        state.total -= 1;
-      })
-      .addCase(deleteFileThunk.rejected, (state, action) => {
-        state.loading.deleteFileThunk = false;
-        state.error = (action.payload as string) || 'Failed to delete file.';
-      });
-
-    // RESTORE
-    builder
-      .addCase(restoreFileThunk.pending, (state) => {
-        state.loading.restoreFileThunk = true;
-        state.error = null;
-      })
-      .addCase(restoreFileThunk.fulfilled, (state, action: PayloadAction<FileEntity>) => {
-        state.loading.restoreFileThunk = false;
-        const index = state.files.findIndex((f) => f.id === action.payload.id);
-        if (index === -1) {
-          state.files.unshift(action.payload);
-          state.total += 1;
-        }
-      })
-      .addCase(restoreFileThunk.rejected, (state, action) => {
-        state.loading.restoreFileThunk = false;
-        state.error = (action.payload as string) || 'Failed to restore file.';
-      });
-  },
-});
-
-// =======================
-// EXPORTS
-// =======================
-
-// Actions
-export const { clearSelectedFile, clearFileError } = fileSlice.actions;
-
-// Selectors
-export const selectFiles = (state: { files: FileState }) => state.files.files;
-export const selectSelectedFile = (state: { files: FileState }) => state.files.selectedFile;
-export const selectFileLoading = (state: { files: FileState }) => state.files.loading;
-export const selectFileError = (state: { files: FileState }) => state.files.error;
-export const selectFilePagination = (state: { files: FileState }) => ({
-  total: state.files.total,
-  currentPage: state.files.currentPage,
-  pageSize: state.files.pageSize,
-});
-
-// Reducer
-export default fileSlice.reducer;
+export default fileReducer;

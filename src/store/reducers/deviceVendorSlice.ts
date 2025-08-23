@@ -1,210 +1,130 @@
 // src/store/reducers/deviceVendorSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { Reducer } from 'redux';
 
 import {
-  createDeviceVendorThunk,
-  deleteDeviceVendorThunk,
-  getDeviceVendorByIdThunk,
-  getDeviceVendorsThunk,
-  restoreDeviceVendorThunk,
-  updateDeviceVendorThunk,
-} from '../actions/deviceVendorActions';
-import type { DeviceVendor, PaginatedResponse } from '../types/ApiTypes';
-import type { DeviceVendorLoadingState } from '../types/LoadingTypes';
+  DEVICE_VENDOR_CLEAR_ERROR,
+  DEVICE_VENDOR_CLEAR_SELECTED,
+  DEVICE_VENDOR_CREATE_FAILED,
+  DEVICE_VENDOR_CREATE_START,
+  DEVICE_VENDOR_CREATE_SUCCESS,
+  DEVICE_VENDOR_DELETE_FAILED,
+  DEVICE_VENDOR_DELETE_START,
+  DEVICE_VENDOR_DELETE_SUCCESS,
+  DEVICE_VENDOR_GET_BY_ID_FAILED,
+  DEVICE_VENDOR_GET_BY_ID_START,
+  DEVICE_VENDOR_GET_BY_ID_SUCCESS,
+  DEVICE_VENDOR_GET_VENDORS_FAILED,
+  DEVICE_VENDOR_GET_VENDORS_START,
+  DEVICE_VENDOR_GET_VENDORS_SUCCESS,
+  DEVICE_VENDOR_RESTORE_FAILED,
+  DEVICE_VENDOR_RESTORE_START,
+  DEVICE_VENDOR_RESTORE_SUCCESS,
+  DEVICE_VENDOR_UPDATE_FAILED,
+  DEVICE_VENDOR_UPDATE_START,
+  DEVICE_VENDOR_UPDATE_SUCCESS,
+  DeviceVendorAction,
+  DeviceVendorState,
+  DeviceVendorStatus,
+  initialDeviceVendorState,
+} from '../types/DeviceVendorTypes';
 
-// =======================
-// STATE INTERFACE
-// =======================
+export const deviceVendorReducer: Reducer<DeviceVendorState, DeviceVendorAction> = (
+  state = initialDeviceVendorState,
+  action,
+) => {
+  switch (action.type) {
+    case DEVICE_VENDOR_GET_VENDORS_START:
+    case DEVICE_VENDOR_GET_BY_ID_START:
+      return { ...state, status: DeviceVendorStatus.Fetching, error: null };
 
-export interface DeviceVendorState {
-  // Data
-  vendors: DeviceVendor[];
-  selectedVendor: DeviceVendor | null;
+    case DEVICE_VENDOR_CREATE_START:
+      return { ...state, status: DeviceVendorStatus.Creating, error: null };
 
-  // Pagination
-  total: number;
-  currentPage: number;
-  pageSize: number;
+    case DEVICE_VENDOR_UPDATE_START:
+      return { ...state, status: DeviceVendorStatus.Updating, error: null };
 
-  // Loading states
-  loading: DeviceVendorLoadingState;
+    case DEVICE_VENDOR_DELETE_START:
+      return { ...state, status: DeviceVendorStatus.Deleting, error: null };
 
-  // Error state
-  error: string | null;
-}
+    case DEVICE_VENDOR_RESTORE_START:
+      return { ...state, status: DeviceVendorStatus.Restoring, error: null };
 
-// =======================
-// INITIAL STATE
-// =======================
+    case DEVICE_VENDOR_GET_VENDORS_SUCCESS:
+      return {
+        ...state,
+        vendors: action.payload.response.data,
+        total: action.payload.response.total,
+        currentPage: action.payload.response.offset / action.payload.response.limit + 1,
+        pageSize: action.payload.response.limit,
+        status: DeviceVendorStatus.Success,
+      };
 
-const initialLoadingState: DeviceVendorLoadingState = {
-  getDeviceVendorsThunk: false,
-  getDeviceVendorByIdThunk: false,
-  createDeviceVendorThunk: false,
-  updateDeviceVendorThunk: false,
-  deleteDeviceVendorThunk: false,
-  restoreDeviceVendorThunk: false,
+    case DEVICE_VENDOR_GET_BY_ID_SUCCESS:
+      return {
+        ...state,
+        selectedVendor: action.payload.vendor,
+        status: DeviceVendorStatus.Success,
+      };
+
+    case DEVICE_VENDOR_CREATE_SUCCESS:
+      return {
+        ...state,
+        vendors: [action.payload.vendor, ...state.vendors],
+        total: state.total + 1,
+        status: DeviceVendorStatus.Success,
+      };
+
+    case DEVICE_VENDOR_UPDATE_SUCCESS: {
+      const updatedVendors = state.vendors.map((v) =>
+        v.id === action.payload.vendor.id ? action.payload.vendor : v,
+      );
+      return {
+        ...state,
+        vendors: updatedVendors,
+        selectedVendor:
+          state.selectedVendor?.id === action.payload.vendor.id
+            ? action.payload.vendor
+            : state.selectedVendor,
+        status: DeviceVendorStatus.Success,
+      };
+    }
+
+    case DEVICE_VENDOR_DELETE_SUCCESS: {
+      const filteredVendors = state.vendors.filter((v) => v.id !== action.payload.id);
+      return {
+        ...state,
+        vendors: filteredVendors,
+        total: state.total - 1,
+        status: DeviceVendorStatus.Success,
+      };
+    }
+
+    case DEVICE_VENDOR_RESTORE_SUCCESS: {
+      return {
+        ...state,
+        vendors: [action.payload.vendor, ...state.vendors],
+        total: state.total + 1,
+        status: DeviceVendorStatus.Success,
+      };
+    }
+
+    case DEVICE_VENDOR_GET_VENDORS_FAILED:
+    case DEVICE_VENDOR_GET_BY_ID_FAILED:
+    case DEVICE_VENDOR_CREATE_FAILED:
+    case DEVICE_VENDOR_UPDATE_FAILED:
+    case DEVICE_VENDOR_DELETE_FAILED:
+    case DEVICE_VENDOR_RESTORE_FAILED:
+      return { ...state, status: DeviceVendorStatus.Failed, error: action.payload.error };
+
+    case DEVICE_VENDOR_CLEAR_ERROR:
+      return { ...state, error: null };
+
+    case DEVICE_VENDOR_CLEAR_SELECTED:
+      return { ...state, selectedVendor: null };
+
+    default:
+      return state;
+  }
 };
 
-const initialState: DeviceVendorState = {
-  vendors: [],
-  selectedVendor: null,
-  total: 0,
-  currentPage: 1,
-  pageSize: 10,
-  loading: initialLoadingState,
-  error: null,
-};
-
-// =======================
-// SLICE
-// =======================
-
-const deviceVendorSlice = createSlice({
-  name: 'deviceVendors',
-  initialState,
-  reducers: {
-    clearSelectedVendor: (state) => {
-      state.selectedVendor = null;
-    },
-    clearVendorError: (state) => {
-      state.error = null;
-    },
-  },
-  extraReducers: (builder) => {
-    // GET ALL (paginated)
-    builder
-      .addCase(getDeviceVendorsThunk.pending, (state) => {
-        state.loading.getDeviceVendorsThunk = true;
-        state.error = null;
-      })
-      .addCase(
-        getDeviceVendorsThunk.fulfilled,
-        (state, action: PayloadAction<PaginatedResponse<DeviceVendor>>) => {
-          state.loading.getDeviceVendorsThunk = false;
-          state.vendors = action.payload.data;
-          state.total = action.payload.total;
-          state.currentPage = action.payload.offset / action.payload.limit + 1;
-          state.pageSize = action.payload.limit;
-        },
-      )
-      .addCase(getDeviceVendorsThunk.rejected, (state, action) => {
-        state.loading.getDeviceVendorsThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch vendors.';
-      });
-
-    // GET BY ID
-    builder
-      .addCase(getDeviceVendorByIdThunk.pending, (state) => {
-        state.loading.getDeviceVendorByIdThunk = true;
-        state.error = null;
-      })
-      .addCase(getDeviceVendorByIdThunk.fulfilled, (state, action: PayloadAction<DeviceVendor>) => {
-        state.loading.getDeviceVendorByIdThunk = false;
-        state.selectedVendor = action.payload;
-      })
-      .addCase(getDeviceVendorByIdThunk.rejected, (state, action) => {
-        state.loading.getDeviceVendorByIdThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch vendor.';
-      });
-
-    // CREATE
-    builder
-      .addCase(createDeviceVendorThunk.pending, (state) => {
-        state.loading.createDeviceVendorThunk = true;
-        state.error = null;
-      })
-      .addCase(createDeviceVendorThunk.fulfilled, (state, action: PayloadAction<DeviceVendor>) => {
-        state.loading.createDeviceVendorThunk = false;
-        state.vendors.unshift(action.payload);
-        state.total += 1;
-      })
-      .addCase(createDeviceVendorThunk.rejected, (state, action) => {
-        state.loading.createDeviceVendorThunk = false;
-        state.error = (action.payload as string) || 'Failed to create vendor.';
-      });
-
-    // UPDATE
-    builder
-      .addCase(updateDeviceVendorThunk.pending, (state) => {
-        state.loading.updateDeviceVendorThunk = true;
-        state.error = null;
-      })
-      .addCase(updateDeviceVendorThunk.fulfilled, (state, action: PayloadAction<DeviceVendor>) => {
-        state.loading.updateDeviceVendorThunk = false;
-        const index = state.vendors.findIndex((v) => v.id === action.payload.id);
-        if (index !== -1) {
-          state.vendors[index] = action.payload;
-        }
-        if (state.selectedVendor?.id === action.payload.id) {
-          state.selectedVendor = action.payload;
-        }
-      })
-      .addCase(updateDeviceVendorThunk.rejected, (state, action) => {
-        state.loading.updateDeviceVendorThunk = false;
-        state.error = (action.payload as string) || 'Failed to update vendor.';
-      });
-
-    // DELETE
-    builder
-      .addCase(deleteDeviceVendorThunk.pending, (state) => {
-        state.loading.deleteDeviceVendorThunk = true;
-        state.error = null;
-      })
-      .addCase(deleteDeviceVendorThunk.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading.deleteDeviceVendorThunk = false;
-        state.vendors = state.vendors.filter((v) => v.id !== action.payload);
-        state.total -= 1;
-      })
-      .addCase(deleteDeviceVendorThunk.rejected, (state, action) => {
-        state.loading.deleteDeviceVendorThunk = false;
-        state.error = (action.payload as string) || 'Failed to delete vendor.';
-      });
-
-    // RESTORE
-    builder
-      .addCase(restoreDeviceVendorThunk.pending, (state) => {
-        state.loading.restoreDeviceVendorThunk = true;
-        state.error = null;
-      })
-      .addCase(restoreDeviceVendorThunk.fulfilled, (state, action: PayloadAction<DeviceVendor>) => {
-        state.loading.restoreDeviceVendorThunk = false;
-        const index = state.vendors.findIndex((v) => v.id === action.payload.id);
-        if (index !== -1) {
-          state.vendors[index] = action.payload;
-        } else {
-          state.vendors.unshift(action.payload);
-          state.total += 1;
-        }
-      })
-      .addCase(restoreDeviceVendorThunk.rejected, (state, action) => {
-        state.loading.restoreDeviceVendorThunk = false;
-        state.error = (action.payload as string) || 'Failed to restore vendor.';
-      });
-  },
-});
-
-// =======================
-// EXPORTS
-// =======================
-
-// Actions
-export const { clearSelectedVendor, clearVendorError } = deviceVendorSlice.actions;
-
-// Selectors
-export const selectVendors = (state: { deviceVendors: DeviceVendorState }) =>
-  state.deviceVendors.vendors;
-export const selectSelectedVendor = (state: { deviceVendors: DeviceVendorState }) =>
-  state.deviceVendors.selectedVendor;
-export const selectVendorLoading = (state: { deviceVendors: DeviceVendorState }) =>
-  state.deviceVendors.loading;
-export const selectVendorError = (state: { deviceVendors: DeviceVendorState }) =>
-  state.deviceVendors.error;
-export const selectVendorPagination = (state: { deviceVendors: DeviceVendorState }) => ({
-  total: state.deviceVendors.total,
-  currentPage: state.deviceVendors.currentPage,
-  pageSize: state.deviceVendors.pageSize,
-});
-
-// Reducer
-export default deviceVendorSlice.reducer;
+export default deviceVendorReducer;

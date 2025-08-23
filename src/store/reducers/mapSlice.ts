@@ -1,220 +1,119 @@
 // src/store/reducers/mapSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { Reducer } from 'redux';
 
 import {
-  addDeviceToMapThunk,
-  createMapThunk,
-  deleteMapThunk,
-  getMapByIdThunk,
-  getMapsThunk,
-  removeDeviceFromMapThunk,
-  restoreMapThunk,
-} from '../actions/mapActions';
-import type { DeviceOnMap, Map, PaginatedResponse } from '../types/ApiTypes';
-import type { MapLoadingState } from '../types/LoadingTypes';
+  MAP_ADD_DEVICE_FAILED,
+  MAP_ADD_DEVICE_START,
+  MAP_ADD_DEVICE_SUCCESS,
+  MAP_CLEAR_ERROR,
+  MAP_CREATE_FAILED,
+  MAP_CREATE_START,
+  MAP_CREATE_SUCCESS,
+  MAP_DELETE_FAILED,
+  MAP_DELETE_START,
+  MAP_DELETE_SUCCESS,
+  MAP_GET_BY_ID_FAILED,
+  MAP_GET_BY_ID_START,
+  MAP_GET_BY_ID_SUCCESS,
+  MAP_GET_MAPS_FAILED,
+  MAP_GET_MAPS_START,
+  MAP_GET_MAPS_SUCCESS,
+  MAP_REMOVE_DEVICE_FAILED,
+  MAP_REMOVE_DEVICE_START,
+  MAP_REMOVE_DEVICE_SUCCESS,
+  MAP_RESTORE_FAILED,
+  MAP_RESTORE_START,
+  MAP_RESTORE_SUCCESS,
+  MapAction,
+  MapState,
+  MapStatus,
+  initialMapState,
+} from '../types/MapTypes';
 
-// =======================
-// STATE INTERFACE
-// =======================
+export const mapReducer: Reducer<MapState, MapAction> = (state = initialMapState, action) => {
+  switch (action.type) {
+    case MAP_GET_MAPS_START:
+    case MAP_GET_BY_ID_START:
+      return { ...state, status: MapStatus.Fetching, error: null };
+    case MAP_CREATE_START:
+      return { ...state, status: MapStatus.Creating, error: null };
+    case MAP_DELETE_START:
+      return { ...state, status: MapStatus.Deleting, error: null };
+    case MAP_RESTORE_START:
+      return { ...state, status: MapStatus.Restoring, error: null };
+    case MAP_ADD_DEVICE_START:
+      return { ...state, status: MapStatus.AddingDevice, error: null };
+    case MAP_REMOVE_DEVICE_START:
+      return { ...state, status: MapStatus.RemovingDevice, error: null };
 
-export interface MapState {
-  // Data
-  maps: Map[];
-  selectedMap: Map | null;
+    case MAP_GET_MAPS_SUCCESS:
+      return {
+        ...state,
+        maps: action.payload.response.data,
+        total: action.payload.response.total,
+        currentPage: action.payload.response.offset / action.payload.response.limit + 1,
+        pageSize: action.payload.response.limit,
+        status: MapStatus.Success,
+      };
+    case MAP_GET_BY_ID_SUCCESS:
+      return { ...state, selectedMap: action.payload.map, status: MapStatus.Success };
+    case MAP_CREATE_SUCCESS:
+      return {
+        ...state,
+        maps: [action.payload.map, ...state.maps],
+        total: state.total + 1,
+        status: MapStatus.Success,
+      };
+    case MAP_DELETE_SUCCESS:
+      return {
+        ...state,
+        maps: state.maps.filter((m) => m.id !== action.payload.id),
+        total: state.total - 1,
+        status: MapStatus.Success,
+      };
+    case MAP_RESTORE_SUCCESS:
+      return {
+        ...state,
+        maps: [action.payload.map, ...state.maps],
+        total: state.total + 1,
+        status: MapStatus.Success,
+      };
+    case MAP_ADD_DEVICE_SUCCESS: {
+      const { device } = action.payload;
+      const updatedMap = state.selectedMap
+        ? {
+            ...state.selectedMap,
+            devices: [...(state.selectedMap.devices || []), device],
+          }
+        : null;
+      return { ...state, selectedMap: updatedMap, status: MapStatus.Success };
+    }
+    case MAP_REMOVE_DEVICE_SUCCESS: {
+      const { deviceMapId } = action.payload;
+      const updatedMap = state.selectedMap
+        ? {
+            ...state.selectedMap,
+            devices: (state.selectedMap.devices || []).filter((d) => d.id !== deviceMapId),
+          }
+        : null;
+      return { ...state, selectedMap: updatedMap, status: MapStatus.Success };
+    }
 
-  // Pagination
-  total: number;
-  currentPage: number;
-  pageSize: number;
+    case MAP_GET_MAPS_FAILED:
+    case MAP_GET_BY_ID_FAILED:
+    case MAP_CREATE_FAILED:
+    case MAP_DELETE_FAILED:
+    case MAP_RESTORE_FAILED:
+    case MAP_ADD_DEVICE_FAILED:
+    case MAP_REMOVE_DEVICE_FAILED:
+      return { ...state, status: MapStatus.Failed, error: action.payload.error };
 
-  // Loading states
-  loading: MapLoadingState;
+    case MAP_CLEAR_ERROR:
+      return { ...state, error: null };
 
-  // Error state
-  error: string | null;
-}
-
-// =======================
-// INITIAL STATE
-// =======================
-
-const initialLoadingState: MapLoadingState = {
-  getMapsThunk: false,
-  getMapByIdThunk: false,
-  createMapThunk: false,
-  deleteMapThunk: false,
-  restoreMapThunk: false,
-  addDeviceToMapThunk: false,
-  removeDeviceFromMapThunk: false,
+    default:
+      return state;
+  }
 };
 
-const initialState: MapState = {
-  maps: [],
-  selectedMap: null,
-  total: 0,
-  currentPage: 1,
-  pageSize: 10,
-  loading: initialLoadingState,
-  error: null,
-};
-
-// =======================
-// SLICE
-// =======================
-
-const mapSlice = createSlice({
-  name: 'maps',
-  initialState,
-  reducers: {
-    clearSelectedMap: (state) => {
-      state.selectedMap = null;
-    },
-    clearMapError: (state) => {
-      state.error = null;
-    },
-  },
-  extraReducers: (builder) => {
-    // GET ALL (paginated)
-    builder
-      .addCase(getMapsThunk.pending, (state) => {
-        state.loading.getMapsThunk = true;
-        state.error = null;
-      })
-      .addCase(getMapsThunk.fulfilled, (state, action: PayloadAction<PaginatedResponse<Map>>) => {
-        state.loading.getMapsThunk = false;
-        state.maps = action.payload.data;
-        state.total = action.payload.total;
-        state.currentPage = action.payload.offset / action.payload.limit + 1;
-        state.pageSize = action.payload.limit;
-      })
-      .addCase(getMapsThunk.rejected, (state, action) => {
-        state.loading.getMapsThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch maps.';
-      });
-
-    // GET BY ID
-    builder
-      .addCase(getMapByIdThunk.pending, (state) => {
-        state.loading.getMapByIdThunk = true;
-        state.error = null;
-      })
-      .addCase(getMapByIdThunk.fulfilled, (state, action: PayloadAction<Map>) => {
-        state.loading.getMapByIdThunk = false;
-        state.selectedMap = action.payload;
-      })
-      .addCase(getMapByIdThunk.rejected, (state, action) => {
-        state.loading.getMapByIdThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch map.';
-      });
-
-    // CREATE
-    builder
-      .addCase(createMapThunk.pending, (state) => {
-        state.loading.createMapThunk = true;
-        state.error = null;
-      })
-      .addCase(createMapThunk.fulfilled, (state, action: PayloadAction<Map>) => {
-        state.loading.createMapThunk = false;
-        state.maps.unshift(action.payload);
-        state.total += 1;
-      })
-      .addCase(createMapThunk.rejected, (state, action) => {
-        state.loading.createMapThunk = false;
-        state.error = (action.payload as string) || 'Failed to create map.';
-      });
-
-    // DELETE
-    builder
-      .addCase(deleteMapThunk.pending, (state) => {
-        state.loading.deleteMapThunk = true;
-        state.error = null;
-      })
-      .addCase(deleteMapThunk.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading.deleteMapThunk = false;
-        state.maps = state.maps.filter((m) => m.id !== action.payload);
-        state.total -= 1;
-      })
-      .addCase(deleteMapThunk.rejected, (state, action) => {
-        state.loading.deleteMapThunk = false;
-        state.error = (action.payload as string) || 'Failed to delete map.';
-      });
-
-    // RESTORE
-    builder
-      .addCase(restoreMapThunk.pending, (state) => {
-        state.loading.restoreMapThunk = true;
-        state.error = null;
-      })
-      .addCase(restoreMapThunk.fulfilled, (state, action: PayloadAction<Map>) => {
-        state.loading.restoreMapThunk = false;
-        const index = state.maps.findIndex((m) => m.id === action.payload.id);
-        if (index !== -1) {
-          state.maps[index] = action.payload;
-        } else {
-          state.maps.unshift(action.payload);
-          state.total += 1;
-        }
-      })
-      .addCase(restoreMapThunk.rejected, (state, action) => {
-        state.loading.restoreMapThunk = false;
-        state.error = (action.payload as string) || 'Failed to restore map.';
-      });
-
-    // ADD DEVICE
-    builder
-      .addCase(addDeviceToMapThunk.pending, (state) => {
-        state.loading.addDeviceToMapThunk = true;
-        state.error = null;
-      })
-      .addCase(addDeviceToMapThunk.fulfilled, (state, action: PayloadAction<DeviceOnMap>) => {
-        state.loading.addDeviceToMapThunk = false;
-        if (state.selectedMap && state.selectedMap.devices) {
-          state.selectedMap.devices.push(action.payload);
-        }
-      })
-      .addCase(addDeviceToMapThunk.rejected, (state, action) => {
-        state.loading.addDeviceToMapThunk = false;
-        state.error = (action.payload as string) || 'Failed to add device to map.';
-      });
-
-    // REMOVE DEVICE
-    builder
-      .addCase(removeDeviceFromMapThunk.pending, (state) => {
-        state.loading.removeDeviceFromMapThunk = true;
-        state.error = null;
-      })
-      .addCase(removeDeviceFromMapThunk.fulfilled, (state, action) => {
-        state.loading.removeDeviceFromMapThunk = false;
-        if (state.selectedMap && state.selectedMap.devices) {
-          state.selectedMap.devices = state.selectedMap.devices.filter(
-            (d) => d.id !== action.meta.arg.deviceMapId,
-          );
-        }
-      })
-      .addCase(removeDeviceFromMapThunk.rejected, (state, action) => {
-        state.loading.removeDeviceFromMapThunk = false;
-        state.error = (action.payload as string) || 'Failed to remove device from map.';
-      });
-  },
-});
-
-// =======================
-// EXPORTS
-// =======================
-
-// Actions
-export const { clearSelectedMap, clearMapError } = mapSlice.actions;
-
-// Selectors
-export const selectMaps = (state: { maps: MapState }) => state.maps.maps;
-export const selectSelectedMap = (state: { maps: MapState }) => state.maps.selectedMap;
-export const selectMapLoading = (state: { maps: MapState }) => state.maps.loading;
-export const selectMapError = (state: { maps: MapState }) => state.maps.error;
-export const selectMapPagination = (state: { maps: MapState }) => ({
-  total: state.maps.total,
-  currentPage: state.maps.currentPage,
-  pageSize: state.maps.pageSize,
-});
-
-// Reducer
-export default mapSlice.reducer;
+export default mapReducer;

@@ -1,85 +1,38 @@
-// src/store/reducers/connectionTypeSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+// src/store/reducers/connectionTypeReducer.ts
+import { Reducer } from 'redux';
 
-import { getConnectionTypesThunk } from '../actions/connectionTypeActions';
-import type { ConnectionType } from '../types/ApiTypes';
-import type { ConnectionTypeLoadingState } from '../types/LoadingTypes';
+import { ConnectionType } from '../types/ApiTypes';
+import {
+  CONNECTION_TYPE_CLEAR_ERROR,
+  CONNECTION_TYPE_GET_CONNECTION_TYPES_FAILED,
+  CONNECTION_TYPE_GET_CONNECTION_TYPES_START,
+  CONNECTION_TYPE_GET_CONNECTION_TYPES_SUCCESS,
+  ConnectionTypeAction,
+  ConnectionTypeState,
+  ConnectionTypeStatus,
+  initialConnectionTypeState,
+} from '../types/ConnectionTypeTypes';
 
-// =======================
-// STATE INTERFACE
-// =======================
-
-export interface ConnectionTypeState {
-  // Data
-  connectionTypes: ConnectionType[];
-
-  // Loading states
-  loading: ConnectionTypeLoadingState;
-
-  // Error state
-  error: string | null;
-}
-
-// =======================
-// INITIAL STATE
-// =======================
-
-const initialLoadingState: ConnectionTypeLoadingState = {
-  getConnectionTypesThunk: false,
+export const connectionTypeReducer: Reducer<ConnectionTypeState, ConnectionTypeAction> = (
+  state = initialConnectionTypeState,
+  action,
+) => {
+  switch (action.type) {
+    case CONNECTION_TYPE_GET_CONNECTION_TYPES_START:
+      return { ...state, status: ConnectionTypeStatus.Fetching, error: null };
+    case CONNECTION_TYPE_GET_CONNECTION_TYPES_SUCCESS:
+      return {
+        ...state,
+        connectionTypes: action.payload.connectionTypes,
+        status: ConnectionTypeStatus.Success,
+      };
+    case CONNECTION_TYPE_GET_CONNECTION_TYPES_FAILED:
+      return { ...state, status: ConnectionTypeStatus.Failed, error: action.payload.error };
+    case CONNECTION_TYPE_CLEAR_ERROR:
+      return { ...state, error: null };
+    default:
+      return state;
+  }
 };
 
-const initialState: ConnectionTypeState = {
-  connectionTypes: [],
-  loading: initialLoadingState,
-  error: null,
-};
-
-// =======================
-// SLICE
-// =======================
-
-const connectionTypeSlice = createSlice({
-  name: 'connectionTypes',
-  initialState,
-  reducers: {
-    clearConnectionTypeError: (state) => {
-      state.error = null;
-    },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(getConnectionTypesThunk.pending, (state) => {
-        state.loading.getConnectionTypesThunk = true;
-        state.error = null;
-      })
-      .addCase(
-        getConnectionTypesThunk.fulfilled,
-        (state, action: PayloadAction<ConnectionType[]>) => {
-          state.loading.getConnectionTypesThunk = false;
-          state.connectionTypes = action.payload;
-        },
-      )
-      .addCase(getConnectionTypesThunk.rejected, (state, action) => {
-        state.loading.getConnectionTypesThunk = false;
-        state.error = action.payload || 'Failed to fetch connection types.';
-      });
-  },
-});
-
-// =======================
-// EXPORTS
-// =======================
-
-// Actions
-export const { clearConnectionTypeError } = connectionTypeSlice.actions;
-
-// Selectors
-export const selectConnectionTypes = (state: { connectionTypes: ConnectionTypeState }) =>
-  state.connectionTypes.connectionTypes;
-export const selectConnectionTypeLoading = (state: { connectionTypes: ConnectionTypeState }) =>
-  state.connectionTypes.loading;
-export const selectConnectionTypeError = (state: { connectionTypes: ConnectionTypeState }) =>
-  state.connectionTypes.error;
-
-// Reducer
-export default connectionTypeSlice.reducer;
+export default connectionTypeReducer;

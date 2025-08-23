@@ -1,101 +1,40 @@
 // src/store/reducers/deviceTypeSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { Reducer } from 'redux';
 
-import { getDeviceTypesThunk } from '../actions/deviceTypeActions';
-import type { DeviceType, PaginatedResponse } from '../types/ApiTypes';
-import type { DeviceTypeLoadingState } from '../types/LoadingTypes';
+import {
+  DEVICE_TYPE_CLEAR_ERROR,
+  DEVICE_TYPE_GET_TYPES_FAILED,
+  DEVICE_TYPE_GET_TYPES_START,
+  DEVICE_TYPE_GET_TYPES_SUCCESS,
+  DeviceTypeAction,
+  DeviceTypeState,
+  DeviceTypeStatus,
+  initialDeviceTypeState,
+} from '../types/DeviceTypeTypes';
 
-// =======================
-// STATE INTERFACE
-// =======================
-
-export interface DeviceTypeState {
-  // Data
-  deviceTypes: DeviceType[];
-
-  // Pagination
-  total: number;
-  currentPage: number;
-  pageSize: number;
-
-  // Loading states
-  loading: DeviceTypeLoadingState;
-
-  // Error state
-  error: string | null;
-}
-
-// =======================
-// INITIAL STATE
-// =======================
-
-const initialLoadingState: DeviceTypeLoadingState = {
-  getDeviceTypesThunk: false,
+export const deviceTypeReducer: Reducer<DeviceTypeState, DeviceTypeAction> = (
+  state = initialDeviceTypeState,
+  action,
+) => {
+  switch (action.type) {
+    case DEVICE_TYPE_GET_TYPES_START:
+      return { ...state, status: DeviceTypeStatus.Fetching, error: null };
+    case DEVICE_TYPE_GET_TYPES_SUCCESS:
+      return {
+        ...state,
+        deviceTypes: action.payload.response.data,
+        total: action.payload.response.total,
+        currentPage: action.payload.response.offset / action.payload.response.limit + 1,
+        pageSize: action.payload.response.limit,
+        status: DeviceTypeStatus.Success,
+      };
+    case DEVICE_TYPE_GET_TYPES_FAILED:
+      return { ...state, status: DeviceTypeStatus.Failed, error: action.payload.error };
+    case DEVICE_TYPE_CLEAR_ERROR:
+      return { ...state, error: null };
+    default:
+      return state;
+  }
 };
 
-const initialState: DeviceTypeState = {
-  deviceTypes: [],
-  total: 0,
-  currentPage: 1,
-  pageSize: 10,
-  loading: initialLoadingState,
-  error: null,
-};
-
-// =======================
-// SLICE
-// =======================
-
-const deviceTypeSlice = createSlice({
-  name: 'deviceTypes',
-  initialState,
-  reducers: {
-    clearDeviceTypeError: (state) => {
-      state.error = null;
-    },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(getDeviceTypesThunk.pending, (state) => {
-        state.loading.getDeviceTypesThunk = true;
-        state.error = null;
-      })
-      .addCase(
-        getDeviceTypesThunk.fulfilled,
-        (state, action: PayloadAction<PaginatedResponse<DeviceType>>) => {
-          state.loading.getDeviceTypesThunk = false;
-          state.deviceTypes = action.payload.data;
-          state.total = action.payload.total;
-          state.currentPage = action.payload.offset / action.payload.limit + 1;
-          state.pageSize = action.payload.limit;
-        },
-      )
-      .addCase(getDeviceTypesThunk.rejected, (state, action) => {
-        state.loading.getDeviceTypesThunk = false;
-        state.error = (action.payload as string) || 'Failed to fetch device types.';
-      });
-  },
-});
-
-// =======================
-// EXPORTS
-// =======================
-
-// Actions
-export const { clearDeviceTypeError } = deviceTypeSlice.actions;
-
-// Selectors
-export const selectDeviceTypes = (state: { deviceTypes: DeviceTypeState }) =>
-  state.deviceTypes.deviceTypes;
-export const selectDeviceTypeLoading = (state: { deviceTypes: DeviceTypeState }) =>
-  state.deviceTypes.loading;
-export const selectDeviceTypeError = (state: { deviceTypes: DeviceTypeState }) =>
-  state.deviceTypes.error;
-export const selectDeviceTypePagination = (state: { deviceTypes: DeviceTypeState }) => ({
-  total: state.deviceTypes.total,
-  currentPage: state.deviceTypes.currentPage,
-  pageSize: state.deviceTypes.pageSize,
-});
-
-// Reducer
-export default deviceTypeSlice.reducer;
+export default deviceTypeReducer;

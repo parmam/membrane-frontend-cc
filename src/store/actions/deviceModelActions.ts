@@ -1,112 +1,211 @@
 // src/store/actions/deviceModelActions.ts
-import { createAsyncThunk } from '@reduxjs/toolkit';
-
-import { DeviceModelService } from '../../api/services';
-import type {
+import { DeviceModelService } from '../../api/services/deviceModelService';
+import {
   CreateDeviceModelRequest,
   DeviceModel,
   DeviceModelQueryParams,
   PaginatedResponse,
-  ThunkApiConfig,
   UpdateDeviceModelRequest,
 } from '../types/ApiTypes';
+import {
+  DEVICE_MODEL_CLEAR_ERROR,
+  DEVICE_MODEL_CREATE_FAILED,
+  DEVICE_MODEL_CREATE_START,
+  DEVICE_MODEL_CREATE_SUCCESS,
+  DEVICE_MODEL_DELETE_FAILED,
+  DEVICE_MODEL_DELETE_START,
+  DEVICE_MODEL_DELETE_SUCCESS,
+  DEVICE_MODEL_GET_BY_ID_FAILED,
+  DEVICE_MODEL_GET_BY_ID_START,
+  DEVICE_MODEL_GET_BY_ID_SUCCESS,
+  DEVICE_MODEL_GET_MODELS_FAILED,
+  DEVICE_MODEL_GET_MODELS_START,
+  DEVICE_MODEL_GET_MODELS_SUCCESS,
+  DEVICE_MODEL_RESTORE_FAILED,
+  DEVICE_MODEL_RESTORE_START,
+  DEVICE_MODEL_RESTORE_SUCCESS,
+  DEVICE_MODEL_UPDATE_FAILED,
+  DEVICE_MODEL_UPDATE_START,
+  DEVICE_MODEL_UPDATE_SUCCESS,
+  DeviceModelAction,
+  DeviceModelThunk,
+} from '../types/DeviceModelTypes';
 import { parseError } from '../types/ErrorTypes';
+import { AppErrorDto } from '../types/ErrorTypes';
 
-// ========================
-// GET DEVICE MODELS (PAGINATED)
-// ========================
-
-export const getDeviceModelsThunk = createAsyncThunk<
-  PaginatedResponse<DeviceModel>,
-  DeviceModelQueryParams | undefined,
-  ThunkApiConfig
->('deviceModels/getDeviceModelsThunk', async (params, { rejectWithValue }) => {
-  try {
-    const response = await DeviceModelService.getDeviceModels(params);
-    return response as unknown as PaginatedResponse<DeviceModel>;
-  } catch (error) {
-    return rejectWithValue(parseError(error));
-  }
+// Action Creators
+export const getModelsStart = (): DeviceModelAction => ({ type: DEVICE_MODEL_GET_MODELS_START });
+export const getModelsSuccess = (response: PaginatedResponse<DeviceModel>): DeviceModelAction => ({
+  type: DEVICE_MODEL_GET_MODELS_SUCCESS,
+  payload: { response },
+});
+export const getModelsFailed = (error: AppErrorDto): DeviceModelAction => ({
+  type: DEVICE_MODEL_GET_MODELS_FAILED,
+  payload: { error },
 });
 
-// ========================
-// GET DEVICE MODEL BY ID
-// ========================
+export const getByIdStart = (): DeviceModelAction => ({ type: DEVICE_MODEL_GET_BY_ID_START });
+export const getByIdSuccess = (model: DeviceModel): DeviceModelAction => ({
+  type: DEVICE_MODEL_GET_BY_ID_SUCCESS,
+  payload: { model },
+});
+export const getByIdFailed = (error: AppErrorDto): DeviceModelAction => ({
+  type: DEVICE_MODEL_GET_BY_ID_FAILED,
+  payload: { error },
+});
 
-export const getDeviceModelByIdThunk = createAsyncThunk<DeviceModel, string, ThunkApiConfig>(
-  'deviceModels/getDeviceModelByIdThunk',
-  async (id, { rejectWithValue }) => {
+export const createStart = (): DeviceModelAction => ({ type: DEVICE_MODEL_CREATE_START });
+export const createSuccess = (model: DeviceModel): DeviceModelAction => ({
+  type: DEVICE_MODEL_CREATE_SUCCESS,
+  payload: { model },
+});
+export const createFailed = (error: AppErrorDto): DeviceModelAction => ({
+  type: DEVICE_MODEL_CREATE_FAILED,
+  payload: { error },
+});
+
+export const updateStart = (): DeviceModelAction => ({ type: DEVICE_MODEL_UPDATE_START });
+export const updateSuccess = (model: DeviceModel): DeviceModelAction => ({
+  type: DEVICE_MODEL_UPDATE_SUCCESS,
+  payload: { model },
+});
+export const updateFailed = (error: AppErrorDto): DeviceModelAction => ({
+  type: DEVICE_MODEL_UPDATE_FAILED,
+  payload: { error },
+});
+
+export const deleteStart = (): DeviceModelAction => ({ type: DEVICE_MODEL_DELETE_START });
+export const deleteSuccess = (id: string): DeviceModelAction => ({
+  type: DEVICE_MODEL_DELETE_SUCCESS,
+  payload: { id },
+});
+export const deleteFailed = (error: AppErrorDto): DeviceModelAction => ({
+  type: DEVICE_MODEL_DELETE_FAILED,
+  payload: { error },
+});
+
+export const restoreStart = (): DeviceModelAction => ({ type: DEVICE_MODEL_RESTORE_START });
+export const restoreSuccess = (model: DeviceModel): DeviceModelAction => ({
+  type: DEVICE_MODEL_RESTORE_SUCCESS,
+  payload: { model },
+});
+export const restoreFailed = (error: AppErrorDto): DeviceModelAction => ({
+  type: DEVICE_MODEL_RESTORE_FAILED,
+  payload: { error },
+});
+
+export const clearError = (): DeviceModelAction => ({ type: DEVICE_MODEL_CLEAR_ERROR });
+
+// Thunks
+export const getDeviceModelsThunk =
+  (params?: DeviceModelQueryParams): DeviceModelThunk =>
+  async (dispatch) => {
+    dispatch(getModelsStart());
     try {
-      const response = await DeviceModelService.getDeviceModelById(id);
-      return response as unknown as DeviceModel;
+      const response = (await DeviceModelService.getDeviceModels(params)) ?? {
+        data: [],
+        total: 0,
+        limit: 10,
+        offset: 0,
+      };
+      dispatch(getModelsSuccess(response));
     } catch (error) {
-      return rejectWithValue(parseError(error));
+      dispatch(getModelsFailed(parseError(error)));
     }
-  },
-);
+  };
 
-// ========================
-// CREATE DEVICE MODEL
-// ========================
+export const getDeviceModelByIdThunk =
+  (id: string): DeviceModelThunk =>
+  async (dispatch) => {
+    dispatch(getByIdStart());
+    try {
+      const model = (await DeviceModelService.getDeviceModelById(id)) ?? {
+        id: '',
+        name: '',
+        deviceVendor: { id: '', name: '' },
+        deviceType: { id: '', name: '' },
+        meta: {},
+        createdAt: '',
+        updatedAt: '',
+        deletedAt: '',
+      };
+      dispatch(getByIdSuccess(model));
+    } catch (error) {
+      dispatch(getByIdFailed(parseError(error)));
+    }
+  };
 
-export const createDeviceModelThunk = createAsyncThunk<
-  DeviceModel,
-  CreateDeviceModelRequest,
-  ThunkApiConfig
->('deviceModels/createDeviceModelThunk', async (deviceModelData, { rejectWithValue }) => {
-  try {
-    const response = await DeviceModelService.createDeviceModel(deviceModelData);
-    return response as unknown as DeviceModel;
-  } catch (error) {
-    return rejectWithValue(parseError(error));
-  }
-});
+export const createDeviceModelThunk =
+  (deviceModelData: CreateDeviceModelRequest): DeviceModelThunk =>
+  async (dispatch) => {
+    dispatch(createStart());
+    try {
+      const model = (await DeviceModelService.createDeviceModel(deviceModelData)) ?? {
+        id: '',
+        name: '',
+        deviceVendor: { id: '', name: '' },
+        deviceType: { id: '', name: '' },
+        meta: {},
+        createdAt: '',
+        updatedAt: '',
+        deletedAt: '',
+      };
+      dispatch(createSuccess(model));
+    } catch (error) {
+      dispatch(createFailed(parseError(error)));
+    }
+  };
 
-// ========================
-// UPDATE DEVICE MODEL
-// ========================
+export const updateDeviceModelThunk =
+  (id: string, deviceModelData: UpdateDeviceModelRequest): DeviceModelThunk =>
+  async (dispatch) => {
+    dispatch(updateStart());
+    try {
+      const model = (await DeviceModelService.updateDeviceModel(id, deviceModelData)) ?? {
+        id: '',
+        name: '',
+        deviceVendor: { id: '', name: '' },
+        deviceType: { id: '', name: '' },
+        meta: {},
+        createdAt: '',
+        updatedAt: '',
+        deletedAt: '',
+      };
+      dispatch(updateSuccess(model));
+    } catch (error) {
+      dispatch(updateFailed(parseError(error)));
+    }
+  };
 
-export const updateDeviceModelThunk = createAsyncThunk<
-  DeviceModel,
-  { id: string; deviceModelData: UpdateDeviceModelRequest },
-  ThunkApiConfig
->('deviceModels/updateDeviceModelThunk', async ({ id, deviceModelData }, { rejectWithValue }) => {
-  try {
-    const response = await DeviceModelService.updateDeviceModel(id, deviceModelData);
-    return response as unknown as DeviceModel;
-  } catch (error) {
-    return rejectWithValue(parseError(error));
-  }
-});
-
-// ========================
-// DELETE DEVICE MODEL
-// ========================
-
-export const deleteDeviceModelThunk = createAsyncThunk<string, string, ThunkApiConfig>(
-  'deviceModels/deleteDeviceModelThunk',
-  async (id, { rejectWithValue }) => {
+export const deleteDeviceModelThunk =
+  (id: string): DeviceModelThunk =>
+  async (dispatch) => {
+    dispatch(deleteStart());
     try {
       await DeviceModelService.deleteDeviceModel(id);
-      return id;
+      dispatch(deleteSuccess(id));
     } catch (error) {
-      return rejectWithValue(parseError(error));
+      dispatch(deleteFailed(parseError(error)));
     }
-  },
-);
+  };
 
-// ========================
-// RESTORE DEVICE MODEL
-// ========================
-
-export const restoreDeviceModelThunk = createAsyncThunk<DeviceModel, string, ThunkApiConfig>(
-  'deviceModels/restoreDeviceModelThunk',
-  async (id, { rejectWithValue }) => {
+export const restoreDeviceModelThunk =
+  (id: string): DeviceModelThunk =>
+  async (dispatch) => {
+    dispatch(restoreStart());
     try {
-      const response = await DeviceModelService.restoreDeviceModel(id);
-      return response as unknown as DeviceModel;
+      const model = (await DeviceModelService.restoreDeviceModel(id)) ?? {
+        id: '',
+        name: '',
+        deviceVendor: { id: '', name: '' },
+        deviceType: { id: '', name: '' },
+        meta: {},
+        createdAt: '',
+        updatedAt: '',
+        deletedAt: '',
+      };
+      dispatch(restoreSuccess(model));
     } catch (error) {
-      return rejectWithValue(parseError(error));
+      dispatch(restoreFailed(parseError(error)));
     }
-  },
-);
+  };

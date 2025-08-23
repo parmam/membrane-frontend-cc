@@ -1,225 +1,116 @@
-// src/store/reducers/roleSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+// src/store/reducers/roleReducer.ts
+import { Reducer } from 'redux';
 
+import { PaginatedResponse, Role } from '../types/ApiTypes';
 import {
-  createRoleThunk,
-  deleteRoleThunk,
-  getRoleByIdThunk,
-  getRolesThunk,
-  restoreRoleThunk,
-  updateRoleThunk,
-} from '../actions/roleActions';
-import type { PaginatedResponse, Role } from '../types/ApiTypes';
-import type { RoleLoadingState } from '../types/LoadingTypes';
+  ROLE_CLEAR_ERROR,
+  ROLE_CREATE_FAILED,
+  ROLE_CREATE_START,
+  ROLE_CREATE_SUCCESS,
+  ROLE_DELETE_FAILED,
+  ROLE_DELETE_START,
+  ROLE_DELETE_SUCCESS,
+  ROLE_GET_ROLES_FAILED,
+  ROLE_GET_ROLES_START,
+  ROLE_GET_ROLES_SUCCESS,
+  ROLE_GET_ROLE_BY_ID_FAILED,
+  ROLE_GET_ROLE_BY_ID_START,
+  ROLE_GET_ROLE_BY_ID_SUCCESS,
+  ROLE_RESTORE_FAILED,
+  ROLE_RESTORE_START,
+  ROLE_RESTORE_SUCCESS,
+  ROLE_UPDATE_FAILED,
+  ROLE_UPDATE_START,
+  ROLE_UPDATE_SUCCESS,
+  RoleAction,
+  RoleState,
+  RoleStatus,
+  initialRoleState,
+} from '../types/RoleTypes';
 
-// ========================
-// STATE INTERFACE
-// ========================
+export const roleReducer: Reducer<RoleState, RoleAction> = (state = initialRoleState, action) => {
+  switch (action.type) {
+    case ROLE_GET_ROLES_START:
+      return { ...state, status: RoleStatus.Fetching, error: null };
+    case ROLE_GET_ROLES_SUCCESS:
+      return {
+        ...state,
+        roles: action.payload.response.data,
+        total: action.payload.response.total,
+        currentPage: action.payload.response.offset / action.payload.response.limit + 1,
+        pageSize: action.payload.response.limit,
+        status: RoleStatus.Success,
+      };
+    case ROLE_GET_ROLES_FAILED:
+      return { ...state, status: RoleStatus.Failed, error: action.payload.error };
 
-export interface RoleState {
-  // Data
-  roles: Role[];
-  selectedRole: Role | null;
+    case ROLE_GET_ROLE_BY_ID_START:
+      return { ...state, status: RoleStatus.Fetching, error: null };
+    case ROLE_GET_ROLE_BY_ID_SUCCESS:
+      return { ...state, selectedRole: action.payload.role, status: RoleStatus.Success };
+    case ROLE_GET_ROLE_BY_ID_FAILED:
+      return { ...state, status: RoleStatus.Failed, error: action.payload.error };
 
-  // Pagination
-  total: number;
-  currentPage: number;
-  pageSize: number;
+    case ROLE_CREATE_START:
+      return { ...state, status: RoleStatus.Creating, error: null };
+    case ROLE_CREATE_SUCCESS:
+      return {
+        ...state,
+        roles: [action.payload.role, ...state.roles],
+        total: state.total + 1,
+        status: RoleStatus.Success,
+      };
+    case ROLE_CREATE_FAILED:
+      return { ...state, status: RoleStatus.Failed, error: action.payload.error };
 
-  // Loading states
-  loading: RoleLoadingState;
+    case ROLE_UPDATE_START:
+      return { ...state, status: RoleStatus.Updating, error: null };
+    case ROLE_UPDATE_SUCCESS: {
+      const updatedRoles = state.roles.map((r) =>
+        r.id === action.payload.role.id ? action.payload.role : r,
+      );
+      return {
+        ...state,
+        roles: updatedRoles,
+        selectedRole: action.payload.role,
+        status: RoleStatus.Success,
+      };
+    }
+    case ROLE_UPDATE_FAILED:
+      return { ...state, status: RoleStatus.Failed, error: action.payload.error };
 
-  // Error state
-  error: string | null;
-}
+    case ROLE_DELETE_START:
+      return { ...state, status: RoleStatus.Deleting, error: null };
+    case ROLE_DELETE_SUCCESS: {
+      const filteredRoles = state.roles.filter((r) => r.id !== action.payload.id);
+      return {
+        ...state,
+        roles: filteredRoles,
+        total: state.total - 1,
+        status: RoleStatus.Success,
+      };
+    }
+    case ROLE_DELETE_FAILED:
+      return { ...state, status: RoleStatus.Failed, error: action.payload.error };
 
-// ========================
-// INITIAL STATE
-// ========================
+    case ROLE_RESTORE_START:
+      return { ...state, status: RoleStatus.Restoring, error: null };
+    case ROLE_RESTORE_SUCCESS:
+      return {
+        ...state,
+        roles: [action.payload.role, ...state.roles],
+        total: state.total + 1,
+        status: RoleStatus.Success,
+      };
+    case ROLE_RESTORE_FAILED:
+      return { ...state, status: RoleStatus.Failed, error: action.payload.error };
 
-const initialLoadingState: RoleLoadingState = {
-  getRolesThunk: false,
-  getRoleByIdThunk: false,
-  createRoleThunk: false,
-  updateRoleThunk: false,
-  deleteRoleThunk: false,
-  restoreRoleThunk: false,
+    case ROLE_CLEAR_ERROR:
+      return { ...state, error: null };
+
+    default:
+      return state;
+  }
 };
 
-const initialState: RoleState = {
-  roles: [],
-  selectedRole: null,
-  total: 0,
-  currentPage: 1,
-  pageSize: 10,
-  loading: initialLoadingState,
-  error: null,
-};
-
-// ========================
-// SLICE
-// ========================
-
-const roleSlice = createSlice({
-  name: 'roles',
-  initialState,
-  reducers: {
-    // Clear error
-    clearError: (state) => {
-      state.error = null;
-    },
-
-    // Clear selected role
-    clearSelectedRole: (state) => {
-      state.selectedRole = null;
-    },
-
-    // Reset state
-    resetState: () => initialState,
-  },
-  extraReducers: (builder) => {
-    // ========================
-    // GET ROLES
-    // ========================
-    builder
-      .addCase(getRolesThunk.pending, (state) => {
-        state.loading.getRolesThunk = true;
-        state.error = null;
-      })
-      .addCase(getRolesThunk.fulfilled, (state, action: PayloadAction<PaginatedResponse<Role>>) => {
-        state.loading.getRolesThunk = false;
-        state.roles = action.payload.data;
-        state.total = action.payload.total;
-        state.currentPage = Math.floor(action.payload.offset / action.payload.limit) + 1;
-        state.pageSize = action.payload.limit;
-        state.error = null;
-      })
-      .addCase(getRolesThunk.rejected, (state, action) => {
-        state.loading.getRolesThunk = false;
-        state.error = action.payload || 'Failed to fetch roles';
-      })
-
-      // ========================
-      // GET ROLE BY ID
-      // ========================
-      .addCase(getRoleByIdThunk.pending, (state) => {
-        state.loading.getRoleByIdThunk = true;
-        state.error = null;
-      })
-      .addCase(getRoleByIdThunk.fulfilled, (state, action: PayloadAction<Role>) => {
-        state.loading.getRoleByIdThunk = false;
-        state.selectedRole = action.payload;
-        state.error = null;
-      })
-      .addCase(getRoleByIdThunk.rejected, (state, action) => {
-        state.loading.getRoleByIdThunk = false;
-        state.error = action.payload || 'Failed to fetch role';
-      })
-
-      // ========================
-      // CREATE ROLE
-      // ========================
-      .addCase(createRoleThunk.pending, (state) => {
-        state.loading.createRoleThunk = true;
-        state.error = null;
-      })
-      .addCase(createRoleThunk.fulfilled, (state, action: PayloadAction<Role>) => {
-        state.loading.createRoleThunk = false;
-        state.roles.unshift(action.payload);
-        state.selectedRole = action.payload;
-        state.total += 1;
-        state.error = null;
-      })
-      .addCase(createRoleThunk.rejected, (state, action) => {
-        state.loading.createRoleThunk = false;
-        state.error = action.payload || 'Failed to create role';
-      })
-
-      // ========================
-      // UPDATE ROLE
-      // ========================
-      .addCase(updateRoleThunk.pending, (state) => {
-        state.loading.updateRoleThunk = true;
-        state.error = null;
-      })
-      .addCase(updateRoleThunk.fulfilled, (state, action: PayloadAction<Role>) => {
-        state.loading.updateRoleThunk = false;
-        const index = state.roles.findIndex((role) => role.id === action.payload.id);
-        if (index !== -1) {
-          state.roles[index] = action.payload;
-        }
-        if (state.selectedRole?.id === action.payload.id) {
-          state.selectedRole = action.payload;
-        }
-        state.error = null;
-      })
-      .addCase(updateRoleThunk.rejected, (state, action) => {
-        state.loading.updateRoleThunk = false;
-        state.error = action.payload || 'Failed to update role';
-      })
-
-      // ========================
-      // DELETE ROLE
-      // ========================
-      .addCase(deleteRoleThunk.pending, (state) => {
-        state.loading.deleteRoleThunk = true;
-        state.error = null;
-      })
-      .addCase(deleteRoleThunk.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading.deleteRoleThunk = false;
-        state.roles = state.roles.filter((role) => role.id !== action.payload);
-        if (state.selectedRole?.id === action.payload) {
-          state.selectedRole = null;
-        }
-        state.total -= 1;
-        state.error = null;
-      })
-      .addCase(deleteRoleThunk.rejected, (state, action) => {
-        state.loading.deleteRoleThunk = false;
-        state.error = action.payload || 'Failed to delete role';
-      })
-
-      // ========================
-      // RESTORE ROLE
-      // ========================
-      .addCase(restoreRoleThunk.pending, (state) => {
-        state.loading.restoreRoleThunk = true;
-        state.error = null;
-      })
-      .addCase(restoreRoleThunk.fulfilled, (state, action: PayloadAction<Role>) => {
-        state.loading.restoreRoleThunk = false;
-        const index = state.roles.findIndex((role) => role.id === action.payload.id);
-        if (index !== -1) {
-          state.roles[index] = action.payload;
-        } else {
-          state.roles.unshift(action.payload);
-          state.total += 1;
-        }
-        state.selectedRole = action.payload;
-        state.error = null;
-      })
-      .addCase(restoreRoleThunk.rejected, (state, action) => {
-        state.loading.restoreRoleThunk = false;
-        state.error = action.payload || 'Failed to restore role';
-      });
-  },
-});
-
-// ========================
-// ACTIONS & SELECTORS
-// ========================
-
-export const { clearError, clearSelectedRole, resetState } = roleSlice.actions;
-
-// Selectors
-export const selectRoles = (state: { roles: RoleState }) => state.roles.roles;
-export const selectSelectedRole = (state: { roles: RoleState }) => state.roles.selectedRole;
-export const selectRoleLoading = (state: { roles: RoleState }) => state.roles.loading;
-export const selectRoleError = (state: { roles: RoleState }) => state.roles.error;
-export const selectRolePagination = (state: { roles: RoleState }) => ({
-  total: state.roles.total,
-  currentPage: state.roles.currentPage,
-  pageSize: state.roles.pageSize,
-});
-
-export default roleSlice.reducer;
+export default roleReducer;

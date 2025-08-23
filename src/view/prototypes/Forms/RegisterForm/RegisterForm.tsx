@@ -1,8 +1,8 @@
+import { useAppSelector } from '@/hooks/useAppSelector';
 import { useAuth } from '@/hooks/useAuth';
 import { useI18n } from '@/i18n';
 
 import { FunctionComponent, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { RootState } from '@store/index';
@@ -26,7 +26,9 @@ const RegisterForm: FunctionComponent<RegisterFormProps> = (props) => {
   const theme = useTheme();
   const { t } = useI18n();
   const { register, error: authError } = useAuth();
-  const { loading: userLoading, error: userError } = useSelector((state: RootState) => state.users);
+  const { loading: userLoading, error: userError } = useAppSelector(
+    (state: RootState) => state.users,
+  );
   const navigate = useNavigate();
 
   const [firstName, setFirstName] = useState('');

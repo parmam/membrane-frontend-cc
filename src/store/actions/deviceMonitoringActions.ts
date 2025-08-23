@@ -1,111 +1,147 @@
 // src/store/actions/deviceMonitoringActions.ts
-import { createAsyncThunk } from '@reduxjs/toolkit';
-
-import { DeviceMonitoringService } from '../../api/services';
-import type {
+import { DeviceMonitoringService } from '../../api/services/deviceMonitoringService';
+import {
   DeviceMonitoring,
   DeviceMonitoringQueryParams,
   GetLastStatusByDeviceRequest,
   GetUptimeFilters,
   LastStatusQueryParams,
   PaginatedResponse,
-  ThunkApiConfig,
 } from '../types/ApiTypes';
-import { parseError } from '../types/ErrorTypes';
-import { getDevicesThunk } from './deviceActions';
-import { getDeviceStatusesThunk } from './deviceStatusActions';
-import { getDeviceTypesThunk } from './deviceTypeActions';
-import { getDeviceVendorsThunk } from './deviceVendorActions';
-import { getGroupsThunk } from './groupActions';
-import { getPlacesThunk } from './placeActions';
+import {
+  DEVICE_MONITORING_CLEAR_ERROR,
+  DEVICE_MONITORING_GET_DATA_FAILED,
+  DEVICE_MONITORING_GET_DATA_START,
+  DEVICE_MONITORING_GET_DATA_SUCCESS,
+  DEVICE_MONITORING_GET_LAST_STATUS_BY_ID_FAILED,
+  DEVICE_MONITORING_GET_LAST_STATUS_BY_ID_START,
+  DEVICE_MONITORING_GET_LAST_STATUS_BY_ID_SUCCESS,
+  DEVICE_MONITORING_GET_LAST_STATUS_FAILED,
+  DEVICE_MONITORING_GET_LAST_STATUS_START,
+  DEVICE_MONITORING_GET_LAST_STATUS_SUCCESS,
+  DEVICE_MONITORING_GET_UPTIME_FAILED,
+  DEVICE_MONITORING_GET_UPTIME_START,
+  DEVICE_MONITORING_GET_UPTIME_SUCCESS,
+  DeviceMonitoringAction,
+  DeviceMonitoringThunk,
+} from '../types/DeviceMonitoringTypes';
+import { AppErrorDto, parseError } from '../types/ErrorTypes';
 
-// =======================
-// GET DEVICE MONITORING (PAGINATED)
-// =======================
-
-export const getDeviceMonitoringThunk = createAsyncThunk<
-  PaginatedResponse<DeviceMonitoring>,
-  DeviceMonitoringQueryParams | undefined,
-  ThunkApiConfig
->('deviceMonitoring/getDeviceMonitoringThunk', async (params, { rejectWithValue }) => {
-  try {
-    const response = await DeviceMonitoringService.getDeviceMonitoring(params);
-    return response as unknown as PaginatedResponse<DeviceMonitoring>;
-  } catch (error) {
-    return rejectWithValue(parseError(error));
-  }
+// Action Creators
+export const getDeviceMonitoringStart = (): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_DATA_START,
 });
 
-// =======================
-// GET LAST STATUS
-// =======================
-
-export const getLastStatusThunk = createAsyncThunk<
-  DeviceMonitoring[],
-  LastStatusQueryParams,
-  ThunkApiConfig
->('deviceMonitoring/getLastStatusThunk', async (params, { rejectWithValue }) => {
-  try {
-    const response = await DeviceMonitoringService.getLastStatus(params);
-    return response as unknown as DeviceMonitoring[];
-  } catch (error) {
-    return rejectWithValue(parseError(error));
-  }
+export const getDeviceMonitoringSuccess = (
+  response: PaginatedResponse<DeviceMonitoring>,
+): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_DATA_SUCCESS,
+  payload: { response },
 });
 
-// =======================
-// GET LAST STATUS BY ID
-// =======================
-
-export const getLastStatusByIdThunk = createAsyncThunk<
-  DeviceMonitoring[],
-  GetLastStatusByDeviceRequest,
-  ThunkApiConfig
->('deviceMonitoring/getLastStatusByIdThunk', async (deviceData, { rejectWithValue }) => {
-  try {
-    const response = await DeviceMonitoringService.getLastStatusById(deviceData);
-    return response as unknown as DeviceMonitoring[];
-  } catch (error) {
-    return rejectWithValue(parseError(error));
-  }
+export const getDeviceMonitoringFailed = (error: AppErrorDto): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_DATA_FAILED,
+  payload: { error },
 });
 
-// =======================
-// GET UPTIME
-// =======================
-
-export const getUptimeThunk = createAsyncThunk<
-  unknown, // The return type is not defined in the openapi spec
-  GetUptimeFilters,
-  ThunkApiConfig
->('deviceMonitoring/getUptimeThunk', async (filters, { rejectWithValue }) => {
-  try {
-    const response = await DeviceMonitoringService.getUptime(filters);
-    return response;
-  } catch (error) {
-    return rejectWithValue(parseError(error));
-  }
+export const getLastStatusStart = (): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_LAST_STATUS_START,
 });
 
-// =======================
-// GET MONITORING PAGE INITIAL DATA
-// =======================
+export const getLastStatusSuccess = (lastStatus: DeviceMonitoring[]): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_LAST_STATUS_SUCCESS,
+  payload: { lastStatus },
+});
 
-export const getMonitoringPageInitialDataThunk = createAsyncThunk<void, void, ThunkApiConfig>(
-  'deviceMonitoring/getMonitoringPageInitialDataThunk',
-  async (_, { dispatch, rejectWithValue }) => {
+export const getLastStatusFailed = (error: AppErrorDto): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_LAST_STATUS_FAILED,
+  payload: { error },
+});
+
+export const getLastStatusByIdStart = (): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_LAST_STATUS_BY_ID_START,
+});
+
+export const getLastStatusByIdSuccess = (
+  lastStatus: DeviceMonitoring[],
+): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_LAST_STATUS_BY_ID_SUCCESS,
+  payload: { lastStatus },
+});
+
+export const getLastStatusByIdFailed = (error: AppErrorDto): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_LAST_STATUS_BY_ID_FAILED,
+  payload: { error },
+});
+
+export const getUptimeStart = (): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_UPTIME_START,
+});
+
+export const getUptimeSuccess = (uptime: unknown): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_UPTIME_SUCCESS,
+  payload: { uptime },
+});
+
+export const getUptimeFailed = (error: AppErrorDto): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_GET_UPTIME_FAILED,
+  payload: { error },
+});
+
+export const clearDeviceMonitoringError = (): DeviceMonitoringAction => ({
+  type: DEVICE_MONITORING_CLEAR_ERROR,
+});
+
+// Thunks
+export const getDeviceMonitoringThunk =
+  (params?: DeviceMonitoringQueryParams): DeviceMonitoringThunk =>
+  async (dispatch) => {
+    dispatch(getDeviceMonitoringStart());
     try {
-      await Promise.all([
-        dispatch(getDeviceMonitoringThunk({ limit: 10, offset: 0, withTrashed: 1 })),
-        dispatch(getDevicesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-        dispatch(getDeviceStatusesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-        dispatch(getDeviceTypesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-        dispatch(getDeviceVendorsThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-        dispatch(getGroupsThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-        dispatch(getPlacesThunk({ limit: 99, offset: 0, withTrashed: 0 })),
-      ]);
+      const response = (await DeviceMonitoringService.getDeviceMonitoring(params)) ?? {
+        data: [],
+        total: 0,
+        limit: 10,
+        offset: 0,
+      };
+      dispatch(getDeviceMonitoringSuccess(response));
     } catch (error) {
-      return rejectWithValue(parseError(error));
+      dispatch(getDeviceMonitoringFailed(parseError(error)));
     }
-  },
-);
+  };
+
+export const getLastStatusThunk =
+  (params: LastStatusQueryParams): DeviceMonitoringThunk =>
+  async (dispatch) => {
+    dispatch(getLastStatusStart());
+    try {
+      const response = (await DeviceMonitoringService.getLastStatus(params)) ?? [];
+      dispatch(getLastStatusSuccess(response));
+    } catch (error) {
+      dispatch(getLastStatusFailed(parseError(error)));
+    }
+  };
+
+export const getLastStatusByIdThunk =
+  (deviceData: GetLastStatusByDeviceRequest): DeviceMonitoringThunk =>
+  async (dispatch) => {
+    dispatch(getLastStatusByIdStart());
+    try {
+      const response = (await DeviceMonitoringService.getLastStatusById(deviceData)) ?? [];
+      dispatch(getLastStatusByIdSuccess(response));
+    } catch (error) {
+      dispatch(getLastStatusByIdFailed(parseError(error)));
+    }
+  };
+
+export const getUptimeThunk =
+  (filters: GetUptimeFilters): DeviceMonitoringThunk =>
+  async (dispatch) => {
+    dispatch(getUptimeStart());
+    try {
+      const response = await DeviceMonitoringService.getUptime(filters);
+      dispatch(getUptimeSuccess(response));
+    } catch (error) {
+      dispatch(getUptimeFailed(parseError(error)));
+    }
+  };

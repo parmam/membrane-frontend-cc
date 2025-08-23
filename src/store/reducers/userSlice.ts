@@ -1,288 +1,101 @@
-// src/store/reducers/userSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+// src/store/reducers/userReducer.ts
+import { Reducer } from 'redux';
 
-import {
-  createUserThunk,
-  deleteUserThunk,
-  getUserByIdThunk,
-  getUsersThunk,
-  hasPermissionToThunk,
-  restoreUserThunk,
-  searchUserByCredentialsThunk,
-  updateUserThunk,
-} from '../actions/userActions';
-import type { PaginatedResponse, User } from '../types/ApiTypes';
-import { AppErrorDto } from '../types/ErrorTypes';
-import type { UserLoadingState } from '../types/LoadingTypes';
+import { UserAction, UserState, UserStatus, initialUserState } from '../types/UserTypes';
 
-// ========================
-// STATE INTERFACE
-// ========================
+export const userReducer: Reducer<UserState, UserAction> = (state = initialUserState, action) => {
+  switch (action.type) {
+    case USER_GET_USERS_START:
+      return { ...state, status: UserStatus.Fetching, error: null };
+    case USER_GET_USERS_SUCCESS:
+      return {
+        ...state,
+        users: action.payload.response.data,
+        total: action.payload.response.total,
+        currentPage: action.payload.response.offset / action.payload.response.limit + 1,
+        pageSize: action.payload.response.limit,
+        status: UserStatus.Success,
+      };
+    case USER_GET_USERS_FAILED:
+      return { ...state, status: UserStatus.Failed, error: action.payload.error };
 
-export interface UserState {
-  // Data
-  users: User[];
-  selectedUser: User | null;
-  searchedUser: User | null;
+    case USER_GET_USER_BY_ID_START:
+      return { ...state, status: UserStatus.Fetching, error: null };
+    case USER_GET_USER_BY_ID_SUCCESS:
+      return { ...state, selectedUser: action.payload.user, status: UserStatus.Success };
+    case USER_GET_USER_BY_ID_FAILED:
+      return { ...state, status: UserStatus.Failed, error: action.payload.error };
 
-  // Pagination
-  total: number;
-  currentPage: number;
-  pageSize: number;
+    case USER_CREATE_START:
+      return { ...state, status: UserStatus.Creating, error: null };
+    case USER_CREATE_SUCCESS:
+      return {
+        ...state,
+        users: [action.payload.user, ...state.users],
+        total: state.total + 1,
+        status: UserStatus.Success,
+      };
+    case USER_CREATE_FAILED:
+      return { ...state, status: UserStatus.Failed, error: action.payload.error };
 
-  // Loading states
-  loading: UserLoadingState;
+    case USER_UPDATE_START:
+      return { ...state, status: UserStatus.Updating, error: null };
+    case USER_UPDATE_SUCCESS:
+      const updatedUsers = state.users.map((u) =>
+        u.id === action.payload.user.id ? action.payload.user : u,
+      );
+      return {
+        ...state,
+        users: updatedUsers,
+        selectedUser: action.payload.user,
+        status: UserStatus.Success,
+      };
+    case USER_UPDATE_FAILED:
+      return { ...state, status: UserStatus.Failed, error: action.payload.error };
 
-  // Error state
-  error: AppErrorDto | null;
+    case USER_DELETE_START:
+      return { ...state, status: UserStatus.Deleting, error: null };
+    case USER_DELETE_SUCCESS:
+      const filteredUsers = state.users.filter((u) => u.id !== action.payload.id);
+      return {
+        ...state,
+        users: filteredUsers,
+        total: state.total - 1,
+        status: UserStatus.Success,
+      };
+    case USER_DELETE_FAILED:
+      return { ...state, status: UserStatus.Failed, error: action.payload.error };
 
-  // Additional states
-  hasPermission: boolean | null;
-}
+    case USER_RESTORE_START:
+      return { ...state, status: UserStatus.Restoring, error: null };
+    case USER_RESTORE_SUCCESS:
+      return {
+        ...state,
+        users: [action.payload.user, ...state.users],
+        total: state.total + 1,
+        status: UserStatus.Success,
+      };
+    case USER_RESTORE_FAILED:
+      return { ...state, status: UserStatus.Failed, error: action.payload.error };
 
-// ========================
-// INITIAL STATE
-// ========================
+    case USER_HAS_PERMISSION_START:
+      return { ...state, status: UserStatus.CheckingPermission, error: null };
+    case USER_HAS_PERMISSION_SUCCESS:
+      return { ...state, hasPermission: action.payload.hasPermission, status: UserStatus.Success };
+    case USER_HAS_PERMISSION_FAILED:
+      return { ...state, status: UserStatus.Failed, error: action.payload.error };
 
-const initialLoadingState: UserLoadingState = {
-  getUsersThunk: false,
-  getUserByIdThunk: false,
-  createUserThunk: false,
-  updateUserThunk: false,
-  deleteUserThunk: false,
-  restoreUserThunk: false,
-  hasPermissionToThunk: false,
-  searchUserByCredentialsThunk: false,
+    case USER_SEARCH_BY_CREDENTIALS_START:
+      return { ...state, status: UserStatus.Searching, error: null };
+    case USER_SEARCH_BY_CREDENTIALS_SUCCESS:
+      return { ...state, selectedUser: action.payload.user, status: UserStatus.Success };
+    case USER_SEARCH_BY_CREDENTIALS_FAILED:
+      return { ...state, status: UserStatus.Failed, error: action.payload.error };
+
+    case USER_CLEAR_ERROR:
+      return { ...state, error: null };
+
+    default:
+      return state;
+  }
 };
-
-const initialState: UserState = {
-  users: [],
-  selectedUser: null,
-  searchedUser: null,
-  total: 0,
-  currentPage: 1,
-  pageSize: 10,
-  loading: initialLoadingState,
-  error: null,
-  hasPermission: null,
-};
-
-// ========================
-// SLICE
-// ========================
-
-const userSlice = createSlice({
-  name: 'users',
-  initialState,
-  reducers: {
-    // Clear error
-    clearError: (state) => {
-      state.error = null;
-    },
-
-    // Clear selected user
-    clearSelectedUser: (state) => {
-      state.selectedUser = null;
-    },
-
-    // Clear searched user
-    clearSearchedUser: (state) => {
-      state.searchedUser = null;
-    },
-
-    // Clear permission result
-    clearPermissionResult: (state) => {
-      state.hasPermission = null;
-    },
-
-    // Reset state
-    resetState: () => initialState,
-  },
-  extraReducers: (builder) => {
-    // ========================
-    // GET USERS
-    // ========================
-    builder
-      .addCase(getUsersThunk.pending, (state) => {
-        state.loading.getUsersThunk = true;
-        state.error = null;
-      })
-      .addCase(getUsersThunk.fulfilled, (state, action: PayloadAction<PaginatedResponse<User>>) => {
-        state.loading.getUsersThunk = false;
-        state.users = action.payload.data;
-        state.total = action.payload.total;
-        state.currentPage = Math.floor(action.payload.offset / action.payload.limit) + 1;
-        state.pageSize = action.payload.limit;
-        state.error = null;
-      })
-      .addCase(getUsersThunk.rejected, (state, action) => {
-        state.loading.getUsersThunk = false;
-        state.error = action.payload ?? null;
-      })
-
-      // ========================
-      // GET USER BY ID
-      // ========================
-      .addCase(getUserByIdThunk.pending, (state) => {
-        state.loading.getUserByIdThunk = true;
-        state.error = null;
-      })
-      .addCase(getUserByIdThunk.fulfilled, (state, action: PayloadAction<User>) => {
-        state.loading.getUserByIdThunk = false;
-        state.selectedUser = action.payload;
-        state.error = null;
-      })
-      .addCase(getUserByIdThunk.rejected, (state, action) => {
-        state.loading.getUserByIdThunk = false;
-        state.error = action.payload ?? null;
-      })
-
-      // ========================
-      // CREATE USER
-      // ========================
-      .addCase(createUserThunk.pending, (state) => {
-        state.loading.createUserThunk = true;
-        state.error = null;
-      })
-      .addCase(createUserThunk.fulfilled, (state, action: PayloadAction<User>) => {
-        state.loading.createUserThunk = false;
-        state.users.unshift(action.payload);
-        state.selectedUser = action.payload;
-        state.total += 1;
-        state.error = null;
-      })
-      .addCase(createUserThunk.rejected, (state, action) => {
-        state.loading.createUserThunk = false;
-        state.error = action.payload ?? null;
-      })
-
-      // ========================
-      // UPDATE USER
-      // ========================
-      .addCase(updateUserThunk.pending, (state) => {
-        state.loading.updateUserThunk = true;
-        state.error = null;
-      })
-      .addCase(updateUserThunk.fulfilled, (state, action: PayloadAction<User>) => {
-        state.loading.updateUserThunk = false;
-        const index = state.users.findIndex((user) => user.id === action.payload.id);
-        if (index !== -1) {
-          state.users[index] = action.payload;
-        }
-        if (state.selectedUser?.id === action.payload.id) {
-          state.selectedUser = action.payload;
-        }
-        state.error = null;
-      })
-      .addCase(updateUserThunk.rejected, (state, action) => {
-        state.loading.updateUserThunk = false;
-        state.error = action.payload ?? null;
-      })
-
-      // ========================
-      // DELETE USER
-      // ========================
-      .addCase(deleteUserThunk.pending, (state) => {
-        state.loading.deleteUserThunk = true;
-        state.error = null;
-      })
-      .addCase(deleteUserThunk.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading.deleteUserThunk = false;
-        state.users = state.users.filter((user) => user.id !== action.payload);
-        if (state.selectedUser?.id === action.payload) {
-          state.selectedUser = null;
-        }
-        state.total -= 1;
-        state.error = null;
-      })
-      .addCase(deleteUserThunk.rejected, (state, action) => {
-        state.loading.deleteUserThunk = false;
-        state.error = action.payload ?? null;
-      })
-
-      // ========================
-      // RESTORE USER
-      // ========================
-      .addCase(restoreUserThunk.pending, (state) => {
-        state.loading.restoreUserThunk = true;
-        state.error = null;
-      })
-      .addCase(restoreUserThunk.fulfilled, (state, action: PayloadAction<User>) => {
-        state.loading.restoreUserThunk = false;
-        const index = state.users.findIndex((user) => user.id === action.payload.id);
-        if (index !== -1) {
-          state.users[index] = action.payload;
-        } else {
-          state.users.unshift(action.payload);
-          state.total += 1;
-        }
-        state.selectedUser = action.payload;
-        state.error = null;
-      })
-      .addCase(restoreUserThunk.rejected, (state, action) => {
-        state.loading.restoreUserThunk = false;
-        state.error = action.payload ?? null;
-      })
-
-      // ========================
-      // HAS PERMISSION TO
-      // ========================
-      .addCase(hasPermissionToThunk.pending, (state) => {
-        state.loading.hasPermissionToThunk = true;
-        state.error = null;
-      })
-      .addCase(hasPermissionToThunk.fulfilled, (state, action: PayloadAction<boolean>) => {
-        state.loading.hasPermissionToThunk = false;
-        state.hasPermission = action.payload;
-        state.error = null;
-      })
-      .addCase(hasPermissionToThunk.rejected, (state, action) => {
-        state.loading.hasPermissionToThunk = false;
-        state.error = action.payload ?? null;
-      })
-
-      // ========================
-      // SEARCH USER BY CREDENTIALS
-      // ========================
-      .addCase(searchUserByCredentialsThunk.pending, (state) => {
-        state.loading.searchUserByCredentialsThunk = true;
-        state.error = null;
-      })
-      .addCase(searchUserByCredentialsThunk.fulfilled, (state, action: PayloadAction<User>) => {
-        state.loading.searchUserByCredentialsThunk = false;
-        state.searchedUser = action.payload;
-        state.error = null;
-      })
-      .addCase(searchUserByCredentialsThunk.rejected, (state, action) => {
-        state.loading.searchUserByCredentialsThunk = false;
-        state.error = action.payload ?? null;
-      });
-  },
-});
-
-// ========================
-// ACTIONS & SELECTORS
-// ========================
-
-export const {
-  clearError,
-  clearSelectedUser,
-  clearSearchedUser,
-  clearPermissionResult,
-  resetState,
-} = userSlice.actions;
-
-// Selectors
-export const selectUsers = (state: { users: UserState }) => state.users.users;
-export const selectSelectedUser = (state: { users: UserState }) => state.users.selectedUser;
-export const selectSearchedUser = (state: { users: UserState }) => state.users.searchedUser;
-export const selectUserLoading = (state: { users: UserState }) => state.users.loading;
-export const selectUserError = (state: { users: UserState }) => state.users.error;
-export const selectHasPermission = (state: { users: UserState }) => state.users.hasPermission;
-export const selectUserPagination = (state: { users: UserState }) => ({
-  total: state.users.total,
-  currentPage: state.users.currentPage,
-  pageSize: state.users.pageSize,
-});
-
-export default userSlice.reducer;

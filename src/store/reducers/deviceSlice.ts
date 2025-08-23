@@ -1,178 +1,117 @@
-// src/store/reducers/deviceSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+// src/store/reducers/deviceReducer.ts
+import { Reducer } from 'redux';
 
+import { Device, PaginatedResponse } from '../types/ApiTypes';
 import {
-  createDeviceThunk,
-  deleteDeviceThunk,
-  getDeviceByIdThunk,
-  getDevicesThunk,
-  restoreDeviceThunk,
-  updateDeviceThunk,
-} from '../actions/deviceActions';
-import type { Device, PaginatedResponse } from '../types/ApiTypes';
-import type { DeviceLoadingState } from '../types/LoadingTypes';
+  DEVICE_CLEAR_ERROR,
+  DEVICE_CREATE_FAILED,
+  DEVICE_CREATE_START,
+  DEVICE_CREATE_SUCCESS,
+  DEVICE_DELETE_FAILED,
+  DEVICE_DELETE_START,
+  DEVICE_DELETE_SUCCESS,
+  DEVICE_GET_BY_ID_FAILED,
+  DEVICE_GET_BY_ID_START,
+  DEVICE_GET_BY_ID_SUCCESS,
+  DEVICE_GET_DEVICES_FAILED,
+  DEVICE_GET_DEVICES_START,
+  DEVICE_GET_DEVICES_SUCCESS,
+  DEVICE_RESTORE_FAILED,
+  DEVICE_RESTORE_START,
+  DEVICE_RESTORE_SUCCESS,
+  DEVICE_UPDATE_FAILED,
+  DEVICE_UPDATE_START,
+  DEVICE_UPDATE_SUCCESS,
+  DeviceAction,
+  DeviceState,
+  DeviceStatus,
+  initialDeviceState,
+} from '../types/DeviceTypes';
 
-// =======================
-// STATE INTERFACE
-// =======================
+export const deviceReducer: Reducer<DeviceState, DeviceAction> = (
+  state = initialDeviceState,
+  action,
+) => {
+  switch (action.type) {
+    case DEVICE_GET_DEVICES_START:
+      return { ...state, status: DeviceStatus.Fetching, error: null };
+    case DEVICE_GET_DEVICES_SUCCESS:
+      return {
+        ...state,
+        devices: action.payload.response.data,
+        total: action.payload.response.total,
+        currentPage: action.payload.response.offset / action.payload.response.limit + 1,
+        pageSize: action.payload.response.limit,
+        status: DeviceStatus.Success,
+      };
+    case DEVICE_GET_DEVICES_FAILED:
+      return { ...state, status: DeviceStatus.Failed, error: action.payload.error };
 
-export interface DeviceState {
-  // Data
-  devices: Device[];
-  selectedDevice: Device | null;
+    case DEVICE_GET_BY_ID_START:
+      return { ...state, status: DeviceStatus.Fetching, error: null };
+    case DEVICE_GET_BY_ID_SUCCESS:
+      return { ...state, selectedDevice: action.payload.device, status: DeviceStatus.Success };
+    case DEVICE_GET_BY_ID_FAILED:
+      return { ...state, status: DeviceStatus.Failed, error: action.payload.error };
 
-  // Pagination
-  total: number;
-  currentPage: number;
-  pageSize: number;
+    case DEVICE_CREATE_START:
+      return { ...state, status: DeviceStatus.Creating, error: null };
+    case DEVICE_CREATE_SUCCESS:
+      return {
+        ...state,
+        devices: [action.payload.device, ...state.devices],
+        total: state.total + 1,
+        status: DeviceStatus.Success,
+      };
+    case DEVICE_CREATE_FAILED:
+      return { ...state, status: DeviceStatus.Failed, error: action.payload.error };
 
-  // Loading states
-  loading: DeviceLoadingState;
+    case DEVICE_UPDATE_START:
+      return { ...state, status: DeviceStatus.Updating, error: null };
+    case DEVICE_UPDATE_SUCCESS: {
+      const updatedDevices = state.devices.map((d) =>
+        d.id === action.payload.device.id ? action.payload.device : d,
+      );
+      return {
+        ...state,
+        devices: updatedDevices,
+        selectedDevice: action.payload.device,
+        status: DeviceStatus.Success,
+      };
+    }
+    case DEVICE_UPDATE_FAILED:
+      return { ...state, status: DeviceStatus.Failed, error: action.payload.error };
 
-  // Error state
-  error: string | null;
-}
+    case DEVICE_DELETE_START:
+      return { ...state, status: DeviceStatus.Deleting, error: null };
+    case DEVICE_DELETE_SUCCESS: {
+      const filteredDevices = state.devices.filter((d) => d.id !== action.payload.id);
+      return {
+        ...state,
+        devices: filteredDevices,
+        total: state.total - 1,
+        status: DeviceStatus.Success,
+      };
+    }
+    case DEVICE_DELETE_FAILED:
+      return { ...state, status: DeviceStatus.Failed, error: action.payload.error };
 
-// =======================
-// INITIAL STATE
-// =======================
+    case DEVICE_RESTORE_START:
+      return { ...state, status: DeviceStatus.Restoring, error: null };
+    case DEVICE_RESTORE_SUCCESS:
+      return {
+        ...state,
+        devices: [action.payload.device, ...state.devices],
+        total: state.total + 1,
+        status: DeviceStatus.Success,
+      };
+    case DEVICE_RESTORE_FAILED:
+      return { ...state, status: DeviceStatus.Failed, error: action.payload.error };
 
-const initialLoadingState: DeviceLoadingState = {
-  getDevicesThunk: false,
-  getDeviceByIdThunk: false,
-  createDeviceThunk: false,
-  updateDeviceThunk: false,
-  deleteDeviceThunk: false,
-  restoreDeviceThunk: false,
+    case DEVICE_CLEAR_ERROR:
+      return { ...state, error: null };
+
+    default:
+      return state;
+  }
 };
-
-const initialState: DeviceState = {
-  devices: [],
-  selectedDevice: null,
-  total: 0,
-  currentPage: 1,
-  pageSize: 10,
-  loading: initialLoadingState,
-  error: null,
-};
-
-// =======================
-// SLICE
-// =======================
-
-const deviceSlice = createSlice({
-  name: 'devices',
-  initialState,
-  reducers: {
-    clearSelectedDevice: (state) => {
-      state.selectedDevice = null;
-    },
-    clearDeviceError: (state) => {
-      state.error = null;
-    },
-  },
-  extraReducers: (builder) => {
-    // Shared pending and rejected states
-    const handlePending = (state: DeviceState, action: { type: string }) => {
-      const thunkName = action.type.split('/')[1];
-      state.loading[thunkName as keyof DeviceLoadingState] = true;
-      state.error = null;
-    };
-
-    const handleRejected = (state: DeviceState, action: PayloadAction<string>) => {
-      const thunkName = action.type.split('/')[1];
-      state.loading[thunkName as keyof DeviceLoadingState] = false;
-      state.error = action.payload;
-    };
-
-    // GET ALL (paginated)
-    builder.addCase(
-      getDevicesThunk.fulfilled,
-      (state, action: PayloadAction<PaginatedResponse<Device>>) => {
-        state.devices = action.payload.data;
-        state.total = action.payload.total;
-        state.currentPage = action.payload.offset / action.payload.limit + 1;
-        state.pageSize = action.payload.limit;
-        state.loading.getDevicesThunk = false;
-      },
-    );
-
-    // GET BY ID
-    builder.addCase(getDeviceByIdThunk.fulfilled, (state, action: PayloadAction<Device>) => {
-      state.selectedDevice = action.payload;
-      state.loading.getDeviceByIdThunk = false;
-    });
-
-    // CREATE
-    builder.addCase(createDeviceThunk.fulfilled, (state, action: PayloadAction<Device>) => {
-      state.devices.unshift(action.payload);
-      state.total += 1;
-      state.loading.createDeviceThunk = false;
-    });
-
-    // UPDATE
-    builder.addCase(updateDeviceThunk.fulfilled, (state, action: PayloadAction<Device>) => {
-      const index = state.devices.findIndex((d) => d.id === action.payload.id);
-      if (index !== -1) {
-        state.devices[index] = action.payload;
-      }
-      if (state.selectedDevice?.id === action.payload.id) {
-        state.selectedDevice = action.payload;
-      }
-      state.loading.updateDeviceThunk = false;
-    });
-
-    // DELETE
-    builder.addCase(deleteDeviceThunk.fulfilled, (state, action: PayloadAction<string>) => {
-      state.devices = state.devices.filter((d) => d.id !== action.payload);
-      state.total -= 1;
-      state.loading.deleteDeviceThunk = false;
-    });
-
-    // RESTORE
-    builder.addCase(restoreDeviceThunk.fulfilled, (state, action: PayloadAction<Device>) => {
-      // Assuming a restored device might not be in the current list,
-      // we can either add it or leave it to be fetched again.
-      // For now, let's update it if it exists, similar to update.
-      const index = state.devices.findIndex((d) => d.id === action.payload.id);
-      if (index !== -1) {
-        state.devices[index] = action.payload;
-      } else {
-        // Or add it to the list if not present
-        state.devices.unshift(action.payload);
-        state.total += 1;
-      }
-      if (state.selectedDevice?.id === action.payload.id) {
-        state.selectedDevice = action.payload;
-      }
-      state.loading.restoreDeviceThunk = false;
-    });
-
-    // Add matchers for pending and rejected actions
-    builder
-      .addMatcher((action) => action.type.endsWith('/pending'), handlePending)
-      .addMatcher((action) => action.type.endsWith('/rejected'), handleRejected);
-  },
-});
-
-// =======================
-// EXPORTS
-// =======================
-
-// Actions
-export const { clearSelectedDevice, clearDeviceError } = deviceSlice.actions;
-
-// Selectors
-export const selectDevices = (state: { devices: DeviceState }) => state.devices.devices;
-export const selectSelectedDevice = (state: { devices: DeviceState }) =>
-  state.devices.selectedDevice;
-export const selectDeviceLoading = (state: { devices: DeviceState }) => state.devices.loading;
-export const selectDeviceError = (state: { devices: DeviceState }) => state.devices.error;
-export const selectDevicePagination = (state: { devices: DeviceState }) => ({
-  total: state.devices.total,
-  currentPage: state.devices.currentPage,
-  pageSize: state.devices.pageSize,
-});
-
-// Reducer
-export default deviceSlice.reducer;

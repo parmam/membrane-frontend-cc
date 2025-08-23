@@ -1,112 +1,202 @@
 // src/store/actions/deviceVendorActions.ts
-import { createAsyncThunk } from '@reduxjs/toolkit';
-
-import { DeviceVendorService } from '../../api/services';
-import type {
+import { DeviceVendorService } from '../../api/services/deviceVendorService';
+import {
   CreateDeviceVendorRequest,
   DeviceVendor,
   DeviceVendorQueryParams,
   PaginatedResponse,
-  ThunkApiConfig,
   UpdateDeviceVendorRequest,
 } from '../types/ApiTypes';
-import { parseError } from '../types/ErrorTypes';
+import {
+  DEVICE_VENDOR_CLEAR_ERROR,
+  DEVICE_VENDOR_CLEAR_SELECTED,
+  DEVICE_VENDOR_CREATE_FAILED,
+  DEVICE_VENDOR_CREATE_START,
+  DEVICE_VENDOR_CREATE_SUCCESS,
+  DEVICE_VENDOR_DELETE_FAILED,
+  DEVICE_VENDOR_DELETE_START,
+  DEVICE_VENDOR_DELETE_SUCCESS,
+  DEVICE_VENDOR_GET_BY_ID_FAILED,
+  DEVICE_VENDOR_GET_BY_ID_START,
+  DEVICE_VENDOR_GET_BY_ID_SUCCESS,
+  DEVICE_VENDOR_GET_VENDORS_FAILED,
+  DEVICE_VENDOR_GET_VENDORS_START,
+  DEVICE_VENDOR_GET_VENDORS_SUCCESS,
+  DEVICE_VENDOR_RESTORE_FAILED,
+  DEVICE_VENDOR_RESTORE_START,
+  DEVICE_VENDOR_RESTORE_SUCCESS,
+  DEVICE_VENDOR_UPDATE_FAILED,
+  DEVICE_VENDOR_UPDATE_START,
+  DEVICE_VENDOR_UPDATE_SUCCESS,
+  DeviceVendorAction,
+  DeviceVendorThunk,
+} from '../types/DeviceVendorTypes';
+import { AppErrorDto, parseError } from '../types/ErrorTypes';
 
-// =======================
-// GET DEVICE VENDORS (PAGINATED)
-// =======================
-
-export const getDeviceVendorsThunk = createAsyncThunk<
-  PaginatedResponse<DeviceVendor>,
-  DeviceVendorQueryParams | undefined,
-  ThunkApiConfig
->('deviceVendors/getDeviceVendorsThunk', async (params, { rejectWithValue }) => {
-  try {
-    const response = await DeviceVendorService.getDeviceVendors(params);
-    return response as unknown as PaginatedResponse<DeviceVendor>;
-  } catch (error) {
-    return rejectWithValue(parseError(error));
-  }
+// Action Creators
+export const getVendorsStart = (): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_GET_VENDORS_START,
+});
+export const getVendorsSuccess = (
+  response: PaginatedResponse<DeviceVendor>,
+): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_GET_VENDORS_SUCCESS,
+  payload: { response },
+});
+export const getVendorsFailed = (error: AppErrorDto): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_GET_VENDORS_FAILED,
+  payload: { error },
 });
 
-// =======================
-// GET DEVICE VENDOR BY ID
-// =======================
+export const getByIdStart = (): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_GET_BY_ID_START,
+});
+export const getByIdSuccess = (vendor: DeviceVendor): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_GET_BY_ID_SUCCESS,
+  payload: { vendor },
+});
+export const getByIdFailed = (error: AppErrorDto): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_GET_BY_ID_FAILED,
+  payload: { error },
+});
 
-export const getDeviceVendorByIdThunk = createAsyncThunk<DeviceVendor, string, ThunkApiConfig>(
-  'deviceVendors/getDeviceVendorByIdThunk',
-  async (id, { rejectWithValue }) => {
+export const createStart = (): DeviceVendorAction => ({ type: DEVICE_VENDOR_CREATE_START });
+export const createSuccess = (vendor: DeviceVendor): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_CREATE_SUCCESS,
+  payload: { vendor },
+});
+export const createFailed = (error: AppErrorDto): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_CREATE_FAILED,
+  payload: { error },
+});
+
+export const updateStart = (): DeviceVendorAction => ({ type: DEVICE_VENDOR_UPDATE_START });
+export const updateSuccess = (vendor: DeviceVendor): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_UPDATE_SUCCESS,
+  payload: { vendor },
+});
+export const updateFailed = (error: AppErrorDto): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_UPDATE_FAILED,
+  payload: { error },
+});
+
+export const deleteStart = (): DeviceVendorAction => ({ type: DEVICE_VENDOR_DELETE_START });
+export const deleteSuccess = (id: string): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_DELETE_SUCCESS,
+  payload: { id },
+});
+export const deleteFailed = (error: AppErrorDto): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_DELETE_FAILED,
+  payload: { error },
+});
+
+export const restoreStart = (): DeviceVendorAction => ({ type: DEVICE_VENDOR_RESTORE_START });
+export const restoreSuccess = (vendor: DeviceVendor): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_RESTORE_SUCCESS,
+  payload: { vendor },
+});
+export const restoreFailed = (error: AppErrorDto): DeviceVendorAction => ({
+  type: DEVICE_VENDOR_RESTORE_FAILED,
+  payload: { error },
+});
+
+export const clearError = (): DeviceVendorAction => ({ type: DEVICE_VENDOR_CLEAR_ERROR });
+export const clearSelected = (): DeviceVendorAction => ({ type: DEVICE_VENDOR_CLEAR_SELECTED });
+
+// Thunks
+export const getDeviceVendorsThunk =
+  (params?: DeviceVendorQueryParams): DeviceVendorThunk =>
+  async (dispatch) => {
+    dispatch(getVendorsStart());
     try {
-      const response = await DeviceVendorService.getDeviceVendorById(id);
-      return response as unknown as DeviceVendor;
+      const response = (await DeviceVendorService.getDeviceVendors(params)) ?? {
+        data: [],
+        total: 0,
+        limit: 10,
+        offset: 0,
+      };
+      dispatch(getVendorsSuccess(response));
     } catch (error) {
-      return rejectWithValue(parseError(error));
+      dispatch(getVendorsFailed(parseError(error)));
     }
-  },
-);
+  };
 
-// =======================
-// CREATE DEVICE VENDOR
-// =======================
+export const getDeviceVendorByIdThunk =
+  (id: string): DeviceVendorThunk =>
+  async (dispatch) => {
+    dispatch(getByIdStart());
+    try {
+      const vendor = (await DeviceVendorService.getDeviceVendorById(id)) ?? {
+        id: '',
+        name: '',
+        createdAt: '',
+        updatedAt: '',
+      };
+      dispatch(getByIdSuccess(vendor));
+    } catch (error) {
+      dispatch(getByIdFailed(parseError(error)));
+    }
+  };
 
-export const createDeviceVendorThunk = createAsyncThunk<
-  DeviceVendor,
-  CreateDeviceVendorRequest,
-  ThunkApiConfig
->('deviceVendors/createDeviceVendorThunk', async (vendorData, { rejectWithValue }) => {
-  try {
-    const response = await DeviceVendorService.createDeviceVendor(vendorData);
-    return response as unknown as DeviceVendor;
-  } catch (error) {
-    return rejectWithValue(parseError(error));
-  }
-});
+export const createDeviceVendorThunk =
+  (vendorData: CreateDeviceVendorRequest): DeviceVendorThunk =>
+  async (dispatch) => {
+    dispatch(createStart());
+    try {
+      const vendor = (await DeviceVendorService.createDeviceVendor(vendorData)) ?? {
+        id: '',
+        name: '',
+        createdAt: '',
+        updatedAt: '',
+      };
+      dispatch(createSuccess(vendor));
+    } catch (error) {
+      dispatch(createFailed(parseError(error)));
+    }
+  };
 
-// =======================
-// UPDATE DEVICE VENDOR
-// =======================
+export const updateDeviceVendorThunk =
+  (id: string, vendorData: UpdateDeviceVendorRequest): DeviceVendorThunk =>
+  async (dispatch) => {
+    dispatch(updateStart());
+    try {
+      const vendor = (await DeviceVendorService.updateDeviceVendor(id, vendorData)) ?? {
+        id: '',
+        name: '',
+        createdAt: '',
+        updatedAt: '',
+      };
+      dispatch(updateSuccess(vendor));
+    } catch (error) {
+      dispatch(updateFailed(parseError(error)));
+    }
+  };
 
-export const updateDeviceVendorThunk = createAsyncThunk<
-  DeviceVendor,
-  { id: string; vendorData: UpdateDeviceVendorRequest },
-  ThunkApiConfig
->('deviceVendors/updateDeviceVendorThunk', async ({ id, vendorData }, { rejectWithValue }) => {
-  try {
-    const response = await DeviceVendorService.updateDeviceVendor(id, vendorData);
-    return response as unknown as DeviceVendor;
-  } catch (error) {
-    return rejectWithValue(parseError(error));
-  }
-});
-
-// =======================
-// DELETE DEVICE VENDOR
-// =======================
-
-export const deleteDeviceVendorThunk = createAsyncThunk<string, string, ThunkApiConfig>(
-  'deviceVendors/deleteDeviceVendorThunk',
-  async (id, { rejectWithValue }) => {
+export const deleteDeviceVendorThunk =
+  (id: string): DeviceVendorThunk =>
+  async (dispatch) => {
+    dispatch(deleteStart());
     try {
       await DeviceVendorService.deleteDeviceVendor(id);
-      return id;
+      dispatch(deleteSuccess(id));
     } catch (error) {
-      return rejectWithValue(parseError(error));
+      dispatch(deleteFailed(parseError(error)));
     }
-  },
-);
+  };
 
-// =======================
-// RESTORE DEVICE VENDOR
-// =======================
-
-export const restoreDeviceVendorThunk = createAsyncThunk<DeviceVendor, string, ThunkApiConfig>(
-  'deviceVendors/restoreDeviceVendorThunk',
-  async (id, { rejectWithValue }) => {
+export const restoreDeviceVendorThunk =
+  (id: string): DeviceVendorThunk =>
+  async (dispatch) => {
+    dispatch(restoreStart());
     try {
-      const response = await DeviceVendorService.restoreDeviceVendor(id);
-      return response as unknown as DeviceVendor;
+      const vendor = (await DeviceVendorService.restoreDeviceVendor(id)) ?? {
+        id: '',
+        name: '',
+        createdAt: '',
+        updatedAt: '',
+      };
+      dispatch(restoreSuccess(vendor));
     } catch (error) {
-      return rejectWithValue(parseError(error));
+      dispatch(restoreFailed(parseError(error)));
     }
-  },
-);
+  };
